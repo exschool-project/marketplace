@@ -1,5 +1,11 @@
 const { getSupabaseAdmin } = require('./supabaseAdmin');
 
+// Hierarki role: makin besar angkanya, makin tinggi aksesnya.
+// owner  = pemilik tertinggi, bisa kelola admin & owner lain
+// admin  = kelola konten (banner/kategori/produk)
+// member = akun publik biasa (pembeli), tanpa akses panel
+const ROLE_LEVEL = { member: 1, admin: 2, owner: 3 };
+
 /**
  * Membaca token Bearer dari header Authorization, memverifikasinya ke
  * Supabase Auth, lalu mengambil profile (termasuk role) user tersebut.
@@ -28,12 +34,16 @@ async function getUserFromRequest(req) {
   return { user: userData.user, profile };
 }
 
+function roleLevel(role) {
+  return ROLE_LEVEL[role] || 0;
+}
+
 /**
- * Sama seperti getUserFromRequest, tapi WAJIB admin.
- * Kalau tidak admin, langsung mengirim response 401/403 dan
+ * Wajib login DAN role-nya minimal `minRole` (mengikuti hierarki di atas).
+ * Kalau tidak memenuhi, langsung mengirim response 401/403 dan
  * mengembalikan null — endpoint pemanggil cukup `return` setelahnya.
  */
-async function requireAdmin(req, res) {
+async function requireRole(req, res, minRole) {
   const ctx = await getUserFromRequest(req);
 
   if (!ctx) {
@@ -41,12 +51,29 @@ async function requireAdmin(req, res) {
     return null;
   }
 
-  if (ctx.profile.role !== 'admin') {
-    res.status(403).json({ error: 'Akun ini tidak memiliki akses admin.' });
+  if (roleLevel(ctx.profile.role) < roleLevel(minRole)) {
+    res.status(403).json({ error: 'Akun ini tidak memiliki akses yang cukup.' });
     return null;
   }
 
   return ctx;
 }
 
-module.exports = { getUserFromRequest, requireAdmin };
+/** Wajib admin ATAU owner (level admin ke atas). */
+async function requireAdmin(req, res) {
+  return requireRole(req, res, 'admin');
+}
+
+/** Wajib owner — dipakai untuk endpoint sensitif seperti manajemen akun admin. */
+async function requireOwner(req, res) {
+  return requireRole(req, res, 'owner');
+}
+
+module.exports = {
+  getUserFromRequest,
+  requireAdmin,
+  requireOwner,
+  requireRole,
+  roleLevel,
+  ROLE_LEVEL,
+};
