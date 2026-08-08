@@ -2,6 +2,8 @@ const API_BASE = '/api';
 
 let supabaseClient = null;
 let session = null;
+let currentRole = null;
+let pendingImageUrl = null;
 
 // ---------- Util ----------
 function escapeHtml(str) {
@@ -44,6 +46,14 @@ function showDashboard(profile) {
   document.getElementById('login-view').classList.add('hidden');
   document.getElementById('dashboard-view').classList.remove('hidden');
   document.getElementById('admin-name').textContent = profile.full_name || profile.email;
+
+  currentRole = profile.role;
+  const badge = document.getElementById('role-badge');
+  badge.textContent = profile.role.toUpperCase();
+  badge.className = `role-badge role-${profile.role}`;
+
+  const teamPanel = document.getElementById('team-panel');
+  teamPanel.classList.toggle('hidden', profile.role !== 'owner');
 }
 
 // ---------- Init Supabase (hanya dipakai untuk proses login) ----------
@@ -74,8 +84,8 @@ async function handleLogin(e) {
   } catch (err) {
     await supabaseClient.auth.signOut();
     session = null;
-    const msg = err.message === 'Akun ini tidak memiliki akses admin.'
-      ? 'Login berhasil, tapi akun ini bukan admin.'
+    const msg = err.message === 'Akun ini tidak memiliki akses yang cukup.'
+      ? 'Login berhasil, tapi akun ini bukan admin atau owner.'
       : err.message;
     showLogin(msg);
   } finally {
@@ -120,6 +130,9 @@ async function loadBannerAdmin() {
       <button class="mini-btn danger delete-banner" type="button">Hapus</button>
     </div>
   `).join('') || '<p class="empty-msg">Belum ada pesan banner.</p>';
+
+  const statEl = document.getElementById('stat-banners');
+  if (statEl) statEl.textContent = data.filter((b) => b.is_active).length;
 }
 
 async function handleBannerSubmit(e) {
@@ -170,6 +183,9 @@ async function loadCategoriesAdmin() {
     select.innerHTML = '<option value="">Tanpa kategori</option>' +
       data.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
   }
+
+  const statEl = document.getElementById('stat-categories');
+  if (statEl) statEl.textContent = data.length;
 }
 
 async function handleCategorySubmit(e) {
@@ -195,18 +211,74 @@ document.getElementById('category-list')?.addEventListener('click', async (e) =>
   }
 });
 
+// ---------- Upload gambar produk (Cloudinary, signed upload) ----------
+async function uploadProductImage(file) {
+  const statusEl = document.getElementById('product-image-status');
+  statusEl.textContent = 'Mengunggah ke Cloudinary...';
+
+  const ticket = await authedFetch(`${API_BASE}/upload-signature`, {
+    method: 'POST',
+    body: JSON.stringify({ folder: 'pasarin/products' }),
+  });
+
+  const form = new FormData();
+  form.append('file', file);
+  form.append('api_key', ticket.apiKey);
+  form.append('timestamp', ticket.timestamp);
+  form.append('signature', ticket.signature);
+  form.append('folder', ticket.folder);
+
+  const res = await fetch(ticket.uploadUrl, { method: 'POST', body: form });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error?.message || 'Upload ke Cloudinary gagal.');
+
+  return body.secure_url;
+}
+
+function initProductImageInput() {
+  const input = document.getElementById('product-image');
+  const previewWrap = document.getElementById('product-image-preview');
+  const previewImg = document.getElementById('product-image-preview-img');
+  const statusEl = document.getElementById('product-image-status');
+
+  input?.addEventListener('change', async () => {
+    const file = input.files?.[0];
+    pendingImageUrl = null;
+    if (!file) {
+      previewWrap.classList.add('hidden');
+      return;
+    }
+
+    previewWrap.classList.remove('hidden');
+    previewImg.src = URL.createObjectURL(file);
+    statusEl.textContent = 'Mengunggah...';
+
+    try {
+      pendingImageUrl = await uploadProductImage(file);
+      statusEl.textContent = 'Berhasil diunggah ✓';
+    } catch (err) {
+      statusEl.textContent = `Gagal: ${err.message}`;
+      pendingImageUrl = null;
+    }
+  });
+}
+
 // ---------- Produk ----------
 async function loadProductsAdmin() {
   const { data } = await authedFetch(`${API_BASE}/products`);
   const list = document.getElementById('product-list');
   list.innerHTML = data.map((p) => `
     <div class="admin-row" data-id="${p.id}">
-      <span class="admin-row-text">${escapeHtml(p.icon || '📦')} ${escapeHtml(p.name)} — Rp${Number(p.price).toLocaleString('id-ID')}</span>
+      ${p.image_url ? `<img class="admin-row-thumb" src="${escapeHtml(p.image_url)}" alt="">` : ''}
+      <span class="admin-row-text">${p.image_url ? '' : escapeHtml(p.icon || '📦') + ' '}${escapeHtml(p.name)} — Rp${Number(p.price).toLocaleString('id-ID')}</span>
       <span class="admin-row-tag">${p.is_active ? 'Aktif' : 'Nonaktif'}</span>
       <button class="mini-btn toggle-product" type="button">${p.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
       <button class="mini-btn danger delete-product" type="button">Hapus</button>
     </div>
   `).join('') || '<p class="empty-msg">Belum ada produk.</p>';
+
+  const statEl = document.getElementById('stat-products');
+  if (statEl) statEl.textContent = data.length;
 }
 
 async function handleProductSubmit(e) {
@@ -230,12 +302,15 @@ async function handleProductSubmit(e) {
       ? Number(form.querySelector('#product-old-price').value)
       : null,
     icon: form.querySelector('#product-icon').value.trim() || '📦',
+    image_url: pendingImageUrl || null,
     category_id: form.querySelector('#product-category').value || null,
     badge: form.querySelector('#product-badge').value.trim() || null,
   };
 
   await authedFetch(`${API_BASE}/products`, { method: 'POST', body: JSON.stringify(payload) });
   form.reset();
+  pendingImageUrl = null;
+  document.getElementById('product-image-preview').classList.add('hidden');
   await loadProductsAdmin();
 }
 
@@ -260,10 +335,52 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
   }
 });
 
+// ---------- Manajemen Tim (khusus owner) ----------
+async function loadTeamAdmin() {
+  if (currentRole !== 'owner') return;
+
+  const { data } = await authedFetch(`${API_BASE}/admin/users`);
+  const list = document.getElementById('team-list');
+
+  list.innerHTML = data.map((u) => `
+    <div class="admin-row" data-id="${u.id}">
+      <span class="admin-row-text">
+        ${escapeHtml(u.full_name || u.email || 'Tanpa nama')}
+        <span class="admin-row-sub">${escapeHtml(u.email || '')}${u.is_self ? ' (kamu)' : ''}</span>
+      </span>
+      <span class="role-badge role-${u.role}">${u.role.toUpperCase()}</span>
+      <select class="team-row-select" ${u.is_self && u.role === 'owner' ? 'disabled' : ''}>
+        <option value="member" ${u.role === 'member' ? 'selected' : ''}>Member</option>
+        <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+        <option value="owner" ${u.role === 'owner' ? 'selected' : ''}>Owner</option>
+      </select>
+    </div>
+  `).join('') || '<p class="empty-msg">Belum ada akun.</p>';
+}
+
+document.getElementById('team-list')?.addEventListener('change', async (e) => {
+  const select = e.target.closest('.team-row-select');
+  if (!select) return;
+  const row = select.closest('.admin-row');
+  const id = row.dataset.id;
+  const role = select.value;
+
+  try {
+    await authedFetch(`${API_BASE}/admin/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ role }),
+    });
+    await loadTeamAdmin();
+  } catch (err) {
+    alert(err.message);
+    await loadTeamAdmin();
+  }
+});
+
 // ---------- Load semua data dashboard ----------
 async function loadAllData() {
   await loadCategoriesAdmin(); // duluan, karena dropdown produk butuh ini
-  await Promise.all([loadBannerAdmin(), loadProductsAdmin()]);
+  await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin()]);
 }
 
 // ---------- Init ----------
@@ -280,6 +397,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('banner-form').addEventListener('submit', handleBannerSubmit);
   document.getElementById('category-form').addEventListener('submit', handleCategorySubmit);
   document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
+  initProductImageInput();
 
   await checkExistingSession();
 });

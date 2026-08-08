@@ -2,6 +2,56 @@
 
 .admin-body{ background:var(--paper); }
 
+/* ---------- Premium accents ---------- */
+:root{
+  --gold: #FFD966;
+  --gold-deep: #E8B923;
+}
+
+/* ---------- Auth tabs (akun.html) ---------- */
+.auth-tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:20px;
+  border-bottom:2.5px solid var(--ink);
+}
+.auth-tab{
+  flex:1;
+  padding:10px 8px;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:.85rem;
+  background:none;
+  border:none;
+  border-bottom:3px solid transparent;
+  margin-bottom:-2.5px;
+  cursor:pointer;
+  color:#5a6b64;
+}
+.auth-tab.active{ color:var(--ink); border-bottom-color:var(--ink); }
+.auth-form.hidden{ display:none; }
+.register-success{
+  background:#DFF8DF;
+  border:2px solid var(--ink);
+  padding:8px 10px;
+  font-size:.82rem;
+  margin:0 0 14px;
+}
+
+/* ---------- Role badges ---------- */
+.role-badge{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.68rem;
+  font-weight:700;
+  text-transform:uppercase;
+  padding:4px 10px;
+  border:2px solid var(--ink);
+  letter-spacing:.03em;
+}
+.role-owner{ background:var(--gold); }
+.role-admin{ background:var(--blue); }
+.role-member{ background:var(--paper); }
+
 /* ---------- Login ---------- */
 .login-view{
   min-height:100vh;
@@ -74,6 +124,66 @@
   display:flex;
   flex-direction:column;
   gap:28px;
+}
+
+/* ---------- Stat row ---------- */
+.stat-row{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:16px;
+}
+.stat-card{
+  background:var(--card);
+  padding:18px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.stat-num{
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:1.8rem;
+  line-height:1;
+}
+.stat-label{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.7rem;
+  text-transform:uppercase;
+  color:#5a6b64;
+}
+@media (max-width:560px){
+  .stat-row{ grid-template-columns:1fr; }
+}
+
+/* ---------- Owner-only panel accent ---------- */
+.owner-only{ border-color:var(--gold-deep); box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--gold-deep); }
+
+/* ---------- Product image upload/preview ---------- */
+.image-preview{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:-6px 0 16px;
+  font-size:.78rem;
+}
+.image-preview img{
+  width:64px; height:64px;
+  object-fit:cover;
+  border:2.5px solid var(--ink);
+}
+.admin-row-thumb{
+  width:36px; height:36px;
+  object-fit:cover;
+  border:2px solid var(--ink);
+  flex-shrink:0;
+}
+.team-row-select{
+  border:2px solid var(--ink);
+  padding:6px 8px;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:.78rem;
+  background:var(--paper);
 }
 .admin-panel{
   background:var(--card);

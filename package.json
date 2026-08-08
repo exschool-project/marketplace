@@ -1,8 +1,8 @@
 {
   "name": "pasarin-marketplace",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Marketplace neobrutalism — homepage statis + admin panel, data dari Supabase lewat folder /api (Vercel Functions).",
+  "description": "Marketplace neobrutalism — homepage statis + akun publik + admin panel (role owner/admin), upload gambar Cloudinary, data dari Supabase lewat folder /api (Vercel Functions).",
   "scripts": {
     "dev": "vercel dev"
   },
