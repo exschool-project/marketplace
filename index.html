@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PASARIN — Marketplace Rakyat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- BANNER: diisi dari /api/banner -->
+  <div class="banner" role="banner">
+    <div class="banner-track" id="banner-track"></div>
+  </div>
+
+  <!-- NAV -->
+  <header class="site">
+    <div class="nav-wrap">
+      <div class="logo">PASARIN</div>
+      <form class="search" role="search">
+        <input type="text" placeholder="Cari produk, toko, atau kategori...">
+        <button type="submit" aria-label="Cari">CARI</button>
+      </form>
+      <div class="nav-actions">
+        <a class="btn btn-blue hover-lift-sm brutal-sm" href="admin.html">Masuk</a>
+        <button id="cart-button" class="btn btn-ink hover-lift-sm brutal-sm" type="button">🛒 Keranjang</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- BERANDA / HERO -->
+  <main>
+    <section class="hero" id="beranda">
+      <div>
+        <span class="eyebrow">◆ Beranda Pasarin</span>
+        <h1>Belanja apa aja, <span class="hl">langsung sat set.</span></h1>
+        <p class="lead">Marketplace buat kamu yang cari barang bagus, harga jujur, dan pengiriman cepat — dari toko-toko lokal terpercaya di seluruh Indonesia.</p>
+        <div class="hero-ctas">
+          <a href="#produk" class="btn btn-green hover-lift brutal">Mulai Belanja</a>
+          <a href="#kategori" class="btn btn-ink hover-lift brutal">Lihat Kategori</a>
+        </div>
+      </div>
+      <div class="hero-visual" id="hero-visual">
+        <!-- Diisi dari /api/products (3 produk teratas) -->
+      </div>
+    </section>
+
+    <!-- CATEGORY CHIPS: diisi dari /api/categories -->
+    <nav class="cats" id="category-nav" aria-label="Kategori produk"></nav>
+
+    <!-- PRODUCT GRID: diisi dari /api/products -->
+    <section class="section" id="produk">
+      <div class="section-head">
+        <div>
+          <h2>Lagi rame dicari</h2>
+          <p>Produk pilihan dari toko-toko dengan rating tertinggi.</p>
+        </div>
+      </div>
+      <div class="grid" id="product-grid"></div>
+    </section>
+
+    <!-- WHY US -->
+    <section class="why">
+      <div class="section">
+        <div class="section-head">
+          <div>
+            <h2>Kenapa belanja di Pasarin</h2>
+            <p>Bukan cuma marketplace, ini rumah buat toko-toko lokal.</p>
+          </div>
+        </div>
+        <div class="why-grid">
+          <div class="why-card">
+            <span class="num">01 / Ongkir</span>
+            <h3>Gratis ongkir tiap hari</h3>
+            <p>Minimal belanja 50rb, ongkir ditanggung buat semua kota di Indonesia.</p>
+          </div>
+          <div class="why-card">
+            <span class="num">02 / Jaminan</span>
+            <h3>Uang kembali 100%</h3>
+            <p>Barang gak sesuai? Ajukan komplain dan dana otomatis balik ke kamu.</p>
+          </div>
+          <div class="why-card">
+            <span class="num">03 / Lokal</span>
+            <h3>Dukung toko sekitar</h3>
+            <p>Setiap transaksi langsung ke penjual lokal, tanpa perantara ribet.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA STRIP -->
+    <section class="cta-strip">
+      <div class="cta-inner">
+        <h2>Punya toko? Yuk mulai jualan di Pasarin, gratis daftar.</h2>
+        <a href="#" class="btn btn-ink hover-lift brutal">Daftar Jadi Penjual</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-wrap">
+      <div>
+        <div class="logo" style="display:inline-block; margin-bottom:12px;">PASARIN</div>
+        <p class="foot-desc">Marketplace lokal buat kamu belanja apa aja, dari toko kepercayaan sendiri.</p>
+      </div>
+      <div>
+        <h4>Belanja</h4>
+        <ul>
+          <li><a href="#kategori">Kategori</a></li>
+          <li><a href="#produk">Produk</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Bantuan</h4>
+        <ul>
+          <li><a href="#">Pusat Bantuan</a></li>
+          <li><a href="#">Lacak Pesanan</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Perusahaan</h4>
+        <ul>
+          <li><a href="#">Tentang Kami</a></li>
+          <li><a href="admin.html">Admin Panel</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Pasarin. Semua hak dilindungi.</span>
+      <span>Dibuat dengan ♥ untuk toko lokal Indonesia</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
