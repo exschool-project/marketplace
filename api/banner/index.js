@@ -1,12 +1,12 @@
 const { getSupabaseAdmin } = require('../_lib/supabaseAdmin');
-const { getUserFromRequest, requireAdmin } = require('../_lib/auth');
+const { getUserFromRequest, requireAdmin, roleLevel } = require('../_lib/auth');
 
 module.exports = async (req, res) => {
   const supabase = getSupabaseAdmin();
 
   if (req.method === 'GET') {
     const ctx = await getUserFromRequest(req);
-    const isAdmin = ctx?.profile?.role === 'admin';
+    const isAdmin = roleLevel(ctx?.profile?.role) >= roleLevel('admin');
 
     let query = supabase
       .from('banner_messages')
