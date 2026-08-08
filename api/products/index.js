@@ -1,12 +1,12 @@
 const { getSupabaseAdmin } = require('../_lib/supabaseAdmin');
-const { getUserFromRequest, requireAdmin } = require('../_lib/auth');
+const { getUserFromRequest, requireAdmin, roleLevel } = require('../_lib/auth');
 
 module.exports = async (req, res) => {
   const supabase = getSupabaseAdmin();
 
   if (req.method === 'GET') {
     const ctx = await getUserFromRequest(req);
-    const isAdmin = ctx?.profile?.role === 'admin';
+    const isAdmin = roleLevel(ctx?.profile?.role) >= roleLevel('admin');
     const categorySlug = req.query.category;
 
     let categoryId = null;
@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
 
     const {
       name, shop_name, price, old_price,
-      icon, category_id, badge, is_active, sort_order,
+      icon, image_url, category_id, badge, is_active, sort_order,
     } = req.body || {};
 
     if (!name || !String(name).trim() || !shop_name || !String(shop_name).trim() || price === undefined || price === '') {
@@ -63,6 +63,7 @@ module.exports = async (req, res) => {
         price: Number(price),
         old_price: old_price === undefined || old_price === '' ? null : Number(old_price),
         icon: icon && String(icon).trim() ? String(icon).trim() : '📦',
+        image_url: image_url && String(image_url).trim() ? String(image_url).trim() : null,
         category_id: category_id || null,
         badge: badge && String(badge).trim() ? String(badge).trim() : null,
         is_active: is_active ?? true,
