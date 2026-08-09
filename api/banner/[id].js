@@ -1,7 +1,8 @@
 const { getSupabaseAdmin } = require('../_lib/supabaseAdmin');
 const { requireAdmin } = require('../_lib/auth');
+const { withErrorHandling } = require('../_lib/http');
 
-module.exports = async (req, res) => {
+module.exports = withErrorHandling(async (req, res) => {
   const { id } = req.query;
   const supabase = getSupabaseAdmin();
 
@@ -45,4 +46,4 @@ module.exports = async (req, res) => {
 
   res.setHeader('Allow', 'PUT, DELETE');
   res.status(405).json({ error: 'Method not allowed' });
-};
+});
