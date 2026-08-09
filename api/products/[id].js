@@ -1,18 +1,19 @@
 const { getSupabaseAdmin } = require('../_lib/supabaseAdmin');
-const { getUserFromRequest, requireAdmin } = require('../_lib/auth');
+const { getUserFromRequest, requireAdmin, roleLevel } = require('../_lib/auth');
+const { withErrorHandling } = require('../_lib/http');
 
 const EDITABLE_FIELDS = [
   'name', 'shop_name', 'price', 'old_price',
-  'icon', 'category_id', 'badge', 'is_active', 'sort_order',
+  'icon', 'image_url', 'category_id', 'badge', 'is_active', 'sort_order',
 ];
 
-module.exports = async (req, res) => {
+module.exports = withErrorHandling(async (req, res) => {
   const { id } = req.query;
   const supabase = getSupabaseAdmin();
 
   if (req.method === 'GET') {
     const ctx = await getUserFromRequest(req);
-    const isAdmin = ctx?.profile?.role === 'admin';
+    const isAdmin = roleLevel(ctx?.profile?.role) >= roleLevel('admin');
 
     let query = supabase
       .from('products')
@@ -74,4 +75,4 @@ module.exports = async (req, res) => {
 
   res.setHeader('Allow', 'GET, PUT, DELETE');
   res.status(405).json({ error: 'Method not allowed' });
-};
+});
