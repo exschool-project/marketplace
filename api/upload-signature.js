@@ -22,8 +22,8 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const rawFolder = (req.body && req.body.folder) || 'pasarin/products';
-  const folder = String(rawFolder).replace(/[^a-zA-Z0-9/_-]/g, '').slice(0, 100) || 'pasarin/products';
+  const rawFolder = (req.body && req.body.folder) || 'ex-school/products';
+  const folder = String(rawFolder).replace(/[^a-zA-Z0-9/_-]/g, '').slice(0, 100) || 'ex-school/products';
 
   const timestamp = Math.round(Date.now() / 1000);
   const signature = buildSignature({ timestamp, folder }, config.apiSecret);
