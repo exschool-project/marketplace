@@ -1,10 +1,11 @@
 const { requireAdmin } = require('./_lib/auth');
 const { buildSignature, getCloudinaryConfig } = require('./_lib/cloudinary');
+const { withErrorHandling } = require('./_lib/http');
 
 // Endpoint ini HANYA membuat "tiket" upload yang sudah ditandatangani.
 // File gambar sendiri tidak lewat server ini — browser admin upload
 // langsung ke Cloudinary pakai tiket ini (lebih cepat & hemat kuota function).
-module.exports = async (req, res) => {
+module.exports = withErrorHandling(async (req, res) => {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     res.status(405).json({ error: 'Method not allowed' });
@@ -36,4 +37,4 @@ module.exports = async (req, res) => {
     folder,
     uploadUrl: `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
   });
-};
+});

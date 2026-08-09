@@ -1,4 +1,6 @@
-module.exports = (req, res) => {
+const { withErrorHandling } = require('./_lib/http');
+
+module.exports = withErrorHandling((req, res) => {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     res.status(405).json({ error: 'Method not allowed' });
@@ -16,4 +18,4 @@ module.exports = (req, res) => {
   // anon key aman dikirim ke browser — akses datanya dibatasi oleh RLS,
   // dipakai di admin.html hanya untuk proses login (Supabase Auth)
   res.status(200).json({ supabaseUrl, supabaseAnonKey });
-};
+});
