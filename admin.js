@@ -29,7 +29,11 @@ async function authedFetch(url, options = {}) {
   );
   const res = await fetch(url, { ...options, headers });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || 'Terjadi kesalahan.');
+  if (!res.ok) {
+    const err = new Error(body.error || 'Terjadi kesalahan.');
+    err.status = res.status; // dipakai buat bedain "sesi habis" vs "server lagi gangguan"
+    throw err;
+  }
   return body;
 }
 
@@ -82,11 +86,23 @@ async function handleLogin(e) {
     showDashboard(me);
     await loadAllData();
   } catch (err) {
-    await supabaseClient.auth.signOut();
-    session = null;
-    const msg = err.message === 'Akun ini tidak memiliki akses yang cukup.'
-      ? 'Login berhasil, tapi akun ini bukan admin atau owner.'
-      : err.message;
+    let msg = err.message;
+
+    if (err.status === 403) {
+      // Login berhasil, tapi role-nya bukan admin/owner — memang harus logout.
+      await supabaseClient.auth.signOut();
+      session = null;
+      msg = 'Login berhasil, tapi akun ini bukan admin atau owner.';
+    } else if (err.status === 401) {
+      // Sesi ditolak server — logout supaya bisa login ulang dari awal.
+      await supabaseClient.auth.signOut();
+      session = null;
+    } else if (err.status >= 500 || err.status === undefined) {
+      // Server lagi gangguan sesaat / jaringan bermasalah — JANGAN logout,
+      // supaya kalau di-retry, sesi yang sudah didapat tetap kepakai.
+      msg = 'Server sedang gangguan sesaat. Coba tekan Masuk sekali lagi.';
+    }
+
     showLogin(msg);
   } finally {
     submitBtn.disabled = false;
@@ -112,8 +128,16 @@ async function checkExistingSession() {
     showDashboard(me);
     await loadAllData();
   } catch (err) {
-    await supabaseClient.auth.signOut();
-    session = null;
+    if (err.status === 401 || err.status === 403) {
+      // Sesi memang tidak valid / role tidak cukup — logout beneran.
+      await supabaseClient.auth.signOut();
+      session = null;
+      showLogin(err.status === 403 ? 'Akun ini bukan admin atau owner.' : '');
+      return;
+    }
+    // Server gangguan sesaat — sesi Supabase-nya masih valid, jangan logout.
+    // Coba tampilkan dashboard kosong + biarkan user refresh manual.
+    showLogin('Server sedang gangguan sesaat. Muat ulang halaman untuk coba lagi.');
     showLogin();
   }
 }

@@ -12,7 +12,11 @@ async function authedFetch(url, options = {}) {
   );
   const res = await fetch(url, { ...options, headers });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || 'Terjadi kesalahan.');
+  if (!res.ok) {
+    const err = new Error(body.error || 'Terjadi kesalahan.');
+    err.status = res.status;
+    throw err;
+  }
   return body;
 }
 
@@ -148,8 +152,18 @@ async function checkExistingSession() {
     const profile = await authedFetch(`${API_BASE}/auth/profile`);
     showProfile(profile);
   } catch (err) {
-    await supabaseClient.auth.signOut();
-    session = null;
+    if (err.status === 401 || err.status === 403) {
+      // Sesi memang tidak valid — logout beneran, kembali ke form login.
+      await supabaseClient.auth.signOut();
+      session = null;
+      showAuth();
+      return;
+    }
+    // Server gangguan sesaat / jaringan bermasalah — sesi masih valid,
+    // jangan logout paksa. Biarkan user coba refresh manual.
+    const errEl = document.getElementById('login-error');
+    errEl.textContent = 'Server sedang gangguan sesaat. Muat ulang halaman untuk coba lagi.';
+    errEl.style.display = 'block';
     showAuth();
   }
 }
