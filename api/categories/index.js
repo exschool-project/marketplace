@@ -1,7 +1,8 @@
 const { getSupabaseAdmin } = require('../_lib/supabaseAdmin');
 const { requireAdmin } = require('../_lib/auth');
+const { withErrorHandling } = require('../_lib/http');
 
-module.exports = async (req, res) => {
+module.exports = withErrorHandling(async (req, res) => {
   const supabase = getSupabaseAdmin();
 
   if (req.method === 'GET') {
@@ -48,4 +49,4 @@ module.exports = async (req, res) => {
 
   res.setHeader('Allow', 'GET, POST');
   res.status(405).json({ error: 'Method not allowed' });
-};
+});
