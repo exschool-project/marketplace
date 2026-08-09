@@ -218,7 +218,7 @@ async function uploadProductImage(file) {
 
   const ticket = await authedFetch(`${API_BASE}/upload-signature`, {
     method: 'POST',
-    body: JSON.stringify({ folder: 'pasarin/products' }),
+    body: JSON.stringify({ folder: 'ex-school/products' }),
   });
 
   const form = new FormData();

@@ -185,6 +185,12 @@
   font-size:.78rem;
   background:var(--paper);
 }
+.admin-copyright{
+  text-align:center;
+  font-size:.7rem;
+  color:#5a6b64;
+  padding-top:8px;
+}
 .admin-panel{
   background:var(--card);
   padding:24px;
