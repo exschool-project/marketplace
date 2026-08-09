@@ -1,9 +1,10 @@
 const { getSupabaseAdmin } = require('../_lib/supabaseAdmin');
+const { withErrorHandling } = require('../_lib/http');
 
 // Endpoint publik untuk daftar akun baru (calon pembeli).
 // SELALU membuat akun dengan role 'member' — tidak pernah admin/owner.
 // Role admin/owner hanya bisa diberikan lewat panel Manajemen Tim (owner).
-module.exports = async (req, res) => {
+module.exports = withErrorHandling(async (req, res) => {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     res.status(405).json({ error: 'Method not allowed' });
@@ -55,4 +56,4 @@ module.exports = async (req, res) => {
   }
 
   res.status(201).json({ message: 'Akun berhasil dibuat. Silakan masuk.' });
-};
+});
