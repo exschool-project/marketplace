@@ -15,8 +15,12 @@ function withErrorHandling(handler) {
     } catch (err) {
       console.error('[api error]', req.url, err);
       if (!res.headersSent) {
+        // Tampilkan pesan error ASLI (bukan teks generik) — ini pesan
+        // yang kita tulis sendiri di kode (mis. "env var belum diatur",
+        // error dari Supabase, dll), aman ditampilkan ke admin/owner
+        // supaya penyebabnya langsung kelihatan tanpa perlu buka Vercel Logs.
         res.status(500).json({
-          error: 'Terjadi gangguan sementara di server. Coba lagi sebentar lagi.',
+          error: (err && err.message) || 'Terjadi gangguan sementara di server. Coba lagi sebentar lagi.',
         });
       }
     }
