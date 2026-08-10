@@ -159,10 +159,11 @@ async function checkExistingSession() {
       showAuth();
       return;
     }
-    // Server gangguan sesaat / jaringan bermasalah — sesi masih valid,
-    // jangan logout paksa. Biarkan user coba refresh manual.
+    // Server gangguan / error — sesi Supabase-nya masih valid, jangan logout
+    // paksa. Tampilkan pesan ASLI dari server (bukan teks generik) di form
+    // login supaya kelihatan jelas ini bukan "belum pernah login".
     const errEl = document.getElementById('login-error');
-    errEl.textContent = 'Server sedang gangguan sesaat. Muat ulang halaman untuk coba lagi.';
+    errEl.textContent = `Gagal memuat profil: ${err.message || 'server tidak merespons'}. Sesi kamu masih tersimpan, coba muat ulang halaman.`;
     errEl.style.display = 'block';
     showAuth();
   }

@@ -5,6 +5,24 @@ let session = null;
 let currentRole = null;
 let pendingImageUrl = null;
 
+const ROLE_LEVEL = { member: 1, admin: 2, owner: 3 };
+
+// Ambil profil user yang sedang login, lalu pastikan role-nya cukup
+// (admin/owner) untuk buka panel ini. Pengecekan role dilakukan di sini
+// (client) karena endpoint /api/auth/profile sengaja dibuat terbuka untuk
+// semua akun (dipakai bareng akun.html) — supaya jumlah Vercel Functions
+// tetap hemat. Penegakan yang sesungguhnya tetap ada di server, di setiap
+// endpoint yang mengubah data (requireAdmin/requireOwner).
+async function fetchProfileAndEnforceRole() {
+  const profile = await authedFetch(`${API_BASE}/auth/profile`);
+  if (ROLE_LEVEL[profile.role] < ROLE_LEVEL.admin) {
+    const err = new Error('Akun ini tidak memiliki akses yang cukup.');
+    err.status = 403;
+    throw err;
+  }
+  return profile;
+}
+
 // ---------- Util ----------
 function escapeHtml(str) {
   const div = document.createElement('div');
@@ -82,7 +100,7 @@ async function handleLogin(e) {
     if (error) throw new Error(error.message);
     session = data.session;
 
-    const me = await authedFetch(`${API_BASE}/auth/me`);
+    const me = await fetchProfileAndEnforceRole();
     showDashboard(me);
     await loadAllData();
   } catch (err) {
@@ -97,10 +115,16 @@ async function handleLogin(e) {
       // Sesi ditolak server — logout supaya bisa login ulang dari awal.
       await supabaseClient.auth.signOut();
       session = null;
-    } else if (err.status >= 500 || err.status === undefined) {
-      // Server lagi gangguan sesaat / jaringan bermasalah — JANGAN logout,
-      // supaya kalau di-retry, sesi yang sudah didapat tetap kepakai.
-      msg = 'Server sedang gangguan sesaat. Coba tekan Masuk sekali lagi.';
+    } else if (err.status >= 500) {
+      // Server error — JANGAN logout (sesi masih valid), tapi tampilkan
+      // pesan ASLI dari server (bukan diganti teks generik) supaya
+      // penyebabnya jelas — biasanya env var Supabase/Cloudinary belum
+      // di-set di project Vercel ini.
+      msg = `${err.message} (Sesi kamu masih tersimpan, coba tekan Masuk lagi setelah diperbaiki.)`;
+    } else if (err.status === undefined) {
+      // Tidak ada status sama sekali → kemungkinan gagal konek ke server
+      // (jaringan/CORS), bukan error yang dibalikin server kita.
+      msg = 'Gagal menghubungi server. Cek koneksi internet, lalu coba lagi.';
     }
 
     showLogin(msg);
@@ -124,7 +148,7 @@ async function checkExistingSession() {
   }
   session = data.session;
   try {
-    const me = await authedFetch(`${API_BASE}/auth/me`);
+    const me = await fetchProfileAndEnforceRole();
     showDashboard(me);
     await loadAllData();
   } catch (err) {
@@ -135,10 +159,9 @@ async function checkExistingSession() {
       showLogin(err.status === 403 ? 'Akun ini bukan admin atau owner.' : '');
       return;
     }
-    // Server gangguan sesaat — sesi Supabase-nya masih valid, jangan logout.
-    // Coba tampilkan dashboard kosong + biarkan user refresh manual.
-    showLogin('Server sedang gangguan sesaat. Muat ulang halaman untuk coba lagi.');
-    showLogin();
+    // Server gangguan / error — sesi Supabase-nya masih valid, jangan logout.
+    // Tampilkan pesan asli dari server biar penyebabnya jelas.
+    showLogin(err.message || 'Gagal menghubungi server. Muat ulang halaman untuk coba lagi.');
   }
 }
 
@@ -176,13 +199,13 @@ document.getElementById('banner-list')?.addEventListener('click', async (e) => {
 
   if (e.target.classList.contains('delete-banner')) {
     if (!confirm('Hapus pesan banner ini?')) return;
-    await authedFetch(`${API_BASE}/banner/${id}`, { method: 'DELETE' });
+    await authedFetch(`${API_BASE}/banner?id=${id}`, { method: 'DELETE' });
     await loadBannerAdmin();
   }
 
   if (e.target.classList.contains('toggle-banner')) {
     const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-    await authedFetch(`${API_BASE}/banner/${id}`, {
+    await authedFetch(`${API_BASE}/banner?id=${id}`, {
       method: 'PUT',
       body: JSON.stringify({ is_active: !isActive }),
     });
@@ -230,7 +253,7 @@ document.getElementById('category-list')?.addEventListener('click', async (e) =>
   if (!row) return;
   if (e.target.classList.contains('delete-category')) {
     if (!confirm('Hapus kategori ini? Produk terkait tidak ikut terhapus.')) return;
-    await authedFetch(`${API_BASE}/categories/${row.dataset.id}`, { method: 'DELETE' });
+    await authedFetch(`${API_BASE}/categories?id=${row.dataset.id}`, { method: 'DELETE' });
     await loadCategoriesAdmin();
   }
 });
@@ -345,13 +368,13 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
 
   if (e.target.classList.contains('delete-product')) {
     if (!confirm('Hapus produk ini?')) return;
-    await authedFetch(`${API_BASE}/products/${id}`, { method: 'DELETE' });
+    await authedFetch(`${API_BASE}/products?id=${id}`, { method: 'DELETE' });
     await loadProductsAdmin();
   }
 
   if (e.target.classList.contains('toggle-product')) {
     const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-    await authedFetch(`${API_BASE}/products/${id}`, {
+    await authedFetch(`${API_BASE}/products?id=${id}`, {
       method: 'PUT',
       body: JSON.stringify({ is_active: !isActive }),
     });
@@ -363,7 +386,7 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
 async function loadTeamAdmin() {
   if (currentRole !== 'owner') return;
 
-  const { data } = await authedFetch(`${API_BASE}/admin/users`);
+  const { data } = await authedFetch(`${API_BASE}/admin-users`);
   const list = document.getElementById('team-list');
 
   list.innerHTML = data.map((u) => `
@@ -390,7 +413,7 @@ document.getElementById('team-list')?.addEventListener('change', async (e) => {
   const role = select.value;
 
   try {
-    await authedFetch(`${API_BASE}/admin/users/${id}`, {
+    await authedFetch(`${API_BASE}/admin-users?id=${id}`, {
       method: 'PUT',
       body: JSON.stringify({ role }),
     });
