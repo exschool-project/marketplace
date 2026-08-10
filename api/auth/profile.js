@@ -1,9 +1,14 @@
 const { getUserFromRequest } = require('../_lib/auth');
 const { withErrorHandling } = require('../_lib/http');
 
-// Beda dengan /api/auth/me (yang wajib admin): endpoint ini boleh diakses
-// SEMUA akun yang sudah login, dipakai halaman akun publik untuk menyapa
-// user dan menentukan apakah perlu menampilkan tautan ke Admin Panel.
+// Endpoint ini boleh diakses SEMUA akun yang sudah login (bukan cuma
+// admin/owner) — dipakai baik oleh akun.html (halaman publik) maupun
+// admin.html. Pengecekan "role-nya cukup atau tidak untuk buka panel
+// admin" dilakukan di sisi client (admin.js), BUKAN di endpoint ini —
+// supaya satu function ini bisa dipakai bersama & hemat kuota Vercel
+// Functions. Ini aman karena semua endpoint yang benar-benar mengubah
+// data (produk/kategori/banner/dll) tetap divalidasi role-nya sendiri
+// di server lewat requireAdmin/requireOwner.
 module.exports = withErrorHandling(async (req, res) => {
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
