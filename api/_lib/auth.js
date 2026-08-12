@@ -17,11 +17,18 @@ const ROLE_LEVEL = { member: 1, admin: 2, owner: 3 };
 async function getUserFromRequest(req) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  if (!token) return null;
+  if (!token) {
+    console.log('[auth] tidak ada Bearer token di header Authorization');
+    return null;
+  }
 
   const supabase = getSupabaseAdmin();
   const { data: userData, error: userError } = await supabase.auth.getUser(token);
-  if (userError || !userData?.user) return null;
+  if (userError || !userData?.user) {
+    console.log('[auth] token tidak valid di Supabase:', userError?.message);
+    return null;
+  }
+  console.log('[auth] user terverifikasi:', userData.user.id, userData.user.email);
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
@@ -29,13 +36,20 @@ async function getUserFromRequest(req) {
     .eq('id', userData.user.id)
     .single();
 
-  if (profileError || !profile) return null;
+  if (profileError || !profile) {
+    console.log('[auth] profile TIDAK ditemukan untuk user ini:', profileError?.message);
+    return null;
+  }
+  console.log('[auth] profile ditemukan, role mentah dari DB:', JSON.stringify(profile.role));
 
   return { user: userData.user, profile };
 }
 
+// Normalisasi role dari DB (jaga-jaga kalau tersimpan "OWNER", "Owner ", dst)
+// supaya pencocokan ke ROLE_LEVEL tetap konsisten apapun format aslinya.
 function roleLevel(role) {
-  return ROLE_LEVEL[role] || 0;
+  const normalized = String(role || '').trim().toLowerCase();
+  return ROLE_LEVEL[normalized] || 0;
 }
 
 /**
@@ -47,15 +61,22 @@ async function requireRole(req, res, minRole) {
   const ctx = await getUserFromRequest(req);
 
   if (!ctx) {
+    console.log('[auth] requireRole GAGAL: sesi tidak valid (auth gagal atau profile tidak ketemu)');
     res.status(401).json({ error: 'Sesi tidak valid. Silakan login kembali.' });
     return null;
   }
 
-  if (roleLevel(ctx.profile.role) < roleLevel(minRole)) {
+  const actual = roleLevel(ctx.profile.role);
+  const required = roleLevel(minRole);
+  console.log(`[auth] cek role: role="${ctx.profile.role}" (level ${actual}) vs minimal "${minRole}" (level ${required})`);
+
+  if (actual < required) {
+    console.log('[auth] requireRole GAGAL: role tidak cukup');
     res.status(403).json({ error: 'Akun ini tidak memiliki akses yang cukup.' });
     return null;
   }
 
+  console.log('[auth] requireRole LOLOS');
   return ctx;
 }
 
