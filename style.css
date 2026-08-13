@@ -1,8 +1,11 @@
 :root{
-  --blue:#8FD9F5;
-  --blue-deep:#5CC2E8;
-  --green:#98FB98;
-  --green-deep:#6FE06F;
+  /* Skema warna: biru muda langit (aksen terang) + biru tua laut (warna
+     utama/brand). Nama variabel --blue/--green dipertahankan supaya tidak
+     perlu ubah class di HTML — cuma nilai warnanya yang diganti. */
+  --blue:#87CEEB;       /* biru muda langit */
+  --blue-deep:#56B8DE;  /* biru langit, versi lebih gelap (hover/shadow) */
+  --green:#0B4F71;      /* biru tua laut — dipakai sebagai warna utama/brand */
+  --green-deep:#073852; /* biru laut, versi lebih gelap lagi */
   --ink:#0E1A16;
   --paper:#FBFDF8;
   --card:#FFFFFF;
@@ -82,7 +85,7 @@ img{ max-width:100%; display:block; }
   align-items:center;
   gap:1.4rem;
 }
-.banner-track span::after{ content:"◆"; color:var(--green); }
+.banner-track span::after{ content:"◆"; color:var(--blue); }
 @keyframes marquee{
   from{ transform:translateX(0); }
   to{ transform:translateX(-50%); }
@@ -110,6 +113,7 @@ header.site{
   font-weight:700;
   font-family:'Space Grotesk', sans-serif;
   background:var(--green);
+  color:var(--paper);
   padding:6px 12px;
   border:3px solid var(--ink);
   box-shadow:4px 4px 0 var(--ink);
@@ -156,7 +160,7 @@ header.site{
   background:var(--card);
   cursor:pointer;
 }
-.btn-green{ background:var(--green); }
+.btn-green{ background:var(--green); color:var(--paper); }
 .btn-blue{ background:var(--blue); }
 .btn-ink{ background:var(--ink); color:var(--paper); }
 
@@ -180,13 +184,14 @@ header.site{
   text-transform:uppercase;
   letter-spacing:.08em;
   background:var(--ink);
-  color:var(--green);
+  color:var(--blue);
   padding:5px 10px;
   margin-bottom:18px;
 }
 .hero h1{ font-size:clamp(2.4rem, 5vw, 4rem); }
 .hero h1 .hl{
   background:var(--green);
+  color:var(--paper);
   padding:0 10px;
   box-decoration-break:clone;
   -webkit-box-decoration-break:clone;
@@ -228,7 +233,7 @@ header.site{
   width:230px;
 }
 .float-card.c1{ top:0; left:20px; background:var(--blue); transform:rotate(-6deg); }
-.float-card.c2{ top:120px; right:0; background:var(--green); transform:rotate(4deg); width:200px; }
+.float-card.c2{ top:120px; right:0; background:var(--green); color:var(--paper); transform:rotate(4deg); width:200px; }
 .float-card.c3{ bottom:0; left:60px; background:var(--card); transform:rotate(-3deg); }
 .float-card .tag-hole{
   width:16px; height:16px; border-radius:50%;
@@ -332,12 +337,12 @@ header.site{
   object-fit:cover;
 }
 .pcard:nth-child(4n+1) .thumb{ background:var(--blue); }
-.pcard:nth-child(4n+2) .thumb{ background:var(--green); }
-.pcard:nth-child(4n+3) .thumb{ background:#EAF9FF; }
-.pcard:nth-child(4n+4) .thumb{ background:#EFFFEF; }
+.pcard:nth-child(4n+2) .thumb{ background:#D6ECF7; }
+.pcard:nth-child(4n+3) .thumb{ background:#EAF6FF; }
+.pcard:nth-child(4n+4) .thumb{ background:#F0F8FC; }
 .pcard .badge{
   position:absolute; top:8px; right:8px;
-  background:var(--ink); color:var(--green);
+  background:var(--ink); color:var(--blue);
   font-family:'JetBrains Mono', monospace; font-size:.65rem; font-weight:700;
   padding:3px 7px; text-transform:uppercase; letter-spacing:.04em;
   transform:rotate(4deg);
@@ -358,7 +363,7 @@ header.site{
   font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:.8rem;
   padding:8px; cursor:pointer;
 }
-.pcard .addbtn:hover{ background:var(--ink); color:var(--green); }
+.pcard .addbtn:hover{ background:var(--ink); color:var(--blue); }
 
 /* ---------- WHY US ---------- */
 .why{ background:var(--ink); color:var(--paper); }
@@ -371,7 +376,7 @@ header.site{
   padding:24px 20px;
 }
 .why-card .num{
-  font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--green);
+  font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--blue);
   font-size:.8rem; margin-bottom:14px; display:block;
 }
 .why-card h3{ font-size:1.1rem; margin-bottom:8px; }
@@ -381,6 +386,7 @@ header.site{
 .cta-strip{ max-width:1180px; margin:0 auto; padding:0 24px 64px; }
 .cta-inner{
   background:var(--green);
+  color:var(--paper);
   border:3px solid var(--ink);
   box-shadow:8px 8px 0 var(--ink);
   padding:44px 40px;
