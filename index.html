@@ -19,8 +19,8 @@
   <header class="site">
     <div class="nav-wrap">
       <div class="logo">EX-SCHOOL</div>
-      <form class="search" role="search">
-        <input type="text" placeholder="Cari produk, toko, atau kategori...">
+      <form class="search" role="search" id="search-form">
+        <input type="text" id="search-input" placeholder="Cari produk, toko, atau kategori...">
         <button type="submit" aria-label="Cari">CARI</button>
       </form>
       <div class="nav-actions">
@@ -48,6 +48,7 @@
     </section>
 
     <!-- CATEGORY CHIPS: diisi dari /api/categories -->
+    <div id="kategori"></div>
     <nav class="cats" id="category-nav" aria-label="Kategori produk"></nav>
 
     <!-- PRODUCT GRID: diisi dari /api/products -->
@@ -94,7 +95,7 @@
     <section class="cta-strip">
       <div class="cta-inner">
         <h2>Punya toko? Yuk mulai jualan di EX-SCHOOL, gratis daftar.</h2>
-        <a href="#" class="btn btn-ink hover-lift brutal">Daftar Jadi Penjual</a>
+        <a href="akun.html?tab=daftar" class="btn btn-ink hover-lift brutal">Daftar Jadi Penjual</a>
       </div>
     </section>
   </main>

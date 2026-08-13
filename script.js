@@ -39,6 +39,9 @@ async function loadBanner() {
 }
 
 // ---------- Kategori ----------
+let currentCategory = 'semua';
+let currentSearch = '';
+
 async function loadCategories() {
   const nav = document.getElementById('category-nav');
   if (!nav) return;
@@ -61,7 +64,28 @@ function initCategoryFilter() {
     if (!chip) return;
     nav.querySelectorAll('.chip').forEach((c) => c.classList.remove('active'));
     chip.classList.add('active');
-    loadProducts(chip.dataset.cat);
+    currentCategory = chip.dataset.cat;
+    loadProducts();
+  });
+}
+
+function initSearch() {
+  const form = document.getElementById('search-form');
+  const input = document.getElementById('search-input');
+  if (!form || !input) return;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    currentSearch = input.value.trim();
+    // Pencarian nyari lintas kategori — reset chip ke "Semua" biar hasilnya
+    // tidak kelihatan kosong padahal produknya ada di kategori lain.
+    if (currentSearch) {
+      currentCategory = 'semua';
+      const nav = document.getElementById('category-nav');
+      nav?.querySelectorAll('.chip').forEach((c) => c.classList.toggle('active', c.dataset.cat === 'semua'));
+    }
+    loadProducts();
+    document.getElementById('produk')?.scrollIntoView({ behavior: 'smooth' });
   });
 }
 
@@ -85,7 +109,7 @@ function productCardHTML(p) {
   `;
 }
 
-async function loadProducts(categorySlug = 'semua') {
+async function loadProducts(categorySlug = currentCategory) {
   const grid = document.getElementById('product-grid');
   if (!grid) return;
 
@@ -95,13 +119,24 @@ async function loadProducts(categorySlug = 'semua') {
     const qs = categorySlug && categorySlug !== 'semua' ? `?category=${encodeURIComponent(categorySlug)}` : '';
     const { data } = await fetchJSON(`${API_BASE}/products${qs}`);
 
-    if (!data || data.length === 0) {
-      grid.innerHTML = `<p class="grid-msg">Belum ada produk di kategori ini.</p>`;
+    let filtered = data || [];
+    if (currentSearch) {
+      const q = currentSearch.toLowerCase();
+      filtered = filtered.filter((p) =>
+        p.name.toLowerCase().includes(q) || p.shop_name.toLowerCase().includes(q)
+      );
+    }
+
+    if (filtered.length === 0) {
+      grid.innerHTML = currentSearch
+        ? `<p class="grid-msg">Tidak ada produk yang cocok dengan "${escapeHtml(currentSearch)}".</p>`
+        : `<p class="grid-msg">Belum ada produk di kategori ini.</p>`;
+      if (categorySlug === 'semua' && !currentSearch) renderHeroPicks([]);
       return;
     }
 
-    grid.innerHTML = data.map(productCardHTML).join('');
-    if (categorySlug === 'semua') renderHeroPicks(data.slice(0, 3));
+    grid.innerHTML = filtered.map(productCardHTML).join('');
+    if (categorySlug === 'semua' && !currentSearch) renderHeroPicks(filtered.slice(0, 3));
   } catch (err) {
     grid.innerHTML = `<p class="grid-msg">Gagal memuat produk: ${escapeHtml(err.message)}</p>`;
   }
@@ -144,6 +179,7 @@ function initCart() {
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', async () => {
   initCategoryFilter();
+  initSearch();
   initCart();
   await loadBanner();
   await loadCategories();

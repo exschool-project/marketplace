@@ -186,5 +186,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('register-form').addEventListener('submit', handleRegister);
   document.getElementById('logout-btn').addEventListener('click', handleLogout);
 
+  // Dukung akun.html?tab=daftar — dipakai tombol "Daftar Jadi Penjual" di beranda
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('tab') === 'daftar') {
+    document.getElementById('tab-register').click();
+  }
+
   await checkExistingSession();
 });
