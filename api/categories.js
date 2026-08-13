@@ -1,25 +1,19 @@
 const { getSupabaseAdmin } = require('./_lib/supabaseAdmin');
-const { getUserFromRequest, requireAdmin, roleLevel } = require('./_lib/auth');
+const { requireAdmin } = require('./_lib/auth');
 const { withErrorHandling } = require('./_lib/http');
 
-// Satu file untuk /api/banner (list & create) DAN /api/banner?id=xxx
+// Satu file untuk /api/categories (list & create) DAN /api/categories?id=xxx
 // (update/hapus) — digabung supaya hemat kuota Vercel Functions.
 module.exports = withErrorHandling(async (req, res) => {
   const supabase = getSupabaseAdmin();
   const { id } = req.query;
 
   if (req.method === 'GET') {
-    const ctx = await getUserFromRequest(req);
-    const isAdmin = roleLevel(ctx?.profile?.role) >= roleLevel('admin');
-
-    let query = supabase
-      .from('banner_messages')
+    const { data, error } = await supabase
+      .from('categories')
       .select('*')
       .order('sort_order', { ascending: true });
 
-    if (!isAdmin) query = query.eq('is_active', true);
-
-    const { data, error } = await query;
     if (error) {
       res.status(500).json({ error: error.message });
       return;
@@ -32,21 +26,24 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await requireAdmin(req, res);
     if (!ctx) return;
 
-    const { message, is_active = true, sort_order = 0 } = req.body || {};
+    const { name, slug, sort_order = 0 } = req.body || {};
 
-    if (!message || !String(message).trim()) {
-      res.status(400).json({ error: 'Isi pesan banner wajib diisi.' });
+    if (!name || !String(name).trim() || !slug || !String(slug).trim()) {
+      res.status(400).json({ error: 'Nama dan slug kategori wajib diisi.' });
       return;
     }
 
     const { data, error } = await supabase
-      .from('banner_messages')
-      .insert({ message: String(message).trim(), is_active, sort_order })
+      .from('categories')
+      .insert({ name: String(name).trim(), slug: String(slug).trim(), sort_order })
       .select()
       .single();
 
     if (error) {
-      res.status(500).json({ error: error.message });
+      const message = error.code === '23505'
+        ? 'Slug kategori sudah dipakai, gunakan nama lain.'
+        : error.message;
+      res.status(400).json({ error: message });
       return;
     }
     res.status(201).json({ data });
@@ -61,14 +58,14 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await requireAdmin(req, res);
     if (!ctx) return;
 
-    const { message, is_active, sort_order } = req.body || {};
+    const { name, slug, sort_order } = req.body || {};
     const updates = {};
-    if (message !== undefined) updates.message = String(message).trim();
-    if (is_active !== undefined) updates.is_active = is_active;
+    if (name !== undefined) updates.name = String(name).trim();
+    if (slug !== undefined) updates.slug = String(slug).trim();
     if (sort_order !== undefined) updates.sort_order = sort_order;
 
     const { data, error } = await supabase
-      .from('banner_messages')
+      .from('categories')
       .update(updates)
       .eq('id', id)
       .select()
@@ -90,7 +87,7 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await requireAdmin(req, res);
     if (!ctx) return;
 
-    const { error } = await supabase.from('banner_messages').delete().eq('id', id);
+    const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) {
       res.status(500).json({ error: error.message });
       return;
