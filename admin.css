@@ -191,6 +191,16 @@
   color:#5a6b64;
   padding-top:8px;
 }
+.dashboard-load-error{
+  background:#FFF3CD;
+  border:2.5px solid var(--ink);
+  padding:10px 14px;
+  font-size:.82rem;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
 .admin-panel{
   background:var(--card);
   padding:24px;

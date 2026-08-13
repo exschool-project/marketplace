@@ -61,13 +61,15 @@ function showProfile(profile) {
   document.getElementById('profile-name').textContent = `Halo, ${profile.full_name || 'kamu'}!`;
   document.getElementById('profile-email').textContent = profile.email;
 
+  const normalizedRole = String(profile.role || '').trim().toLowerCase();
+
   const badge = document.getElementById('profile-role-badge');
-  const roleLabel = { owner: 'OWNER', admin: 'ADMIN', member: 'MEMBER' }[profile.role] || profile.role.toUpperCase();
+  const roleLabel = { owner: 'OWNER', admin: 'ADMIN', member: 'MEMBER' }[normalizedRole] || normalizedRole.toUpperCase();
   badge.textContent = roleLabel;
-  badge.className = `role-badge role-${profile.role}`;
+  badge.className = `role-badge role-${normalizedRole}`;
 
   const adminLinkWrap = document.getElementById('profile-admin-link');
-  const canSeeAdminPanel = profile.role === 'admin' || profile.role === 'owner';
+  const canSeeAdminPanel = normalizedRole === 'admin' || normalizedRole === 'owner';
   adminLinkWrap.classList.toggle('hidden', !canSeeAdminPanel);
 }
 

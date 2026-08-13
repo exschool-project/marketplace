@@ -7,6 +7,16 @@ let pendingImageUrl = null;
 
 const ROLE_LEVEL = { member: 1, admin: 2, owner: 3 };
 
+// Normalisasi role di sisi client juga (samakan dengan server) — kalau
+// tidak, role yang formatnya tak terduga (mis. "Admin" dengan huruf besar)
+// akan bikin ROLE_LEVEL[...] jadi undefined, dan "undefined < 2" itu SELALU
+// false di JS — jadi malah lolos padahal harusnya ditolak. Bug keamanan
+// kecil, ditemukan waktu audit ulang.
+function clientRoleLevel(role) {
+  const normalized = String(role || '').trim().toLowerCase();
+  return ROLE_LEVEL[normalized] || 0;
+}
+
 // Ambil profil user yang sedang login, lalu pastikan role-nya cukup
 // (admin/owner) untuk buka panel ini. Pengecekan role dilakukan di sini
 // (client) karena endpoint /api/auth/profile sengaja dibuat terbuka untuk
@@ -15,7 +25,7 @@ const ROLE_LEVEL = { member: 1, admin: 2, owner: 3 };
 // endpoint yang mengubah data (requireAdmin/requireOwner).
 async function fetchProfileAndEnforceRole() {
   const profile = await authedFetch(`${API_BASE}/auth/profile`);
-  if (ROLE_LEVEL[profile.role] < ROLE_LEVEL.admin) {
+  if (clientRoleLevel(profile.role) < ROLE_LEVEL.admin) {
     const err = new Error('Akun ini tidak memiliki akses yang cukup.');
     err.status = 403;
     throw err;
@@ -69,13 +79,14 @@ function showDashboard(profile) {
   document.getElementById('dashboard-view').classList.remove('hidden');
   document.getElementById('admin-name').textContent = profile.full_name || profile.email;
 
-  currentRole = profile.role;
+  const normalizedRole = String(profile.role || '').trim().toLowerCase();
+  currentRole = normalizedRole;
   const badge = document.getElementById('role-badge');
-  badge.textContent = profile.role.toUpperCase();
-  badge.className = `role-badge role-${profile.role}`;
+  badge.textContent = normalizedRole.toUpperCase();
+  badge.className = `role-badge role-${normalizedRole}`;
 
   const teamPanel = document.getElementById('team-panel');
-  teamPanel.classList.toggle('hidden', profile.role !== 'owner');
+  teamPanel.classList.toggle('hidden', normalizedRole !== 'owner');
 }
 
 // ---------- Init Supabase (hanya dipakai untuk proses login) ----------
@@ -102,7 +113,6 @@ async function handleLogin(e) {
 
     const me = await fetchProfileAndEnforceRole();
     showDashboard(me);
-    await loadAllData();
   } catch (err) {
     let msg = err.message;
 
@@ -128,10 +138,20 @@ async function handleLogin(e) {
     }
 
     showLogin(msg);
-  } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Masuk';
+    return;
   }
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'Masuk';
+
+  // PENTING: load data dashboard di LUAR try/catch auth di atas. Kalau salah
+  // satu panggilan di sini gagal (mis. cold-start function lambat sesaat),
+  // JANGAN dianggap sebagai kegagalan login — dashboard tetap tampil, cuma
+  // kasih tahu bagian mana yang gagal dimuat lewat notifDashboardError, dan
+  // tombol "Muat ulang" muncul untuk coba lagi tanpa perlu login ulang.
+  await safeLoadAllData();
 }
 
 async function handleLogout() {
@@ -150,7 +170,6 @@ async function checkExistingSession() {
   try {
     const me = await fetchProfileAndEnforceRole();
     showDashboard(me);
-    await loadAllData();
   } catch (err) {
     if (err.status === 401 || err.status === 403) {
       // Sesi memang tidak valid / role tidak cukup — logout beneran.
@@ -162,7 +181,11 @@ async function checkExistingSession() {
     // Server gangguan / error — sesi Supabase-nya masih valid, jangan logout.
     // Tampilkan pesan asli dari server biar penyebabnya jelas.
     showLogin(err.message || 'Gagal menghubungi server. Muat ulang halaman untuk coba lagi.');
+    return;
   }
+
+  // Di LUAR try/catch auth — lihat penjelasan di safeLoadAllData().
+  await safeLoadAllData();
 }
 
 // ---------- Banner ----------
@@ -430,6 +453,33 @@ async function loadAllData() {
   await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin()]);
 }
 
+// Versi "aman" dari loadAllData(): kalau gagal (mis. cold-start function
+// lambat sesaat), TIDAK melempar balik ke login — dashboard tetap tampil,
+// cuma dikasih notifikasi + tombol coba lagi. Ini yang jadi akar kenapa
+// dulu sering "kelihatan login tapi langsung mental balik ke halaman
+// login": loadAllData() dulu dipanggil di dalam try/catch yang sama
+// dengan pengecekan auth, jadi kegagalan MUAT DATA disalahartikan sebagai
+// kegagalan LOGIN.
+async function safeLoadAllData() {
+  const errEl = document.getElementById('dashboard-load-error');
+  try {
+    await loadAllData();
+    if (errEl) errEl.classList.add('hidden');
+  } catch (err) {
+    console.error('[dashboard] gagal memuat data:', err);
+    if (errEl) {
+      errEl.textContent = `Sebagian data gagal dimuat: ${err.message || 'tidak diketahui'}. `;
+      const retryBtn = document.createElement('button');
+      retryBtn.type = 'button';
+      retryBtn.className = 'mini-btn';
+      retryBtn.textContent = 'Muat ulang';
+      retryBtn.addEventListener('click', () => safeLoadAllData());
+      errEl.appendChild(retryBtn);
+      errEl.classList.remove('hidden');
+    }
+  }
+}
+
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -447,4 +497,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   initProductImageInput();
 
   await checkExistingSession();
+
+  // Poin F dari audit: kalau user logout lalu pencet tombol Back browser,
+  // halaman bisa ke-restore dari bfcache (menampilkan dashboard versi lama
+  // tanpa re-run JS). Listener ini re-cek sesi tiap kali halaman muncul
+  // lagi dari bfcache, supaya dashboard tidak nyangkut kebuka.
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) checkExistingSession();
+  });
 });
