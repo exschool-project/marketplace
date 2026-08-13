@@ -17,7 +17,18 @@ module.exports = withErrorHandling(async (req, res) => {
   }
 
   const ctx = await getUserFromRequest(req);
-  if (!ctx) {
+
+  if (!ctx.profile) {
+    // Beda pesan tergantung penyebabnya, biar jelas di sisi client:
+    // - belum login sama sekali / token expired -> minta login lagi
+    // - token valid tapi baris di tabel profiles tidak ada -> masalah data,
+    //   bukan masalah sesi, jadi jangan minta "login lagi" (bakal loop sia-sia)
+    if (ctx.reason === 'no_profile') {
+      res.status(401).json({
+        error: 'Akun ini terverifikasi tapi datanya tidak ditemukan di tabel profiles. Hubungi owner untuk perbaikan data.',
+      });
+      return;
+    }
     res.status(401).json({ error: 'Sesi tidak valid. Silakan masuk kembali.' });
     return;
   }
