@@ -19,14 +19,14 @@ async function getUserFromRequest(req) {
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) {
     console.log('[auth] tidak ada Bearer token di header Authorization');
-    return null;
+    return { reason: 'no_token' };
   }
 
   const supabase = getSupabaseAdmin();
   const { data: userData, error: userError } = await supabase.auth.getUser(token);
   if (userError || !userData?.user) {
     console.log('[auth] token tidak valid di Supabase:', userError?.message);
-    return null;
+    return { reason: 'invalid_token' };
   }
   console.log('[auth] user terverifikasi:', userData.user.id, userData.user.email);
 
@@ -37,8 +37,10 @@ async function getUserFromRequest(req) {
     .single();
 
   if (profileError || !profile) {
+    // Auth berhasil (token valid), tapi baris di tabel profiles tidak ada.
+    // Ini beda kasus dari "belum login" — jangan disamakan pesannya.
     console.log('[auth] profile TIDAK ditemukan untuk user ini:', profileError?.message);
-    return null;
+    return { reason: 'no_profile', user: userData.user };
   }
   console.log('[auth] profile ditemukan, role mentah dari DB:', JSON.stringify(profile.role));
 
@@ -60,8 +62,15 @@ function roleLevel(role) {
 async function requireRole(req, res, minRole) {
   const ctx = await getUserFromRequest(req);
 
-  if (!ctx) {
-    console.log('[auth] requireRole GAGAL: sesi tidak valid (auth gagal atau profile tidak ketemu)');
+  if (!ctx.profile) {
+    if (ctx.reason === 'no_profile') {
+      console.log('[auth] requireRole GAGAL: token valid tapi profile tidak ada di DB');
+      res.status(401).json({
+        error: 'Akun ini terverifikasi tapi datanya tidak ditemukan di tabel profiles. Hubungi owner untuk perbaikan data.',
+      });
+      return null;
+    }
+    console.log('[auth] requireRole GAGAL: sesi tidak valid (belum login / token tidak valid)');
     res.status(401).json({ error: 'Sesi tidak valid. Silakan login kembali.' });
     return null;
   }
