@@ -44,8 +44,8 @@
   border:2px solid var(--ink);
   letter-spacing:.03em;
 }
-.role-owner{ background:var(--green); color:var(--paper); }
-.role-admin{ background:var(--blue); }
+.role-owner{ background:var(--gold); color:var(--ink); }
+.role-admin{ background:var(--blue); color:var(--paper); }
 .role-member{ background:var(--paper); }
 
 /* ---------- Login ---------- */
@@ -152,7 +152,7 @@
 }
 
 /* ---------- Owner-only panel accent ---------- */
-.owner-only{ border-color:var(--green); box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--green); }
+.owner-only{ border-color:var(--gold-deep); box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--gold-deep); }
 
 /* ---------- Product image upload/preview ---------- */
 .image-preview{

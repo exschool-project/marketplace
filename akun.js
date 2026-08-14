@@ -27,28 +27,6 @@ async function initSupabase() {
   supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
 }
 
-// ---------- Tab switching (login / daftar) ----------
-function initTabs() {
-  const tabLogin = document.getElementById('tab-login');
-  const tabRegister = document.getElementById('tab-register');
-  const loginForm = document.getElementById('login-form');
-  const registerForm = document.getElementById('register-form');
-
-  tabLogin.addEventListener('click', () => {
-    tabLogin.classList.add('active');
-    tabRegister.classList.remove('active');
-    loginForm.classList.remove('hidden');
-    registerForm.classList.add('hidden');
-  });
-
-  tabRegister.addEventListener('click', () => {
-    tabRegister.classList.add('active');
-    tabLogin.classList.remove('active');
-    registerForm.classList.remove('hidden');
-    loginForm.classList.add('hidden');
-  });
-}
-
 // ---------- View switching ----------
 function showAuth() {
   document.getElementById('auth-view').classList.remove('hidden');
@@ -99,42 +77,6 @@ async function handleLogin(e) {
   }
 }
 
-// ---------- Register ----------
-async function handleRegister(e) {
-  e.preventDefault();
-  const full_name = document.getElementById('register-name').value.trim();
-  const email = document.getElementById('register-email').value.trim();
-  const password = document.getElementById('register-password').value;
-  const errEl = document.getElementById('register-error');
-  const okEl = document.getElementById('register-success');
-  const submitBtn = e.target.querySelector('button[type="submit"]');
-  errEl.style.display = 'none';
-  okEl.style.display = 'none';
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Memproses...';
-
-  try {
-    const res = await fetch(`${API_BASE}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ full_name, email, password }),
-    });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.error || 'Gagal mendaftar.');
-
-    okEl.textContent = 'Akun berhasil dibuat! Silakan masuk lewat tab Masuk.';
-    okEl.style.display = 'block';
-    e.target.reset();
-    setTimeout(() => document.getElementById('tab-login').click(), 1200);
-  } catch (err) {
-    errEl.textContent = err.message;
-    errEl.style.display = 'block';
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Daftar';
-  }
-}
-
 // ---------- Logout ----------
 async function handleLogout() {
   await supabaseClient.auth.signOut();
@@ -181,16 +123,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  initTabs();
   document.getElementById('login-form').addEventListener('submit', handleLogin);
-  document.getElementById('register-form').addEventListener('submit', handleRegister);
   document.getElementById('logout-btn').addEventListener('click', handleLogout);
-
-  // Dukung akun.html?tab=daftar — dipakai tombol "Daftar Jadi Penjual" di beranda
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('tab') === 'daftar') {
-    document.getElementById('tab-register').click();
-  }
 
   await checkExistingSession();
 });

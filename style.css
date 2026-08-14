@@ -1,11 +1,14 @@
 :root{
-  /* Palet ketat: biru muda + biru tua + putih saja. */
-  --blue:#87CEEB;       /* biru muda */
-  --blue-deep:#56B8DE;  /* biru muda, versi lebih gelap (hover/shadow kecil) */
-  --green:#0B4F71;      /* biru tua (nama variabel dipertahankan, isinya biru) */
-  --green-deep:#073852; /* biru tua, versi lebih gelap lagi */
-  --ink:#0B4F71;        /* dipakai untuk border/shadow/teks gelap — samain persis dgn biru tua */
-  --paper:#FFFFFF;       /* putih polos (bukan putih gading lagi) */
+  /* Palet diambil dari logo Yayasan Aqilah Hidayah: navy + emas + putih,
+     ditambah biru sedang dari gradasi ilustrasi di logo. */
+  --blue:#4E93C9;       /* biru sedang, dari gradasi kubah/daun di logo */
+  --blue-deep:#356F9E;  /* versi lebih gelap, buat hover/shadow */
+  --green:#0B2A54;      /* navy — warna dasar cincin logo, jadi warna utama situs */
+  --green-deep:#071D3B; /* navy lebih gelap lagi */
+  --gold:#C9A227;       /* emas — dari cincin luar & bintang di logo */
+  --gold-deep:#A5811C;  /* emas lebih gelap, buat shadow/border */
+  --ink:#0B2A54;        /* border/shadow/teks gelap — samain dgn navy */
+  --paper:#FFFFFF;
   --card:#FFFFFF;
   --shadow-w: 6px;
 }
@@ -83,7 +86,7 @@ img{ max-width:100%; display:block; }
   align-items:center;
   gap:1.4rem;
 }
-.banner-track span::after{ content:"◆"; color:var(--blue); }
+.banner-track span::after{ content:"◆"; color:var(--gold); }
 @keyframes marquee{
   from{ transform:translateX(0); }
   to{ transform:translateX(-50%); }
