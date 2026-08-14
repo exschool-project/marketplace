@@ -1,13 +1,11 @@
 :root{
-  /* Skema warna: biru muda langit (aksen terang) + biru tua laut (warna
-     utama/brand). Nama variabel --blue/--green dipertahankan supaya tidak
-     perlu ubah class di HTML — cuma nilai warnanya yang diganti. */
-  --blue:#87CEEB;       /* biru muda langit */
-  --blue-deep:#56B8DE;  /* biru langit, versi lebih gelap (hover/shadow) */
-  --green:#0B4F71;      /* biru tua laut — dipakai sebagai warna utama/brand */
-  --green-deep:#073852; /* biru laut, versi lebih gelap lagi */
-  --ink:#0E1A16;
-  --paper:#FBFDF8;
+  /* Palet ketat: biru muda + biru tua + putih saja. */
+  --blue:#87CEEB;       /* biru muda */
+  --blue-deep:#56B8DE;  /* biru muda, versi lebih gelap (hover/shadow kecil) */
+  --green:#0B4F71;      /* biru tua (nama variabel dipertahankan, isinya biru) */
+  --green-deep:#073852; /* biru tua, versi lebih gelap lagi */
+  --ink:#0B4F71;        /* dipakai untuk border/shadow/teks gelap — samain persis dgn biru tua */
+  --paper:#FFFFFF;       /* putih polos (bukan putih gading lagi) */
   --card:#FFFFFF;
   --shadow-w: 6px;
 }
@@ -200,7 +198,7 @@ header.site{
   font-size:1.05rem;
   max-width:46ch;
   margin:22px 0 28px;
-  color:#20302b;
+  color:var(--ink);
 }
 .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; }
 .hero-stats{
@@ -219,7 +217,7 @@ header.site{
   font-size:.72rem;
   text-transform:uppercase;
   letter-spacing:.05em;
-  color:#4a5a54;
+  color:#3E6B85;
 }
 
 /* hero visual: stacked price-tag stickers */
@@ -272,7 +270,7 @@ header.site{
   grid-column: 1 / -1;
   font-family:'JetBrains Mono', monospace;
   font-size:.85rem;
-  color:#5a6b64;
+  color:#3E6B85;
   padding:24px 0;
 }
 
@@ -287,7 +285,7 @@ header.site{
   flex-wrap:wrap;
 }
 .section-head h2{ font-size:clamp(1.6rem,3vw,2.2rem); }
-.section-head p{ margin:6px 0 0; color:#4a5a54; font-size:.92rem; }
+.section-head p{ margin:6px 0 0; color:#3E6B85; font-size:.92rem; }
 .section-head .see-all{
   font-family:'JetBrains Mono', monospace;
   font-weight:700;
@@ -349,13 +347,13 @@ header.site{
 }
 .pcard .body{ padding:14px 16px 18px; }
 .pcard .shop{
-  font-family:'JetBrains Mono', monospace; font-size:.68rem; color:#5a6b64;
+  font-family:'JetBrains Mono', monospace; font-size:.68rem; color:#3E6B85;
   text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px;
 }
 .pcard .name{ font-weight:700; font-size:.95rem; margin-bottom:10px; }
 .pcard .price-row{ display:flex; align-items:baseline; gap:8px; }
 .pcard .price{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.15rem; }
-.pcard .old{ font-family:'JetBrains Mono', monospace; font-size:.78rem; color:#8a948f; text-decoration:line-through; }
+.pcard .old{ font-family:'JetBrains Mono', monospace; font-size:.78rem; color:#7FA8BD; text-decoration:line-through; }
 .pcard .addbtn{
   margin-top:12px; width:100%;
   border:2.5px solid var(--ink);
@@ -368,11 +366,11 @@ header.site{
 /* ---------- WHY US ---------- */
 .why{ background:var(--ink); color:var(--paper); }
 .why .section-head h2, .why .section-head p{ color:var(--paper); }
-.why .section-head p{ color:#c9d6d0; }
+.why .section-head p{ color:#BFE3F2; }
 .why-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
 .why-card{
-  background:#132420;
-  border:2.5px solid #2c3d37;
+  background:#073852;
+  border:2.5px solid #1B5A7A;
   padding:24px 20px;
 }
 .why-card .num{
@@ -380,7 +378,7 @@ header.site{
   font-size:.8rem; margin-bottom:14px; display:block;
 }
 .why-card h3{ font-size:1.1rem; margin-bottom:8px; }
-.why-card p{ margin:0; font-size:.88rem; color:#b7c6c0; line-height:1.55; }
+.why-card p{ margin:0; font-size:.88rem; color:#A8D4E8; line-height:1.55; }
 
 /* ---------- CTA STRIP ---------- */
 .cta-strip{ max-width:1180px; margin:0 auto; padding:0 24px 64px; }

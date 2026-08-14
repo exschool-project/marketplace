@@ -2,12 +2,6 @@
 
 .admin-body{ background:var(--paper); }
 
-/* ---------- Premium accents ---------- */
-:root{
-  --gold: #FFD966;
-  --gold-deep: #E8B923;
-}
-
 /* ---------- Auth tabs (akun.html) ---------- */
 .auth-tabs{
   display:flex;
@@ -26,19 +20,21 @@
   border-bottom:3px solid transparent;
   margin-bottom:-2.5px;
   cursor:pointer;
-  color:#5a6b64;
+  color:#3E6B85;
 }
 .auth-tab.active{ color:var(--ink); border-bottom-color:var(--ink); }
 .auth-form.hidden{ display:none; }
 .register-success{
-  background:#DFF8DF;
+  background:#DCEFF8;
   border:2px solid var(--ink);
   padding:8px 10px;
   font-size:.82rem;
   margin:0 0 14px;
 }
 
-/* ---------- Role badges ---------- */
+/* ---------- Role badges ----------
+   Cuma 2 warna biru: OWNER pakai biru tua (--green, lebih pekat/menonjol),
+   ADMIN pakai biru muda (--blue). MEMBER polos putih. */
 .role-badge{
   font-family:'JetBrains Mono', monospace;
   font-size:.68rem;
@@ -48,7 +44,7 @@
   border:2px solid var(--ink);
   letter-spacing:.03em;
 }
-.role-owner{ background:var(--gold); }
+.role-owner{ background:var(--green); color:var(--paper); }
 .role-admin{ background:var(--blue); }
 .role-member{ background:var(--paper); }
 
@@ -67,7 +63,7 @@
   max-width:380px;
 }
 .login-card h1{ font-size:1.5rem; margin-bottom:6px; }
-.login-sub{ font-size:.85rem; color:#4a5a54; margin:0 0 22px; }
+.login-sub{ font-size:.85rem; color:#3E6B85; margin:0 0 22px; }
 .login-error{
   background:#FFE3E3;
   border:2px solid var(--ink);
@@ -149,14 +145,14 @@
   font-family:'JetBrains Mono', monospace;
   font-size:.7rem;
   text-transform:uppercase;
-  color:#5a6b64;
+  color:#3E6B85;
 }
 @media (max-width:560px){
   .stat-row{ grid-template-columns:1fr; }
 }
 
 /* ---------- Owner-only panel accent ---------- */
-.owner-only{ border-color:var(--gold-deep); box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--gold-deep); }
+.owner-only{ border-color:var(--green); box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--green); }
 
 /* ---------- Product image upload/preview ---------- */
 .image-preview{
@@ -188,7 +184,7 @@
 .admin-copyright{
   text-align:center;
   font-size:.7rem;
-  color:#5a6b64;
+  color:#3E6B85;
   padding-top:8px;
 }
 .dashboard-load-error{
@@ -206,7 +202,7 @@
   padding:24px;
 }
 .admin-panel h2{ font-size:1.25rem; margin-bottom:4px; }
-.panel-sub{ font-size:.82rem; color:#4a5a54; margin:0 0 18px; }
+.panel-sub{ font-size:.82rem; color:#3E6B85; margin:0 0 18px; }
 
 .inline-form{
   display:flex;
@@ -245,7 +241,7 @@
   flex-wrap:wrap;
 }
 .admin-row-text{ flex:1; font-size:.88rem; font-weight:500; min-width:160px; }
-.admin-row-sub{ color:#5a6b64; font-size:.78rem; }
+.admin-row-sub{ color:#3E6B85; font-size:.78rem; }
 .admin-row-tag{
   font-family:'JetBrains Mono', monospace;
   font-size:.68rem;
@@ -253,7 +249,7 @@
   padding:3px 8px;
   border:2px solid var(--ink);
 }
-.empty-msg{ font-size:.85rem; color:#5a6b64; }
+.empty-msg{ font-size:.85rem; color:#3E6B85; }
 
 .mini-btn{
   font-family:'Space Grotesk', sans-serif;
