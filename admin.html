@@ -117,6 +117,18 @@
         <div id="product-list" class="admin-list"></div>
       </section>
 
+      <!-- MEDIA SOSIAL: hanya dirender & diisi kalau role === owner -->
+      <section id="social-panel" class="admin-panel brutal owner-only hidden">
+        <h2>Media Sosial <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
+        <p class="panel-sub">Link ini tampil di footer beranda. Contoh nama platform: Instagram, WhatsApp, TikTok.</p>
+        <form id="social-form" class="form-grid">
+          <label class="field"><span>Platform</span><input type="text" id="social-platform" placeholder="Instagram" required></label>
+          <label class="field"><span>URL</span><input type="url" id="social-url" placeholder="https://instagram.com/exschool" required></label>
+          <button type="submit" class="btn btn-green brutal-sm" style="align-self:end;">Tambah</button>
+        </form>
+        <div id="social-list" class="admin-list"></div>
+      </section>
+
       <!-- MANAJEMEN TIM: hanya dirender & diisi kalau role === owner -->
       <section id="team-panel" class="admin-panel brutal owner-only hidden">
         <h2>Manajemen Tim <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>

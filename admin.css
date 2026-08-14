@@ -221,14 +221,16 @@
 }
 .inline-form input:focus{ outline:none; background:#fff; }
 
-.product-form .form-grid{
+.product-form .form-grid,
+#social-form.form-grid{
   display:grid;
   grid-template-columns:repeat(2, 1fr);
   gap:14px 18px;
   margin-bottom:16px;
 }
 @media (max-width:560px){
-  .product-form .form-grid{ grid-template-columns:1fr; }
+  .product-form .form-grid,
+  #social-form.form-grid{ grid-template-columns:1fr; }
 }
 
 .admin-list{ display:flex; flex-direction:column; gap:10px; }

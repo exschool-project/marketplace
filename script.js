@@ -109,11 +109,32 @@ function productCardHTML(p) {
   `;
 }
 
+// Kotak kosong berbentuk sama persis kayak kartu produk asli, dipakai
+// selagi /api/products masih dimuat — biar tidak cuma teks "Memuat..."
+function skeletonCardHTML() {
+  return `
+    <div class="pcard-skeleton">
+      <div class="hole"></div>
+      <div class="thumb"></div>
+      <div class="body">
+        <div class="sk-line sk-shop"></div>
+        <div class="sk-line sk-name"></div>
+        <div class="sk-line sk-price"></div>
+        <div class="sk-btn"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderProductSkeletons(grid, count = 8) {
+  grid.innerHTML = Array.from({ length: count }, skeletonCardHTML).join('');
+}
+
 async function loadProducts(categorySlug = currentCategory) {
   const grid = document.getElementById('product-grid');
   if (!grid) return;
 
-  grid.innerHTML = `<p class="grid-msg">Memuat produk...</p>`;
+  renderProductSkeletons(grid);
 
   try {
     const qs = categorySlug && categorySlug !== 'semua' ? `?category=${encodeURIComponent(categorySlug)}` : '';
@@ -164,6 +185,25 @@ function renderHeroPicks(products) {
   `).join('');
 }
 
+// ---------- Media Sosial (diatur owner lewat admin panel) ----------
+async function loadSocialLinks() {
+  const wrap = document.getElementById('social-links');
+  if (!wrap) return;
+
+  try {
+    const { data } = await fetchJSON(`${API_BASE}/social-links`);
+    if (!data || data.length === 0) {
+      wrap.innerHTML = '';
+      return;
+    }
+    wrap.innerHTML = data
+      .map((s) => `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(s.platform)}</a>`)
+      .join('');
+  } catch (err) {
+    wrap.innerHTML = '';
+  }
+}
+
 // ---------- Keranjang (sisi klien, sederhana) ----------
 function initCart() {
   let cartCount = 0;
@@ -184,4 +224,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadBanner();
   await loadCategories();
   await loadProducts();
+  await loadSocialLinks();
 });

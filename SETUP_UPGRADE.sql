@@ -27,6 +27,18 @@ alter table public.profiles alter column role set default 'member';
 alter table public.products add column if not exists image_url text;
 
 -- ---------------------------------------------------------------------
+-- 2b) Tabel baru: social_links (link medsos di footer, diatur owner)
+-- ---------------------------------------------------------------------
+create table if not exists public.social_links (
+  id uuid primary key default gen_random_uuid(),
+  platform text not null,
+  url text not null,
+  is_active boolean not null default true,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------------------
 -- 3) Jadikan akun kamu sebagai OWNER pertama
 --    GANTI 'kamu@email.com' dengan email akun yang sudah kamu daftarkan.
 -- ---------------------------------------------------------------------

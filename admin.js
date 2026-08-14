@@ -87,6 +87,9 @@ function showDashboard(profile) {
 
   const teamPanel = document.getElementById('team-panel');
   teamPanel.classList.toggle('hidden', normalizedRole !== 'owner');
+
+  const socialPanel = document.getElementById('social-panel');
+  socialPanel.classList.toggle('hidden', normalizedRole !== 'owner');
 }
 
 // ---------- Init Supabase (hanya dipakai untuk proses login) ----------
@@ -447,10 +450,68 @@ document.getElementById('team-list')?.addEventListener('change', async (e) => {
   }
 });
 
+// ---------- Media Sosial (khusus owner) ----------
+async function loadSocialAdmin() {
+  if (currentRole !== 'owner') return;
+
+  const { data } = await authedFetch(`${API_BASE}/social-links`);
+  const list = document.getElementById('social-list');
+
+  list.innerHTML = data.map((s) => `
+    <div class="admin-row" data-id="${s.id}">
+      <span class="admin-row-text">
+        ${escapeHtml(s.platform)}
+        <span class="admin-row-sub">${escapeHtml(s.url)}</span>
+      </span>
+      <span class="admin-row-tag">${s.is_active ? 'Aktif' : 'Nonaktif'}</span>
+      <button class="mini-btn toggle-social" type="button">${s.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
+      <button class="mini-btn danger delete-social" type="button">Hapus</button>
+    </div>
+  `).join('') || '<p class="empty-msg">Belum ada link media sosial.</p>';
+}
+
+async function handleSocialSubmit(e) {
+  e.preventDefault();
+  const platformInput = document.getElementById('social-platform');
+  const urlInput = document.getElementById('social-url');
+  const platform = platformInput.value.trim();
+  const url = urlInput.value.trim();
+  if (!platform || !url) return;
+
+  await authedFetch(`${API_BASE}/social-links`, {
+    method: 'POST',
+    body: JSON.stringify({ platform, url }),
+  });
+  platformInput.value = '';
+  urlInput.value = '';
+  await loadSocialAdmin();
+}
+
+document.getElementById('social-list')?.addEventListener('click', async (e) => {
+  const row = e.target.closest('.admin-row');
+  if (!row) return;
+  const id = row.dataset.id;
+
+  if (e.target.classList.contains('delete-social')) {
+    if (!confirm('Hapus link media sosial ini?')) return;
+    await authedFetch(`${API_BASE}/social-links?id=${id}`, { method: 'DELETE' });
+    await loadSocialAdmin();
+  }
+
+  if (e.target.classList.contains('toggle-social')) {
+    const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
+    await authedFetch(`${API_BASE}/social-links?id=${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ is_active: !isActive }),
+    });
+    await loadSocialAdmin();
+  }
+});
+
 // ---------- Load semua data dashboard ----------
 async function loadAllData() {
   await loadCategoriesAdmin(); // duluan, karena dropdown produk butuh ini
-  await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin()]);
+  await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin(), loadSocialAdmin()]);
 }
 
 // Versi "aman" dari loadAllData(): kalau gagal (mis. cold-start function
@@ -494,6 +555,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('banner-form').addEventListener('submit', handleBannerSubmit);
   document.getElementById('category-form').addEventListener('submit', handleCategorySubmit);
   document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
+  document.getElementById('social-form').addEventListener('submit', handleSocialSubmit);
   initProductImageInput();
 
   await checkExistingSession();

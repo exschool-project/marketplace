@@ -366,6 +366,48 @@ header.site{
 }
 .pcard .addbtn:hover{ background:var(--ink); color:var(--blue); }
 
+/* ---------- SKELETON LOADING (bentuknya niru .pcard persis) ---------- */
+@keyframes skeleton-pulse{
+  0%, 100% { opacity:1; }
+  50% { opacity:.55; }
+}
+.pcard-skeleton{
+  position:relative;
+  background:var(--card);
+  border:3px solid var(--ink);
+  box-shadow:6px 6px 0 var(--ink);
+  padding-top:14px;
+}
+.pcard-skeleton .hole{
+  width:20px; height:20px; border-radius:50%;
+  background:var(--paper);
+  border:2.5px solid var(--ink);
+  position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+}
+.pcard-skeleton .thumb{
+  height:150px;
+  border-bottom:3px solid var(--ink);
+  background:#E4F1F7;
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+}
+.pcard-skeleton .body{ padding:14px 16px 18px; display:flex; flex-direction:column; gap:10px; }
+.pcard-skeleton .sk-line{
+  height:10px;
+  background:#D6ECF7;
+  border:1.5px solid var(--ink);
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+}
+.pcard-skeleton .sk-line.sk-shop{ width:40%; height:8px; animation-delay:.05s; }
+.pcard-skeleton .sk-line.sk-name{ width:85%; animation-delay:.1s; }
+.pcard-skeleton .sk-line.sk-price{ width:50%; margin-top:4px; animation-delay:.15s; }
+.pcard-skeleton .sk-btn{
+  margin-top:12px; height:34px;
+  border:2.5px solid var(--ink);
+  background:#F0F8FC;
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+  animation-delay:.2s;
+}
+
 /* ---------- WHY US ---------- */
 .why{ background:var(--ink); color:var(--paper); }
 .why .section-head h2, .why .section-head p{ color:var(--paper); }
@@ -401,6 +443,19 @@ footer{
 .foot-wrap ul a{ font-size:.85rem; }
 .foot-wrap ul a:hover{ text-decoration:underline; }
 .foot-desc{ font-size:.85rem; max-width:32ch; margin:0; }
+.social-links{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.social-links a{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.72rem;
+  font-weight:700;
+  text-transform:uppercase;
+  background:var(--ink);
+  color:var(--paper);
+  border:2px solid var(--ink);
+  padding:6px 10px;
+  text-decoration:none;
+}
+.social-links a:hover{ background:var(--paper); color:var(--ink); }
 .foot-bottom{
   max-width:1180px; margin:0 auto;
   border-top:2.5px solid var(--ink);
