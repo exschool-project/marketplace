@@ -78,8 +78,36 @@ body{
 .hero-banner-title:empty, .hero-banner-subtitle:empty{ display:none; }
 
 /* wadah kartu harga (float-card) supaya tetap bisa diklik di atas gambar */
-.hero-visual-cards{ position:absolute; inset:0; z-index:2; pointer-events:none; }
+.hero-visual-cards{ position:absolute; inset:0; z-index:3; pointer-events:none; }
 .hero-visual-cards .float-card{ pointer-events:auto; }
+
+/* ---------- OVERLAY teks welcome + tombol, MENIMPA gambar hero ----------
+   .hero-visual (position:relative) jadi wadah utama; layer ini
+   position:absolute + inset:0 supaya teks selalu nempel di atas gambar,
+   bukan section terpisah di bawahnya. Gradient di belakang teks biar
+   tetap kebaca di gambar apa pun. Wrapper-nya pointer-events:none supaya
+   area transparan di sekitarnya tidak menghalangi klik ke gambar/kartu
+   di baliknya; tombolnya sendiri diaktifkan lagi lewat pointer-events:auto. */
+.hero-overlay-content{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  padding:clamp(20px, 5vw, 64px);
+  background:linear-gradient(100deg, rgba(11,42,84,.85) 0%, rgba(11,42,84,.6) 38%, rgba(11,42,84,.15) 68%, rgba(11,42,84,0) 88%);
+  pointer-events:none;
+}
+.hero-copy{ max-width:min(560px, 88%); }
+.hero .hero-overlay-content h1{
+  color:#fff;
+  text-shadow:0 2px 14px rgba(0,0,0,.45);
+}
+.hero .hero-overlay-content p.lead{
+  color:#fff;
+  text-shadow:0 1px 10px rgba(0,0,0,.4);
+}
+.hero-overlay-content .hero-ctas a{ pointer-events:auto; }
 
 
 h1, h2, h3, .display{
@@ -224,10 +252,12 @@ header.site{
 .btn-ink{ background:var(--ink); color:var(--paper); }
 
 /* ---------- HERO / BERANDA ---------- */
+/* .hero cuma pembungkus full-width; gambar tetap tepi-ke-tepi (nggak dikotakin
+   1180px) dan teksnya sekarang jadi overlay lewat .hero-overlay-content
+   di dalam .hero-visual, bukan section teks terpisah di atas gambar lagi. */
 .hero{
-  max-width:1180px;
-  margin:0 auto;
-  padding:64px 24px 32px;
+  width:100%;
+  margin:24px 0 32px;
 }
 .eyebrow{
   display:inline-flex;
@@ -285,6 +315,10 @@ header.site{
   width:100%;
   aspect-ratio:16 / 9;
   max-height:640px;
+  overflow:hidden;
+  /* fallback bg (sama kayak .hero-banner-wrap) biar teks overlay tetap
+     kebaca walau banner gambar belum diupload owner di admin */
+  background:linear-gradient(120deg, var(--blue), var(--green));
 }
 .float-card{
   position:absolute;
@@ -534,13 +568,27 @@ footer{
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width:900px){
-  .hero{ padding-top:44px; }
+  .hero{ margin-top:16px; }
+  /* Kotak hero dibikin lebih tinggi (bukan gepeng) supaya teks overlay
+     muat di dalam gambar. object-fit:cover di .hero-banner-img tetap
+     jaga gambar nggak ketarik/distorsi, cuma area yang kelihatan makin
+     tinggi. */
+  .hero-visual{ aspect-ratio:4 / 5; max-height:560px; }
+  .hero-overlay-content{ align-items:flex-end; padding:24px; }
+  .hero-copy{ max-width:100%; }
   .grid{ grid-template-columns:repeat(2,1fr); }
   .why-grid{ grid-template-columns:1fr; }
   .foot-wrap{ grid-template-columns:1fr 1fr; }
 }
 @media (max-width:560px){
   .search{ display:none; }
+  .hero-visual{ aspect-ratio:3 / 4; max-height:none; }
+  .hero-overlay-content{
+    padding:18px;
+    background:linear-gradient(0deg, rgba(11,42,84,.9) 0%, rgba(11,42,84,.75) 45%, rgba(11,42,84,.25) 80%, rgba(11,42,84,0) 100%);
+  }
+  .hero h1{ font-size:clamp(1.6rem, 8vw, 2.2rem); }
+  .hero p.lead{ font-size:.92rem; margin:14px 0 18px; }
   .grid{ grid-template-columns:1fr 1fr; gap:16px; }
   .nav-wrap{ gap:10px; }
   .foot-wrap{ grid-template-columns:1fr; }

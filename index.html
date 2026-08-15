@@ -32,31 +32,39 @@
 
   <!-- BERANDA / HERO -->
   <main>
+    <!-- Hero overlay: gambar/banner jadi background utama (position:relative pada
+         .hero-visual), teks & tombol "Mulai Belanja" MENIMPA gambar lewat
+         .hero-overlay-content (position:absolute). aspect-ratio pada .hero-visual
+         bikin tingginya otomatis ikut lebar layar di semua device, diisi dari
+         /api/hero-banners. -->
     <section class="hero" id="beranda">
-      <span class="eyebrow">◆ Beranda </span>
-      <h1>Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
-      <p class="lead">Marketplace buat kamu yang cari barang bagus, harga jujur, dan pengiriman cepat — dari toko-toko lokal terpercaya di seluruh Indonesia.</p>
-      <div class="hero-ctas">
-        <a href="#produk" class="btn btn-green hover-lift brutal">Mulai Belanja</a>
-      </div>
-    </section>
-
-    <!-- Banner gambar full-width 16:9: diisi dari /api/hero-banners.
-         aspect-ratio bikin tingginya otomatis ikut lebar layar di semua device. -->
-    <div class="hero-visual" id="hero-visual">
-      <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
-        <img id="hero-banner-img" class="hero-banner-img" alt="Banner" loading="lazy">
-        <div class="hero-banner-overlay">
-          <div class="hero-banner-text">
-            <h2 id="hero-banner-title" class="hero-banner-title"></h2>
-            <p id="hero-banner-subtitle" class="hero-banner-subtitle"></p>
+      <div class="hero-visual" id="hero-visual">
+        <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
+          <img id="hero-banner-img" class="hero-banner-img" alt="Banner" loading="lazy">
+          <div class="hero-banner-overlay">
+            <div class="hero-banner-text">
+              <h2 id="hero-banner-title" class="hero-banner-title"></h2>
+              <p id="hero-banner-subtitle" class="hero-banner-subtitle"></p>
+            </div>
           </div>
         </div>
+
+        <div class="hero-overlay-content">
+          <div class="hero-copy">
+            <span class="eyebrow">◆ Beranda </span>
+            <h1>Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
+            <p class="lead">Marketplace buat kamu yang cari barang bagus, harga jujur, dan pengiriman cepat — dari toko-toko lokal terpercaya di seluruh Indonesia.</p>
+            <div class="hero-ctas">
+              <a href="#produk" class="btn btn-green hover-lift brutal">Mulai Belanja</a>
+            </div>
+          </div>
+        </div>
+
+        <div id="hero-visual-cards" class="hero-visual-cards">
+          <!-- Diisi dari /api/products?featured=true (produk populer pilihan owner) -->
+        </div>
       </div>
-      <div id="hero-visual-cards" class="hero-visual-cards">
-        <!-- Diisi dari /api/products?featured=true (produk populer pilihan owner) -->
-      </div>
-    </div>
+    </section>
 
     <!-- CATEGORY CHIPS: diisi dari /api/categories -->
     <div id="kategori"></div>
