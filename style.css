@@ -1,13 +1,13 @@
 :root{
   /* Palet diambil dari logo Yayasan Aqilah Hidayah: navy + emas + putih,
      ditambah biru sedang dari gradasi ilustrasi di logo. */
-  --blue:#4E93C9;       /* biru sedang, dari gradasi kubah/daun di logo */
-  --blue-deep:#356F9E;  /* versi lebih gelap, buat hover/shadow */
-  --green:#0B2A54;      /* navy — warna dasar cincin logo, jadi warna utama situs */
-  --green-deep:#071D3B; /* navy lebih gelap lagi */
-  --gold:#C9A227;       /* emas — dari cincin luar & bintang di logo */
-  --gold-deep:#A5811C;  /* emas lebih gelap, buat shadow/border */
-  --ink:#0B2A54;        /* border/shadow/teks gelap — samain dgn navy */
+  --blue:#4E93C9;
+  --blue-deep:#356F9E;
+  --green:#0B2A54;
+  --green-deep:#071D3B;
+  --gold:#C9A227;
+  --gold-deep:#A5811C;
+  --ink:#0B2A54;
   --paper:#FFFFFF;
   --card:#FFFFFF;
   --shadow-w: 6px;
@@ -28,20 +28,36 @@ body{
 
 /* ---------- BANNER GAMBAR (upload, diatur owner) ---------- */
 .hero-banner-wrap{
-  border-bottom:3px solid var(--ink);
-  max-height:280px;
+  width:100%;
+  max-width:480px;
+  aspect-ratio:16 / 9;
+  border:3px solid var(--ink);
   overflow:hidden;
+  background:var(--paper);
+  margin-left:auto;
 }
+
 .hero-banner-img{
   width:100%;
   height:100%;
-  max-height:280px;
   object-fit:cover;
   display:block;
 }
+
+@media (max-width:900px){
+  .hero-banner-wrap{
+    max-width:520px;
+    width:100%;
+    margin:20px auto 0;
+  }
+}
+
 @media (max-width:640px){
-  .hero-banner-wrap{ max-height:160px; }
-  .hero-banner-img{ max-height:160px; }
+  .hero-banner-wrap{
+    max-width:100%;
+    aspect-ratio:16 / 9;
+    margin:16px auto 0;
+  }
 }
 
 h1, h2, h3, .display{
@@ -386,7 +402,7 @@ header.site{
 }
 .pcard .addbtn:hover{ background:var(--ink); color:var(--blue); }
 
-/* ---------- SKELETON LOADING (bentuknya niru .pcard persis) ---------- */
+/* ---------- SKELETON LOADING ---------- */
 @keyframes skeleton-pulse{
   0%, 100% { opacity:1; }
   50% { opacity:.55; }
