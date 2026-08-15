@@ -125,7 +125,7 @@
       <!-- BANNER GAMBAR: hanya dirender & diisi kalau role === owner -->
       <section id="hero-banner-panel" class="admin-panel brutal owner-only hidden">
         <h2>Banner Gambar <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
-        <p class="panel-sub">Gambar yang tampil di paling atas halaman utama, di bawah pita banner teks.</p>
+        <p class="panel-sub">Gambar yang tampil di paling atas halaman utama, di bawah pita banner teks. Judul &amp; sub-judul akan ditimpa otomatis di atas gambar (bukan diedit manual di file gambarnya) dan menyesuaikan ukuran layar HP/tablet/desktop.</p>
         <form id="hero-banner-form">
           <label class="field">
             <span>Gambar banner (Cloudinary)</span>
@@ -135,6 +135,14 @@
             <img id="hero-banner-preview-img" alt="Pratinjau banner">
             <span id="hero-banner-status" class="mono"></span>
           </div>
+          <label class="field">
+            <span>Judul (ditimpa di atas gambar, opsional)</span>
+            <input type="text" id="hero-banner-title" placeholder="Cth: Promo Spesial Bulan Ini" maxlength="80">
+          </label>
+          <label class="field">
+            <span>Sub-judul (opsional)</span>
+            <input type="text" id="hero-banner-subtitle" placeholder="Cth: Diskon jasa desain sampai 70%" maxlength="140">
+          </label>
           <label class="field">
             <span>Link tujuan kalau diklik (opsional)</span>
             <input type="url" id="hero-banner-link" placeholder="https://...">

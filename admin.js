@@ -561,7 +561,10 @@ async function loadHeroBannerAdmin() {
   list.innerHTML = data.map((b) => `
     <div class="admin-row" data-id="${b.id}">
       <img class="admin-row-thumb" src="${escapeHtml(b.image_url)}" alt="">
-      <span class="admin-row-text">${b.link_url ? escapeHtml(b.link_url) : '<span class="admin-row-sub">Tanpa link tujuan</span>'}</span>
+      <span class="admin-row-text">
+        ${b.title ? escapeHtml(b.title) : '<span class="admin-row-sub">Tanpa judul</span>'}
+        ${b.link_url ? `· ${escapeHtml(b.link_url)}` : ''}
+      </span>
       <span class="admin-row-tag">${b.is_active ? 'Aktif' : 'Nonaktif'}</span>
       <button class="mini-btn toggle-hero-banner" type="button">${b.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
       <button class="mini-btn danger delete-hero-banner" type="button">Hapus</button>
@@ -578,11 +581,15 @@ async function handleHeroBannerSubmit(e) {
   }
 
   const linkInput = document.getElementById('hero-banner-link');
+  const titleInput = document.getElementById('hero-banner-title');
+  const subtitleInput = document.getElementById('hero-banner-subtitle');
   await authedFetch(`${API_BASE}/hero-banners`, {
     method: 'POST',
     body: JSON.stringify({
       image_url: pendingHeroBannerUrl,
       link_url: linkInput.value.trim() || null,
+      title: titleInput.value.trim() || null,
+      subtitle: subtitleInput.value.trim() || null,
     }),
   });
 

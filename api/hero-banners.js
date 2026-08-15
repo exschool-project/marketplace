@@ -34,7 +34,7 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await requireOwner(req, res);
     if (!ctx) return;
 
-    const { image_url, link_url, is_active = true, sort_order = 0 } = req.body || {};
+    const { image_url, link_url, title, subtitle, is_active = true, sort_order = 0 } = req.body || {};
 
     if (!image_url || !String(image_url).trim()) {
       res.status(400).json({ error: 'Gambar banner wajib diunggah dulu.' });
@@ -46,6 +46,8 @@ module.exports = withErrorHandling(async (req, res) => {
       .insert({
         image_url: String(image_url).trim(),
         link_url: link_url && String(link_url).trim() ? String(link_url).trim() : null,
+        title: title && String(title).trim() ? String(title).trim() : null,
+        subtitle: subtitle && String(subtitle).trim() ? String(subtitle).trim() : null,
         is_active,
         sort_order,
       })
@@ -68,10 +70,12 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await requireOwner(req, res);
     if (!ctx) return;
 
-    const { image_url, link_url, is_active, sort_order } = req.body || {};
+    const { image_url, link_url, title, subtitle, is_active, sort_order } = req.body || {};
     const updates = {};
     if (image_url !== undefined) updates.image_url = String(image_url).trim();
     if (link_url !== undefined) updates.link_url = link_url ? String(link_url).trim() : null;
+    if (title !== undefined) updates.title = title ? String(title).trim() : null;
+    if (subtitle !== undefined) updates.subtitle = subtitle ? String(subtitle).trim() : null;
     if (is_active !== undefined) updates.is_active = is_active;
     if (sort_order !== undefined) updates.sort_order = sort_order;
 

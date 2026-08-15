@@ -15,6 +15,17 @@
     <div class="banner-track" id="banner-track"></div>
   </div>
 
+  <!-- BANNER GAMBAR (upload, diatur owner): diisi dari /api/hero-banners -->
+  <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
+    <img id="hero-banner-img" class="hero-banner-img" alt="Banner" loading="lazy">
+    <div class="hero-banner-overlay">
+      <div class="hero-banner-text">
+        <h2 id="hero-banner-title" class="hero-banner-title"></h2>
+        <p id="hero-banner-subtitle" class="hero-banner-subtitle"></p>
+      </div>
+    </div>
+  </div>
+
   <!-- NAV -->
   <header class="site">
     <div class="nav-wrap">
@@ -35,16 +46,12 @@
     <section class="hero" id="beranda">
       <div>
         <span class="eyebrow">◆ Beranda </span>
-        <h1>Selamat Datang di <span class="hl">EX-SCHOOL YAYASAN AQILAH HIDAYAH</span></h1>
+        <h1>Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
         <p class="lead">Marketplace buat kamu yang cari barang bagus, harga jujur, dan pengiriman cepat — dari toko-toko lokal terpercaya di seluruh Indonesia.</p>
         <div class="hero-ctas">
           <a href="#produk" class="btn btn-green hover-lift brutal">Mulai Belanja</a>
         </div>
       </div>
-      <!-- BANNER GAMBAR (upload, diatur owner): diisi dari /api/hero-banners -->
-  <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
-    <img id="hero-banner-img" class="hero-banner-img" alt="Banner">
-  </div>
       <div class="hero-visual" id="hero-visual">
         <!-- Diisi dari /api/products?featured=true (produk populer pilihan owner) -->
       </div>

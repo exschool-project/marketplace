@@ -42,6 +42,8 @@ async function loadBanner() {
 async function loadHeroBannerImage() {
   const wrap = document.getElementById('hero-banner-wrap');
   const img = document.getElementById('hero-banner-img');
+  const titleEl = document.getElementById('hero-banner-title');
+  const subtitleEl = document.getElementById('hero-banner-subtitle');
   if (!wrap || !img) return;
 
   try {
@@ -52,12 +54,15 @@ async function loadHeroBannerImage() {
     }
     const banner = data[0]; // yang paling atas urutannya
     img.src = banner.image_url;
+    img.alt = banner.title || 'Banner';
+    if (titleEl) titleEl.textContent = banner.title || '';
+    if (subtitleEl) subtitleEl.textContent = banner.subtitle || '';
     if (banner.link_url) {
-      img.style.cursor = 'pointer';
-      img.onclick = () => window.open(banner.link_url, '_blank', 'noopener,noreferrer');
+      wrap.style.cursor = 'pointer';
+      wrap.onclick = () => window.open(banner.link_url, '_blank', 'noopener,noreferrer');
     } else {
-      img.style.cursor = 'default';
-      img.onclick = null;
+      wrap.style.cursor = 'default';
+      wrap.onclick = null;
     }
     wrap.classList.remove('hidden');
   } catch (err) {

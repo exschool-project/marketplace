@@ -1,13 +1,13 @@
 :root{
   /* Palet diambil dari logo Yayasan Aqilah Hidayah: navy + emas + putih,
      ditambah biru sedang dari gradasi ilustrasi di logo. */
-  --blue:#4E93C9;
-  --blue-deep:#356F9E;
-  --green:#0B2A54;
-  --green-deep:#071D3B;
-  --gold:#C9A227;
-  --gold-deep:#A5811C;
-  --ink:#0B2A54;
+  --blue:#4E93C9;       /* biru sedang, dari gradasi kubah/daun di logo */
+  --blue-deep:#356F9E;  /* versi lebih gelap, buat hover/shadow */
+  --green:#0B2A54;      /* navy — warna dasar cincin logo, jadi warna utama situs */
+  --green-deep:#071D3B; /* navy lebih gelap lagi */
+  --gold:#C9A227;       /* emas — dari cincin luar & bintang di logo */
+  --gold-deep:#A5811C;  /* emas lebih gelap, buat shadow/border */
+  --ink:#0B2A54;        /* border/shadow/teks gelap — samain dgn navy */
   --paper:#FFFFFF;
   --card:#FFFFFF;
   --shadow-w: 6px;
@@ -26,123 +26,69 @@ body{
 
 .hidden{ display:none !important; }
 
-/* ---------- HERO BANNER RESPONSIVE FIX ---------- */
-
-/* Desktop */
-.hero{
+/* ---------- BANNER GAMBAR (upload, diatur owner) ---------- */
+/* aspect-ratio bikin tinggi banner ikut lebar layar otomatis di semua device,
+   jadi gak perlu breakpoint manual buat tiap ukuran. */
+.hero-banner-wrap{
   position:relative;
-  max-width:1180px;
-  min-height:520px;
-  margin:0 auto;
-  padding:64px 24px 40px;
-  display:block;
-  overflow:hidden;
-}
-
-.hero > div:first-child{
-  position:relative;
-  z-index:2;
-  width:55%;
-}
-
-.hero-visual{
-  position:absolute;
-  z-index:1;
-  top:0;
-  right:0;
   width:100%;
-  height:100%;
-  margin:0;
-  pointer-events:none;
+  aspect-ratio:21 / 8;
+  min-height:140px;
+  max-height:440px;
+  overflow:hidden;
+  border-bottom:3px solid var(--ink);
+  background:linear-gradient(120deg, var(--blue), var(--green));
+  cursor:default;
 }
-
-.hero-visual img,
-.hero-visual .hero-banner-img{
+.hero-banner-img{
+  position:absolute;
+  inset:0;
   width:100%;
   height:100%;
   object-fit:cover;
+  object-position:center;
+  display:block;
+}
+/* teks ditimpa di atas gambar lewat overlay, bukan digambar manual di file gambarnya */
+.hero-banner-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  padding:clamp(16px, 4vw, 56px);
+  background:linear-gradient(90deg, rgba(11,42,84,.78) 0%, rgba(11,42,84,.42) 42%, rgba(11,42,84,0) 78%);
+  pointer-events:none;
+}
+.hero-banner-text{ max-width:min(620px, 88%); color:#fff; }
+.hero-banner-title{
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:clamp(1.15rem, 3.6vw, 2.6rem);
+  line-height:1.12;
+  margin:0 0 6px;
+  text-shadow:0 2px 12px rgba(0,0,0,.35);
+}
+.hero-banner-subtitle{
+  font-family:'Inter', sans-serif;
+  font-weight:500;
+  font-size:clamp(.8rem, 1.8vw, 1.1rem);
+  margin:0;
+  opacity:.95;
+  text-shadow:0 1px 8px rgba(0,0,0,.35);
+}
+.hero-banner-title:empty, .hero-banner-subtitle:empty{ display:none; }
+@media (max-width:640px){
+  .hero-banner-wrap{ aspect-ratio:4 / 3; max-height:380px; }
+  .hero-banner-overlay{
+    align-items:flex-end;
+    background:linear-gradient(180deg, rgba(11,42,84,0) 35%, rgba(11,42,84,.82) 100%);
+  }
+  .hero-banner-text{ max-width:100%; }
+}
+@media (min-width:641px) and (max-width:1024px){
+  .hero-banner-wrap{ aspect-ratio:16 / 7; }
 }
 
-/* Tablet */
-@media (max-width:900px){
-  .hero{
-    min-height:460px;
-    padding:44px 24px 30px;
-  }
-
-  .hero > div:first-child{
-    width:60%;
-  }
-
-  .hero-visual{
-    width:100%;
-    height:100%;
-  }
-}
-
-/* HP */
-@media (max-width:560px){
-  .hero{
-    min-height:605px;
-    padding:40px 21px 30px;
-    margin:0;
-  }
-
-  .hero > div:first-child{
-    width:100%;
-    position:relative;
-    z-index:2;
-  }
-
-  .hero-visual{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    z-index:1;
-  }
-
-  .hero-visual img,
-  .hero-visual .hero-banner-img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    object-position:center;
-  }
-
-  /* Biar teks tetap terbaca di atas banner */
-  .hero::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    z-index:1;
-    background:rgba(255,255,255,.25);
-    pointer-events:none;
-  }
-
-  .hero h1{
-    font-size:2.25rem;
-  }
-
-  .hero p.lead{
-    font-size:.95rem;
-    max-width:42ch;
-  }
-
-  .hero-ctas{
-    position:relative;
-    z-index:3;
-  }
-
-  .hero-stats{
-    position:relative;
-    z-index:3;
-  }
-
-  .float-card{
-    z-index:3;
-  }
-}
 h1, h2, h3, .display{
   font-family:'Space Grotesk', sans-serif;
   font-weight:700;
@@ -485,7 +431,7 @@ header.site{
 }
 .pcard .addbtn:hover{ background:var(--ink); color:var(--blue); }
 
-/* ---------- SKELETON LOADING ---------- */
+/* ---------- SKELETON LOADING (bentuknya niru .pcard persis) ---------- */
 @keyframes skeleton-pulse{
   0%, 100% { opacity:1; }
   50% { opacity:.55; }
