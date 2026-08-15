@@ -4,7 +4,7 @@ const { withErrorHandling } = require('./_lib/http');
 
 const EDITABLE_FIELDS = [
   'name', 'shop_name', 'price', 'old_price',
-  'icon', 'image_url', 'category_id', 'badge', 'is_active', 'sort_order',
+  'icon', 'image_url', 'category_id', 'badge', 'is_active', 'sort_order', 'is_featured',
 ];
 
 // Satu file menangani /api/products (list & create) DAN /api/products?id=xxx
@@ -44,6 +44,7 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await getUserFromRequest(req);
     const isAdmin = roleLevel(ctx?.profile?.role) >= roleLevel('admin');
     const categorySlug = req.query.category;
+    const onlyFeatured = req.query.featured === 'true';
 
     let categoryId = null;
     if (categorySlug && categorySlug !== 'semua') {
@@ -67,6 +68,7 @@ module.exports = withErrorHandling(async (req, res) => {
 
     if (!isAdmin) query = query.eq('is_active', true);
     if (categoryId) query = query.eq('category_id', categoryId);
+    if (onlyFeatured) query = query.eq('is_featured', true);
 
     const { data, error } = await query;
     if (error) {

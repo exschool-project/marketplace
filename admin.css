@@ -100,6 +100,17 @@
 }
 .field input:focus, .field select:focus{ outline:none; background:#fff; }
 
+.field-checkbox{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:16px;
+  font-family:'Inter', sans-serif;
+  font-size:.85rem;
+  cursor:pointer;
+}
+.field-checkbox input{ width:16px; height:16px; flex-shrink:0; }
+
 /* ---------- Dashboard shell ---------- */
 .admin-header{
   display:flex;

@@ -22,9 +22,12 @@ alter table public.profiles
 alter table public.profiles alter column role set default 'member';
 
 -- ---------------------------------------------------------------------
--- 2) Tambah kolom image_url di tabel products (untuk foto Cloudinary)
+-- 2) Tambah kolom image_url & is_featured di tabel products
+--    (image_url = foto Cloudinary, is_featured = ditandai "populer" oleh
+--    owner, dipakai buat kartu melayang di hero beranda)
 -- ---------------------------------------------------------------------
 alter table public.products add column if not exists image_url text;
+alter table public.products add column if not exists is_featured boolean not null default false;
 
 -- ---------------------------------------------------------------------
 -- 2b) Tabel baru: social_links (link medsos di footer, diatur owner)
@@ -33,6 +36,19 @@ create table if not exists public.social_links (
   id uuid primary key default gen_random_uuid(),
   platform text not null,
   url text not null,
+  is_active boolean not null default true,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------------------
+-- 2c) Tabel baru: hero_banners (banner gambar di atas beranda, upload
+--     Cloudinary, diatur owner)
+-- ---------------------------------------------------------------------
+create table if not exists public.hero_banners (
+  id uuid primary key default gen_random_uuid(),
+  image_url text not null,
+  link_url text,
   is_active boolean not null default true,
   sort_order int not null default 0,
   created_at timestamptz not null default now()

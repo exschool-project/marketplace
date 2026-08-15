@@ -38,6 +38,33 @@ async function loadBanner() {
   }
 }
 
+// ---------- Banner Gambar (upload, diatur owner) ----------
+async function loadHeroBannerImage() {
+  const wrap = document.getElementById('hero-banner-wrap');
+  const img = document.getElementById('hero-banner-img');
+  if (!wrap || !img) return;
+
+  try {
+    const { data } = await fetchJSON(`${API_BASE}/hero-banners`);
+    if (!data || data.length === 0) {
+      wrap.classList.add('hidden');
+      return;
+    }
+    const banner = data[0]; // yang paling atas urutannya
+    img.src = banner.image_url;
+    if (banner.link_url) {
+      img.style.cursor = 'pointer';
+      img.onclick = () => window.open(banner.link_url, '_blank', 'noopener,noreferrer');
+    } else {
+      img.style.cursor = 'default';
+      img.onclick = null;
+    }
+    wrap.classList.remove('hidden');
+  } catch (err) {
+    wrap.classList.add('hidden');
+  }
+}
+
 // ---------- Kategori ----------
 let currentCategory = 'semua';
 let currentSearch = '';
@@ -152,14 +179,25 @@ async function loadProducts(categorySlug = currentCategory) {
       grid.innerHTML = currentSearch
         ? `<p class="grid-msg">Tidak ada produk yang cocok dengan "${escapeHtml(currentSearch)}".</p>`
         : `<p class="grid-msg">Belum ada produk di kategori ini.</p>`;
-      if (categorySlug === 'semua' && !currentSearch) renderHeroPicks([]);
       return;
     }
 
     grid.innerHTML = filtered.map(productCardHTML).join('');
-    if (categorySlug === 'semua' && !currentSearch) renderHeroPicks(filtered.slice(0, 3));
   } catch (err) {
     grid.innerHTML = `<p class="grid-msg">Gagal memuat produk: ${escapeHtml(err.message)}</p>`;
+  }
+}
+
+// ---------- Produk Populer (pilihan owner, dipasang di hero-visual) ----------
+async function loadFeaturedProducts() {
+  const visual = document.getElementById('hero-visual');
+  if (!visual) return;
+
+  try {
+    const { data } = await fetchJSON(`${API_BASE}/products?featured=true`);
+    renderHeroPicks((data || []).slice(0, 3));
+  } catch (err) {
+    visual.innerHTML = '';
   }
 }
 
@@ -221,8 +259,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   initCategoryFilter();
   initSearch();
   initCart();
+  await loadHeroBannerImage();
   await loadBanner();
   await loadCategories();
   await loadProducts();
+  await loadFeaturedProducts();
   await loadSocialLinks();
 });

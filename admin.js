@@ -90,6 +90,9 @@ function showDashboard(profile) {
 
   const socialPanel = document.getElementById('social-panel');
   socialPanel.classList.toggle('hidden', normalizedRole !== 'owner');
+
+  const heroBannerPanel = document.getElementById('hero-banner-panel');
+  heroBannerPanel.classList.toggle('hidden', normalizedRole !== 'owner');
 }
 
 // ---------- Init Supabase (hanya dipakai untuk proses login) ----------
@@ -284,14 +287,14 @@ document.getElementById('category-list')?.addEventListener('click', async (e) =>
   }
 });
 
-// ---------- Upload gambar produk (Cloudinary, signed upload) ----------
-async function uploadProductImage(file) {
-  const statusEl = document.getElementById('product-image-status');
-  statusEl.textContent = 'Mengunggah ke Cloudinary...';
+// ---------- Upload gambar (Cloudinary, signed upload) — dipakai bersama
+// oleh form produk dan form banner gambar ----------
+async function uploadImageToCloudinary(file, folder, statusEl) {
+  if (statusEl) statusEl.textContent = 'Mengunggah ke Cloudinary...';
 
   const ticket = await authedFetch(`${API_BASE}/upload-signature`, {
     method: 'POST',
-    body: JSON.stringify({ folder: 'ex-school/products' }),
+    body: JSON.stringify({ folder }),
   });
 
   const form = new FormData();
@@ -324,10 +327,9 @@ function initProductImageInput() {
 
     previewWrap.classList.remove('hidden');
     previewImg.src = URL.createObjectURL(file);
-    statusEl.textContent = 'Mengunggah...';
 
     try {
-      pendingImageUrl = await uploadProductImage(file);
+      pendingImageUrl = await uploadImageToCloudinary(file, 'ex-school/products', statusEl);
       statusEl.textContent = 'Berhasil diunggah ✓';
     } catch (err) {
       statusEl.textContent = `Gagal: ${err.message}`;
@@ -345,6 +347,8 @@ async function loadProductsAdmin() {
       ${p.image_url ? `<img class="admin-row-thumb" src="${escapeHtml(p.image_url)}" alt="">` : ''}
       <span class="admin-row-text">${p.image_url ? '' : escapeHtml(p.icon || '📦') + ' '}${escapeHtml(p.name)} — Rp${Number(p.price).toLocaleString('id-ID')}</span>
       <span class="admin-row-tag">${p.is_active ? 'Aktif' : 'Nonaktif'}</span>
+      ${p.is_featured ? '<span class="role-badge role-owner">POPULER</span>' : ''}
+      <button class="mini-btn toggle-featured">${p.is_featured ? 'Batal Populer' : 'Jadikan Populer'}</button>
       <button class="mini-btn toggle-product" type="button">${p.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
       <button class="mini-btn danger delete-product" type="button">Hapus</button>
     </div>
@@ -378,6 +382,7 @@ async function handleProductSubmit(e) {
     image_url: pendingImageUrl || null,
     category_id: form.querySelector('#product-category').value || null,
     badge: form.querySelector('#product-badge').value.trim() || null,
+    is_featured: form.querySelector('#product-featured').checked,
   };
 
   await authedFetch(`${API_BASE}/products`, { method: 'POST', body: JSON.stringify(payload) });
@@ -403,6 +408,15 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
     await authedFetch(`${API_BASE}/products?id=${id}`, {
       method: 'PUT',
       body: JSON.stringify({ is_active: !isActive }),
+    });
+    await loadProductsAdmin();
+  }
+
+  if (e.target.classList.contains('toggle-featured')) {
+    const isFeatured = e.target.textContent.trim() === 'Batal Populer';
+    await authedFetch(`${API_BASE}/products?id=${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ is_featured: !isFeatured }),
     });
     await loadProductsAdmin();
   }
@@ -508,10 +522,101 @@ document.getElementById('social-list')?.addEventListener('click', async (e) => {
   }
 });
 
+// ---------- Banner Gambar (khusus owner) ----------
+let pendingHeroBannerUrl = null;
+
+function initHeroBannerImageInput() {
+  const input = document.getElementById('hero-banner-image');
+  const previewWrap = document.getElementById('hero-banner-preview');
+  const previewImg = document.getElementById('hero-banner-preview-img');
+  const statusEl = document.getElementById('hero-banner-status');
+
+  input?.addEventListener('change', async () => {
+    const file = input.files?.[0];
+    pendingHeroBannerUrl = null;
+    if (!file) {
+      previewWrap.classList.add('hidden');
+      return;
+    }
+
+    previewWrap.classList.remove('hidden');
+    previewImg.src = URL.createObjectURL(file);
+
+    try {
+      pendingHeroBannerUrl = await uploadImageToCloudinary(file, 'ex-school/hero-banners', statusEl);
+      statusEl.textContent = 'Berhasil diunggah ✓';
+    } catch (err) {
+      statusEl.textContent = `Gagal: ${err.message}`;
+      pendingHeroBannerUrl = null;
+    }
+  });
+}
+
+async function loadHeroBannerAdmin() {
+  if (currentRole !== 'owner') return;
+
+  const { data } = await authedFetch(`${API_BASE}/hero-banners`);
+  const list = document.getElementById('hero-banner-list');
+
+  list.innerHTML = data.map((b) => `
+    <div class="admin-row" data-id="${b.id}">
+      <img class="admin-row-thumb" src="${escapeHtml(b.image_url)}" alt="">
+      <span class="admin-row-text">${b.link_url ? escapeHtml(b.link_url) : '<span class="admin-row-sub">Tanpa link tujuan</span>'}</span>
+      <span class="admin-row-tag">${b.is_active ? 'Aktif' : 'Nonaktif'}</span>
+      <button class="mini-btn toggle-hero-banner" type="button">${b.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
+      <button class="mini-btn danger delete-hero-banner" type="button">Hapus</button>
+    </div>
+  `).join('') || '<p class="empty-msg">Belum ada banner gambar.</p>';
+}
+
+async function handleHeroBannerSubmit(e) {
+  e.preventDefault();
+
+  if (!pendingHeroBannerUrl) {
+    alert('Tunggu gambar selesai diunggah dulu (atau pilih gambar).');
+    return;
+  }
+
+  const linkInput = document.getElementById('hero-banner-link');
+  await authedFetch(`${API_BASE}/hero-banners`, {
+    method: 'POST',
+    body: JSON.stringify({
+      image_url: pendingHeroBannerUrl,
+      link_url: linkInput.value.trim() || null,
+    }),
+  });
+
+  document.getElementById('hero-banner-form').reset();
+  pendingHeroBannerUrl = null;
+  document.getElementById('hero-banner-preview').classList.add('hidden');
+  await loadHeroBannerAdmin();
+}
+
+document.getElementById('hero-banner-list')?.addEventListener('click', async (e) => {
+  const row = e.target.closest('.admin-row');
+  if (!row) return;
+  const id = row.dataset.id;
+
+  if (e.target.classList.contains('delete-hero-banner')) {
+    if (!confirm('Hapus banner gambar ini?')) return;
+    await authedFetch(`${API_BASE}/hero-banners?id=${id}`, { method: 'DELETE' });
+    await loadHeroBannerAdmin();
+  }
+
+  if (e.target.classList.contains('toggle-hero-banner')) {
+    const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
+    await authedFetch(`${API_BASE}/hero-banners?id=${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ is_active: !isActive }),
+    });
+    await loadHeroBannerAdmin();
+  }
+});
+
 // ---------- Load semua data dashboard ----------
 async function loadAllData() {
   await loadCategoriesAdmin(); // duluan, karena dropdown produk butuh ini
-  await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin(), loadSocialAdmin()]);
+  await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin(), loadSocialAdmin(), loadHeroBannerAdmin()]);
 }
 
 // Versi "aman" dari loadAllData(): kalau gagal (mis. cold-start function
@@ -556,7 +661,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('category-form').addEventListener('submit', handleCategorySubmit);
   document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
   document.getElementById('social-form').addEventListener('submit', handleSocialSubmit);
+  document.getElementById('hero-banner-form').addEventListener('submit', handleHeroBannerSubmit);
   initProductImageInput();
+  initHeroBannerImageInput();
 
   await checkExistingSession();
 

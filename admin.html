@@ -112,9 +112,36 @@
             <span id="product-image-status" class="mono"></span>
           </div>
 
+          <label class="field-checkbox">
+            <input type="checkbox" id="product-featured">
+            <span>Jadikan produk populer (tampil di banner "Produk Populer" beranda)</span>
+          </label>
+
           <button type="submit" class="btn btn-green brutal-sm">Tambah Produk</button>
         </form>
         <div id="product-list" class="admin-list"></div>
+      </section>
+
+      <!-- BANNER GAMBAR: hanya dirender & diisi kalau role === owner -->
+      <section id="hero-banner-panel" class="admin-panel brutal owner-only hidden">
+        <h2>Banner Gambar <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
+        <p class="panel-sub">Gambar yang tampil di paling atas halaman utama, di bawah pita banner teks.</p>
+        <form id="hero-banner-form">
+          <label class="field">
+            <span>Gambar banner (Cloudinary)</span>
+            <input type="file" id="hero-banner-image" accept="image/*" required>
+          </label>
+          <div id="hero-banner-preview" class="image-preview hidden">
+            <img id="hero-banner-preview-img" alt="Pratinjau banner">
+            <span id="hero-banner-status" class="mono"></span>
+          </div>
+          <label class="field">
+            <span>Link tujuan kalau diklik (opsional)</span>
+            <input type="url" id="hero-banner-link" placeholder="https://...">
+          </label>
+          <button type="submit" class="btn btn-green brutal-sm">Tambah Banner</button>
+        </form>
+        <div id="hero-banner-list" class="admin-list"></div>
       </section>
 
       <!-- MEDIA SOSIAL: hanya dirender & diisi kalau role === owner -->
