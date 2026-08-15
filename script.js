@@ -195,29 +195,29 @@ async function loadProducts(categorySlug = currentCategory) {
 
 // ---------- Produk Populer (pilihan owner, dipasang di hero-visual) ----------
 async function loadFeaturedProducts() {
-  const visual = document.getElementById('hero-visual');
-  if (!visual) return;
+  const cardsWrap = document.getElementById('hero-visual-cards');
+  if (!cardsWrap) return;
 
   try {
     const { data } = await fetchJSON(`${API_BASE}/products?featured=true`);
     renderHeroPicks((data || []).slice(0, 3));
   } catch (err) {
-    visual.innerHTML = '';
+    cardsWrap.innerHTML = '';
   }
 }
 
 // ---------- Hero visual (produk unggulan) ----------
 function renderHeroPicks(products) {
-  const visual = document.getElementById('hero-visual');
-  if (!visual) return;
+  const cardsWrap = document.getElementById('hero-visual-cards');
+  if (!cardsWrap) return;
 
   if (!products || products.length === 0) {
-    visual.innerHTML = '';
+    cardsWrap.innerHTML = '';
     return;
   }
 
   const classes = ['c1', 'c2', 'c3'];
-  visual.innerHTML = products.map((p, i) => `
+  cardsWrap.innerHTML = products.map((p, i) => `
     <div class="float-card ${classes[i] || ''}">
       <div class="tag-hole"></div>
       <div class="ttl">${escapeHtml(p.name)}</div>

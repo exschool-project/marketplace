@@ -15,17 +15,6 @@
     <div class="banner-track" id="banner-track"></div>
   </div>
 
-  <!-- BANNER GAMBAR (upload, diatur owner): diisi dari /api/hero-banners -->
-  <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
-    <img id="hero-banner-img" class="hero-banner-img" alt="Banner" loading="lazy">
-    <div class="hero-banner-overlay">
-      <div class="hero-banner-text">
-        <h2 id="hero-banner-title" class="hero-banner-title"></h2>
-        <p id="hero-banner-subtitle" class="hero-banner-subtitle"></p>
-      </div>
-    </div>
-  </div>
-
   <!-- NAV -->
   <header class="site">
     <div class="nav-wrap">
@@ -52,8 +41,21 @@
           <a href="#produk" class="btn btn-green hover-lift brutal">Mulai Belanja</a>
         </div>
       </div>
+      <!-- Gambar ilustrasi hero: diisi dari /api/hero-banners, otomatis pindah
+           ke bawah teks di layar kecil (ikut breakpoint .hero di CSS) -->
       <div class="hero-visual" id="hero-visual">
-        <!-- Diisi dari /api/products?featured=true (produk populer pilihan owner) -->
+        <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
+          <img id="hero-banner-img" class="hero-banner-img" alt="Banner" loading="lazy">
+          <div class="hero-banner-overlay">
+            <div class="hero-banner-text">
+              <h2 id="hero-banner-title" class="hero-banner-title"></h2>
+              <p id="hero-banner-subtitle" class="hero-banner-subtitle"></p>
+            </div>
+          </div>
+        </div>
+        <div id="hero-visual-cards" class="hero-visual-cards">
+          <!-- Diisi dari /api/products?featured=true (produk populer pilihan owner) -->
+        </div>
       </div>
     </section>
 
