@@ -27,16 +27,15 @@ body{
 .hidden{ display:none !important; }
 
 /* ---------- BANNER GAMBAR (upload, diatur owner) ---------- */
-/* Gambar ini ngisi kotak .hero-visual (sebelah kanan teks hero di desktop,
-   pindah ke bawah teks di HP — ikut breakpoint .hero yang sudah ada).
+/* Banner full-width 16:9, nempel dari tepi ke tepi layar, di bawah teks hero.
    position:absolute + inset:0 bikin gambar selalu pas ngisi ukuran
    .hero-visual berapa pun tingginya, jadi otomatis ikut device apa aja. */
 .hero-banner-wrap{
   position:absolute;
   inset:0;
   overflow:hidden;
-  border:3px solid var(--ink);
-  box-shadow:7px 7px 0 var(--ink);
+  border-top:3px solid var(--ink);
+  border-bottom:3px solid var(--ink);
   background:linear-gradient(120deg, var(--blue), var(--green));
   z-index:1;
 }
@@ -55,26 +54,26 @@ body{
   inset:0;
   display:flex;
   align-items:flex-end;
-  padding:clamp(14px, 3vw, 28px);
-  background:linear-gradient(180deg, rgba(11,42,84,0) 42%, rgba(11,42,84,.8) 100%);
+  padding:clamp(16px, 4vw, 48px);
+  background:linear-gradient(180deg, rgba(11,42,84,0) 45%, rgba(11,42,84,.78) 100%);
   pointer-events:none;
 }
-.hero-banner-text{ max-width:100%; color:#fff; }
+.hero-banner-text{ max-width:min(680px, 90%); color:#fff; }
 .hero-banner-title{
   font-family:'Space Grotesk', sans-serif;
   font-weight:700;
-  font-size:clamp(1.05rem, 2.6vw, 1.7rem);
+  font-size:clamp(1.2rem, 3.6vw, 2.4rem);
   line-height:1.15;
-  margin:0 0 4px;
-  text-shadow:0 2px 10px rgba(0,0,0,.35);
+  margin:0 0 6px;
+  text-shadow:0 2px 12px rgba(0,0,0,.35);
 }
 .hero-banner-subtitle{
   font-family:'Inter', sans-serif;
   font-weight:500;
-  font-size:clamp(.75rem, 1.4vw, .95rem);
+  font-size:clamp(.8rem, 1.8vw, 1.1rem);
   margin:0;
   opacity:.95;
-  text-shadow:0 1px 6px rgba(0,0,0,.35);
+  text-shadow:0 1px 8px rgba(0,0,0,.35);
 }
 .hero-banner-title:empty, .hero-banner-subtitle:empty{ display:none; }
 
@@ -228,11 +227,7 @@ header.site{
 .hero{
   max-width:1180px;
   margin:0 auto;
-  padding:64px 24px 40px;
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:40px;
-  align-items:center;
+  padding:64px 24px 32px;
 }
 .eyebrow{
   display:inline-flex;
@@ -282,10 +277,15 @@ header.site{
   color:#3E6B85;
 }
 
-/* hero visual: gambar banner + stacked price-tag stickers di atasnya.
-   height pakai clamp() supaya ukurannya ngikutin lebar layar secara halus
-   di semua device, bukan cuma loncat di satu breakpoint. */
-.hero-visual{ position:relative; height:clamp(260px, 34vw, 400px); }
+/* hero visual: banner gambar full-width 16:9 + stacked price-tag stickers
+   di atasnya. aspect-ratio bikin tingginya otomatis ikut lebar layar di
+   semua device (HP, tablet, laptop, PC lebar) tanpa breakpoint manual. */
+.hero-visual{
+  position:relative;
+  width:100%;
+  aspect-ratio:16 / 9;
+  max-height:640px;
+}
 .float-card{
   position:absolute;
   background:var(--card);
@@ -293,10 +293,11 @@ header.site{
   box-shadow:7px 7px 0 var(--ink);
   padding:16px 18px;
   width:230px;
+  z-index:3;
 }
-.float-card.c1{ top:0; left:20px; background:var(--blue); transform:rotate(-6deg); }
-.float-card.c2{ top:120px; right:0; background:var(--green); color:var(--paper); transform:rotate(4deg); width:200px; }
-.float-card.c3{ bottom:0; left:60px; background:var(--card); transform:rotate(-3deg); }
+.float-card.c1{ top:20px; left:20px; background:var(--blue); transform:rotate(-6deg); }
+.float-card.c2{ top:140px; right:20px; background:var(--green); color:var(--paper); transform:rotate(4deg); width:200px; }
+.float-card.c3{ bottom:20px; left:60px; background:var(--card); transform:rotate(-3deg); }
 .float-card .tag-hole{
   width:16px; height:16px; border-radius:50%;
   background:var(--paper); border:2.5px solid var(--ink);
@@ -305,6 +306,12 @@ header.site{
 .float-card .ttl{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1rem; margin-bottom:6px; }
 .float-card .prc{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.1rem; }
 .float-card .prc del{ opacity:.5; font-weight:500; margin-right:6px; font-size:.85rem; }
+@media (max-width:640px){
+  .float-card{ width:180px; padding:12px 14px; }
+  .float-card .ttl{ font-size:.88rem; }
+  .float-card .prc{ font-size:.95rem; }
+  .float-card.c2{ width:160px; }
+}
 
 /* ---------- CATEGORY CHIPS ---------- */
 .cats{
@@ -527,8 +534,7 @@ footer{
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width:900px){
-  .hero{ grid-template-columns:1fr; padding-top:44px; }
-  .hero-visual{ margin-top:20px; }
+  .hero{ padding-top:44px; }
   .grid{ grid-template-columns:repeat(2,1fr); }
   .why-grid{ grid-template-columns:1fr; }
   .foot-wrap{ grid-template-columns:1fr 1fr; }
