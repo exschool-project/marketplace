@@ -102,6 +102,7 @@ body{
 .hero .hero-overlay-content h1{
   color:#fff;
   text-shadow:0 2px 14px rgba(0,0,0,.45);
+  overflow-wrap:break-word;
 }
 .hero .hero-overlay-content p.lead{
   color:#fff;
@@ -572,23 +573,32 @@ footer{
   /* Kotak hero dibikin lebih tinggi (bukan gepeng) supaya teks overlay
      muat di dalam gambar. object-fit:cover di .hero-banner-img tetap
      jaga gambar nggak ketarik/distorsi, cuma area yang kelihatan makin
-     tinggi. */
-  .hero-visual{ aspect-ratio:4 / 5; max-height:560px; }
-  .hero-overlay-content{ align-items:flex-end; padding:24px; }
+     tinggi. Teks di-tengah (bukan mepet bawah) + dirapatkan jaraknya
+     biar nggak kelihatan panjang & berantakan di layar sempit. */
+  .hero-visual{ aspect-ratio:4 / 5; max-height:520px; }
+  .hero-overlay-content{
+    align-items:center;
+    padding:22px;
+    background:linear-gradient(180deg, rgba(11,42,84,.35) 0%, rgba(11,42,84,.62) 55%, rgba(11,42,84,.55) 100%);
+  }
   .hero-copy{ max-width:100%; }
+  .eyebrow{ margin-bottom:12px; }
+  .hero p.lead{ margin:14px 0 20px; }
   .grid{ grid-template-columns:repeat(2,1fr); }
   .why-grid{ grid-template-columns:1fr; }
   .foot-wrap{ grid-template-columns:1fr 1fr; }
 }
 @media (max-width:560px){
   .search{ display:none; }
-  .hero-visual{ aspect-ratio:3 / 4; max-height:none; }
+  .hero-visual{ aspect-ratio:1 / 1.15; max-height:460px; }
   .hero-overlay-content{
     padding:18px;
-    background:linear-gradient(0deg, rgba(11,42,84,.9) 0%, rgba(11,42,84,.75) 45%, rgba(11,42,84,.25) 80%, rgba(11,42,84,0) 100%);
+    background:linear-gradient(180deg, rgba(11,42,84,.4) 0%, rgba(11,42,84,.6) 50%, rgba(11,42,84,.52) 100%);
   }
-  .hero h1{ font-size:clamp(1.6rem, 8vw, 2.2rem); }
-  .hero p.lead{ font-size:.92rem; margin:14px 0 18px; }
+  .hero h1{ font-size:clamp(1.5rem, 7vw, 2rem); line-height:1.12; }
+  .hero p.lead{ font-size:.88rem; line-height:1.4; margin:10px 0 16px; max-width:38ch; }
+  .eyebrow{ margin-bottom:10px; padding:4px 9px; font-size:.7rem; }
+  .hero-ctas{ gap:10px; }
   .grid{ grid-template-columns:1fr 1fr; gap:16px; }
   .nav-wrap{ gap:10px; }
   .foot-wrap{ grid-template-columns:1fr; }
