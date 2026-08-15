@@ -1,10 +1,14 @@
 :root{
-  --blue:#8FD9F5;
-  --blue-deep:#5CC2E8;
-  --green:#98FB98;
-  --green-deep:#6FE06F;
-  --ink:#0E1A16;
-  --paper:#FBFDF8;
+  /* Palet diambil dari logo Yayasan Aqilah Hidayah: navy + emas + putih,
+     ditambah biru sedang dari gradasi ilustrasi di logo. */
+  --blue:#4E93C9;
+  --blue-deep:#356F9E;
+  --green:#0B2A54;
+  --green-deep:#071D3B;
+  --gold:#C9A227;
+  --gold-deep:#A5811C;
+  --ink:#0B2A54;
+  --paper:#FFFFFF;
   --card:#FFFFFF;
   --shadow-w: 6px;
 }
@@ -18,6 +22,77 @@ body{
   color:var(--ink);
   font-family:'Inter', sans-serif;
   -webkit-font-smoothing:antialiased;
+}
+
+.hidden{ display:none !important; }
+
+/* ---------- HERO BANNER DATABASE ---------- */
+.hero{
+  position:relative;
+  overflow:hidden;
+}
+
+/* Banner menjadi layer/background di dalam hero */
+.hero-banner-wrap{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  aspect-ratio:auto;
+
+  border:0;
+  margin:0;
+  overflow:hidden;
+
+  z-index:0;
+}
+
+/* Gambar memenuhi area hero */
+.hero-banner-img{
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+
+  object-fit:cover;
+  object-position:center;
+
+  display:block;
+}
+
+/* Semua isi teks/tombol berada DI ATAS banner */
+.hero > *:not(.hero-banner-wrap){
+  position:relative;
+  z-index:2;
+}
+
+/* Kalau hero visual masih ada, tetap di atas banner */
+.hero-visual{
+  position:relative;
+  z-index:2;
+}
+
+/* Mobile */
+@media (max-width:900px){
+  .hero{
+    min-height:650px;
+  }
+
+  .hero-banner-wrap{
+    height:100%;
+  }
+
+  .hero-banner-img{
+    object-fit:cover;
+  }
+}
+
+@media (max-width:560px){
+  .hero{
+    min-height:700px;
+  }
 }
 
 h1, h2, h3, .display{
@@ -82,7 +157,7 @@ img{ max-width:100%; display:block; }
   align-items:center;
   gap:1.4rem;
 }
-.banner-track span::after{ content:"◆"; color:var(--green); }
+.banner-track span::after{ content:"◆"; color:var(--gold); }
 @keyframes marquee{
   from{ transform:translateX(0); }
   to{ transform:translateX(-50%); }
@@ -110,6 +185,7 @@ header.site{
   font-weight:700;
   font-family:'Space Grotesk', sans-serif;
   background:var(--green);
+  color:var(--paper);
   padding:6px 12px;
   border:3px solid var(--ink);
   box-shadow:4px 4px 0 var(--ink);
@@ -156,7 +232,7 @@ header.site{
   background:var(--card);
   cursor:pointer;
 }
-.btn-green{ background:var(--green); }
+.btn-green{ background:var(--green); color:var(--paper); }
 .btn-blue{ background:var(--blue); }
 .btn-ink{ background:var(--ink); color:var(--paper); }
 
@@ -180,13 +256,14 @@ header.site{
   text-transform:uppercase;
   letter-spacing:.08em;
   background:var(--ink);
-  color:var(--green);
+  color:var(--blue);
   padding:5px 10px;
   margin-bottom:18px;
 }
 .hero h1{ font-size:clamp(2.4rem, 5vw, 4rem); }
 .hero h1 .hl{
   background:var(--green);
+  color:var(--paper);
   padding:0 10px;
   box-decoration-break:clone;
   -webkit-box-decoration-break:clone;
@@ -195,7 +272,7 @@ header.site{
   font-size:1.05rem;
   max-width:46ch;
   margin:22px 0 28px;
-  color:#20302b;
+  color:var(--ink);
 }
 .hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; }
 .hero-stats{
@@ -214,7 +291,7 @@ header.site{
   font-size:.72rem;
   text-transform:uppercase;
   letter-spacing:.05em;
-  color:#4a5a54;
+  color:#3E6B85;
 }
 
 /* hero visual: stacked price-tag stickers */
@@ -228,7 +305,7 @@ header.site{
   width:230px;
 }
 .float-card.c1{ top:0; left:20px; background:var(--blue); transform:rotate(-6deg); }
-.float-card.c2{ top:120px; right:0; background:var(--green); transform:rotate(4deg); width:200px; }
+.float-card.c2{ top:120px; right:0; background:var(--green); color:var(--paper); transform:rotate(4deg); width:200px; }
 .float-card.c3{ bottom:0; left:60px; background:var(--card); transform:rotate(-3deg); }
 .float-card .tag-hole{
   width:16px; height:16px; border-radius:50%;
@@ -267,7 +344,7 @@ header.site{
   grid-column: 1 / -1;
   font-family:'JetBrains Mono', monospace;
   font-size:.85rem;
-  color:#5a6b64;
+  color:#3E6B85;
   padding:24px 0;
 }
 
@@ -282,7 +359,7 @@ header.site{
   flex-wrap:wrap;
 }
 .section-head h2{ font-size:clamp(1.6rem,3vw,2.2rem); }
-.section-head p{ margin:6px 0 0; color:#4a5a54; font-size:.92rem; }
+.section-head p{ margin:6px 0 0; color:#3E6B85; font-size:.92rem; }
 .section-head .see-all{
   font-family:'JetBrains Mono', monospace;
   font-weight:700;
@@ -325,27 +402,32 @@ header.site{
   display:flex; align-items:center; justify-content:center;
   font-size:2.6rem;
   border-bottom:3px solid var(--ink);
+  overflow:hidden;
+}
+.pcard .thumb img{
+  width:100%; height:100%;
+  object-fit:cover;
 }
 .pcard:nth-child(4n+1) .thumb{ background:var(--blue); }
-.pcard:nth-child(4n+2) .thumb{ background:var(--green); }
-.pcard:nth-child(4n+3) .thumb{ background:#EAF9FF; }
-.pcard:nth-child(4n+4) .thumb{ background:#EFFFEF; }
+.pcard:nth-child(4n+2) .thumb{ background:#D6ECF7; }
+.pcard:nth-child(4n+3) .thumb{ background:#EAF6FF; }
+.pcard:nth-child(4n+4) .thumb{ background:#F0F8FC; }
 .pcard .badge{
   position:absolute; top:8px; right:8px;
-  background:var(--ink); color:var(--green);
+  background:var(--ink); color:var(--blue);
   font-family:'JetBrains Mono', monospace; font-size:.65rem; font-weight:700;
   padding:3px 7px; text-transform:uppercase; letter-spacing:.04em;
   transform:rotate(4deg);
 }
 .pcard .body{ padding:14px 16px 18px; }
 .pcard .shop{
-  font-family:'JetBrains Mono', monospace; font-size:.68rem; color:#5a6b64;
+  font-family:'JetBrains Mono', monospace; font-size:.68rem; color:#3E6B85;
   text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px;
 }
 .pcard .name{ font-weight:700; font-size:.95rem; margin-bottom:10px; }
 .pcard .price-row{ display:flex; align-items:baseline; gap:8px; }
 .pcard .price{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.15rem; }
-.pcard .old{ font-family:'JetBrains Mono', monospace; font-size:.78rem; color:#8a948f; text-decoration:line-through; }
+.pcard .old{ font-family:'JetBrains Mono', monospace; font-size:.78rem; color:#7FA8BD; text-decoration:line-through; }
 .pcard .addbtn{
   margin-top:12px; width:100%;
   border:2.5px solid var(--ink);
@@ -353,39 +435,66 @@ header.site{
   font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:.8rem;
   padding:8px; cursor:pointer;
 }
-.pcard .addbtn:hover{ background:var(--ink); color:var(--green); }
+.pcard .addbtn:hover{ background:var(--ink); color:var(--blue); }
+
+/* ---------- SKELETON LOADING ---------- */
+@keyframes skeleton-pulse{
+  0%, 100% { opacity:1; }
+  50% { opacity:.55; }
+}
+.pcard-skeleton{
+  position:relative;
+  background:var(--card);
+  border:3px solid var(--ink);
+  box-shadow:6px 6px 0 var(--ink);
+  padding-top:14px;
+}
+.pcard-skeleton .hole{
+  width:20px; height:20px; border-radius:50%;
+  background:var(--paper);
+  border:2.5px solid var(--ink);
+  position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+}
+.pcard-skeleton .thumb{
+  height:150px;
+  border-bottom:3px solid var(--ink);
+  background:#E4F1F7;
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+}
+.pcard-skeleton .body{ padding:14px 16px 18px; display:flex; flex-direction:column; gap:10px; }
+.pcard-skeleton .sk-line{
+  height:10px;
+  background:#D6ECF7;
+  border:1.5px solid var(--ink);
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+}
+.pcard-skeleton .sk-line.sk-shop{ width:40%; height:8px; animation-delay:.05s; }
+.pcard-skeleton .sk-line.sk-name{ width:85%; animation-delay:.1s; }
+.pcard-skeleton .sk-line.sk-price{ width:50%; margin-top:4px; animation-delay:.15s; }
+.pcard-skeleton .sk-btn{
+  margin-top:12px; height:34px;
+  border:2.5px solid var(--ink);
+  background:#F0F8FC;
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+  animation-delay:.2s;
+}
 
 /* ---------- WHY US ---------- */
 .why{ background:var(--ink); color:var(--paper); }
 .why .section-head h2, .why .section-head p{ color:var(--paper); }
-.why .section-head p{ color:#c9d6d0; }
+.why .section-head p{ color:#BFE3F2; }
 .why-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
 .why-card{
-  background:#132420;
-  border:2.5px solid #2c3d37;
+  background:#073852;
+  border:2.5px solid #1B5A7A;
   padding:24px 20px;
 }
 .why-card .num{
-  font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--green);
+  font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--blue);
   font-size:.8rem; margin-bottom:14px; display:block;
 }
 .why-card h3{ font-size:1.1rem; margin-bottom:8px; }
-.why-card p{ margin:0; font-size:.88rem; color:#b7c6c0; line-height:1.55; }
-
-/* ---------- CTA STRIP ---------- */
-.cta-strip{ max-width:1180px; margin:0 auto; padding:0 24px 64px; }
-.cta-inner{
-  background:var(--green);
-  border:3px solid var(--ink);
-  box-shadow:8px 8px 0 var(--ink);
-  padding:44px 40px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:24px;
-  flex-wrap:wrap;
-}
-.cta-inner h2{ font-size:clamp(1.5rem,3vw,2rem); max-width:24ch; }
+.why-card p{ margin:0; font-size:.88rem; color:#A8D4E8; line-height:1.55; }
 
 /* ---------- FOOTER ---------- */
 footer{
@@ -405,6 +514,19 @@ footer{
 .foot-wrap ul a{ font-size:.85rem; }
 .foot-wrap ul a:hover{ text-decoration:underline; }
 .foot-desc{ font-size:.85rem; max-width:32ch; margin:0; }
+.social-links{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.social-links a{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.72rem;
+  font-weight:700;
+  text-transform:uppercase;
+  background:var(--ink);
+  color:var(--paper);
+  border:2px solid var(--ink);
+  padding:6px 10px;
+  text-decoration:none;
+}
+.social-links a:hover{ background:var(--paper); color:var(--ink); }
 .foot-bottom{
   max-width:1180px; margin:0 auto;
   border-top:2.5px solid var(--ink);
