@@ -289,9 +289,22 @@ header.site{
   text-transform:uppercase;
   letter-spacing:.08em;
   background:var(--ink);
-  color:var(--blue);
+  color:#BFE3F2;
   padding:5px 10px;
   margin-bottom:18px;
+}
+.hero-org{
+  display:inline-flex;
+  align-items:center;
+  font-family:'JetBrains Mono', monospace;
+  font-size:.78rem;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  background:var(--ink);
+  color:var(--gold);
+  padding:5px 10px;
+  margin:10px 0 0;
 }
 .hero h1{ font-size:clamp(2.4rem, 5vw, 4rem); }
 .hero h1 .hl{
@@ -300,15 +313,6 @@ header.site{
   padding:0 10px;
   box-decoration-break:clone;
   -webkit-box-decoration-break:clone;
-}
-.hero-org{
-  font-family:'JetBrains Mono', monospace;
-  font-size:.85rem;
-  font-weight:700;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  color:var(--gold);
-  margin:10px 0 0;
 }
 .hero p.lead{
   font-size:1.05rem;
@@ -558,7 +562,7 @@ header.site{
   padding:24px 20px;
 }
 .why-card .num{
-  font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--blue);
+  font-family:'JetBrains Mono', monospace; font-weight:700; color:#BFE3F2;
   font-size:.8rem; margin-bottom:14px; display:block;
 }
 .why-card h3{ font-size:1.1rem; margin-bottom:8px; }
@@ -577,11 +581,11 @@ footer{
   gap:30px;
   padding-bottom:28px;
 }
-.foot-wrap h4{ font-family:'Space Grotesk', sans-serif; font-size:.95rem; margin-bottom:14px; }
+.foot-wrap h4{ font-family:'Space Grotesk', sans-serif; font-size:.95rem; margin-bottom:14px; color:var(--green-deep); }
 .foot-wrap ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:9px; }
-.foot-wrap ul a{ font-size:.85rem; }
+.foot-wrap ul a{ font-size:.85rem; color:var(--green-deep); }
 .foot-wrap ul a:hover{ text-decoration:underline; }
-.foot-desc{ font-size:.85rem; max-width:32ch; margin:0; }
+.foot-desc{ font-size:.85rem; max-width:32ch; margin:0; color:var(--green-deep); }
 .social-links{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
 .social-links a{
   font-family:'JetBrains Mono', monospace;
@@ -601,6 +605,7 @@ footer{
   padding-top:16px;
   display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
   font-family:'JetBrains Mono', monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em;
+  color:var(--green-deep);
 }
 
 /* ---------- RESPONSIVE ---------- */
