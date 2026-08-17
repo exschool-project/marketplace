@@ -170,7 +170,16 @@ module.exports = withErrorHandling(async (req, res) => {
       return;
     }
 
-    let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
+    // Dipakai admin.html (panel ringkas) & cs.html (command center chat) —
+    // pakai view orders_with_last_message supaya sekalian dapat cuplikan
+    // pesan terakhir tanpa query N+1, dan diurutkan berdasarkan aktivitas
+    // chat terbaru (bukan cuma tanggal dibuat) biar percakapan yang perlu
+    // dibalas naik ke atas.
+    let query = supabase
+      .from('orders_with_last_message')
+      .select('*')
+      .order('last_message_at', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false });
     if (req.query.status) query = query.eq('status', req.query.status);
 
     const { data, error } = await query;

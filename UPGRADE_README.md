@@ -107,6 +107,23 @@ terbaca oleh functions.
 - Karena belum ada akun multi-toko (semua produk dikelola 1 admin/owner),
   "chat dengan pemilik produk" di sini = chat dengan admin/owner situs.
 
+### Halaman CS khusus (cs.html) — balas chat sampai selesai
+- Halaman baru **`cs.html`** (+ `cs.js`), login sama seperti `admin.html`
+  (khusus role admin/owner), didaftarkan `noindex` juga di `robots.txt` &
+  `vercel.json`.
+- Tampilan 2 kolom: kiri daftar semua percakapan (bisa cari & filter per
+  status), kanan jendela chat aktif — diurutkan otomatis berdasarkan
+  **aktivitas chat terbaru** (bukan cuma tanggal pesanan dibuat), dan
+  percakapan yang pesan terakhirnya dari pembeli (belum dibalas admin)
+  ditandai kuning muda.
+- Status pesanan bisa langsung diubah dari dropdown di header chat —
+  jadi admin bisa bales sampai status `selesai` tanpa pindah halaman.
+- Ada link "💬 CS Panel" di header `admin.html`, dan sebaliknya link
+  "Admin Panel" di header `cs.html`, biar gampang bolak-balik.
+- Butuh 1 SQL tambahan: **`ADD_ORDERS_LAST_MESSAGE.sql`** — bikin view
+  `orders_with_last_message` (cuplikan pesan terakhir per pesanan, dipakai
+  daftar percakapan di CS Panel).
+
 ## 4. File baru yang ditambahkan
 
 ```
@@ -114,8 +131,10 @@ akun.html, akun.js              → halaman login/daftar publik
 robots.txt                      → blokir crawler dari /admin
 SETUP_UPGRADE.sql               → migrasi database (jalankan sekali)
 ADD_ORDERS_CHAT.sql             → migrasi tabel orders + order_messages
+ADD_ORDERS_LAST_MESSAGE.sql     → view orders_with_last_message (buat CS Panel)
 api/orders.js                   → API pesanan + chat (publik & admin)
 pesanan.html, pesanan.js        → ruang chat pesanan untuk pembeli
+cs.html, cs.js                  → CS Panel — balas chat pembeli sampai selesai
 api/_lib/cloudinary.js          → helper signed upload
 api/upload-signature.js         → endpoint pembuat tiket upload
 api/auth/register.js            → daftar akun publik (role member)
