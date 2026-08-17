@@ -1,29 +1,17 @@
 {
-  "cleanUrls": true,
-  "headers": [
+  "version": 2,
+  "installCommand": "npm install && npm install --prefix server",
+  "builds": [
+    { "src": "client/**", "use": "@vercel/static" },
     {
-      "source": "/admin",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
-      ]
-    },
-    {
-      "source": "/admin.html",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
-      ]
-    },
-    {
-      "source": "/cs",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
-      ]
-    },
-    {
-      "source": "/cs.html",
-      "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
-      ]
+      "src": "api/index.js",
+      "use": "@vercel/node",
+      "config": { "includeFiles": "server/**" }
     }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api" },
+    { "src": "/", "dest": "/client/index.html" },
+    { "src": "/(.*)", "dest": "/client/$1" }
   ]
 }

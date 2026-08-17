@@ -1,0 +1,15 @@
+[build]
+  publish = "client"
+  functions = "server/adapters/netlify/functions"
+  command = "npm install --prefix server"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Netlify's own static-file lookup runs before redirects are evaluated, so
+# this only ever catches requests that don't match a real file under
+# client/ (i.e. actual /api/* calls) — it won't shadow client/css, client/js, etc.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
