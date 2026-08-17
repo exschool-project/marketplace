@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#0B1220"/>
-  <rect x="56" y="56" width="400" height="400" fill="#1565FF" stroke="#000000" stroke-width="24"/>
-  <text x="256" y="300" font-family="IBM Plex Mono, monospace" font-weight="700" font-size="160" fill="#F5F7FA" text-anchor="middle">UP</text>
-  <rect x="56" y="392" width="400" height="24" fill="#00C2FF"/>
-</svg>
