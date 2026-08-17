@@ -620,10 +620,163 @@ document.getElementById('hero-banner-list')?.addEventListener('click', async (e)
   }
 });
 
+// ---------- Pesanan & Chat ----------
+const ORDER_STATUS_LABEL = {
+  menunggu: 'Menunggu Konfirmasi',
+  diproses: 'Diproses',
+  dikirim: 'Dikirim',
+  selesai: 'Selesai',
+  dibatalkan: 'Dibatalkan',
+};
+
+function formatOrderTime(iso) {
+  try {
+    return new Date(iso).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+  } catch (err) {
+    return '';
+  }
+}
+
+async function loadOrdersAdmin() {
+  const statusFilter = document.getElementById('order-status-filter')?.value || '';
+  const qs = statusFilter ? `?status=${encodeURIComponent(statusFilter)}` : '';
+  const { data } = await authedFetch(`${API_BASE}/orders${qs}`);
+  const list = document.getElementById('order-list');
+
+  list.innerHTML = data.map((o) => `
+    <div class="admin-row" data-id="${o.id}" data-code="${escapeHtml(o.order_code)}" data-buyer="${escapeHtml(o.buyer_name)}">
+      <span class="admin-row-text">
+        <span class="mono">${escapeHtml(o.order_code)}</span> — ${escapeHtml(o.product_name)} · Rp${Number(o.product_price).toLocaleString('id-ID')}
+        <span class="admin-row-sub">${escapeHtml(o.buyer_name)} · ${escapeHtml(o.buyer_phone)} · ${formatOrderTime(o.created_at)}</span>
+      </span>
+      <select class="team-row-select order-status-select">
+        ${Object.entries(ORDER_STATUS_LABEL).map(([val, label]) => `<option value="${val}" ${o.status === val ? 'selected' : ''}>${label}</option>`).join('')}
+      </select>
+      <button class="mini-btn open-order-chat" type="button">💬 Chat</button>
+    </div>
+  `).join('') || '<p class="empty-msg">Belum ada pesanan masuk.</p>';
+
+  const statEl = document.getElementById('stat-orders-new');
+  if (statEl) statEl.textContent = data.filter((o) => o.status === 'menunggu').length;
+}
+
+document.getElementById('order-status-filter')?.addEventListener('change', () => loadOrdersAdmin());
+
+document.getElementById('order-list')?.addEventListener('click', async (e) => {
+  const row = e.target.closest('.admin-row');
+  if (!row) return;
+
+  if (e.target.classList.contains('open-order-chat')) {
+    openOrderChat(row.dataset.id, row.dataset.code, row.dataset.buyer);
+  }
+});
+
+document.getElementById('order-list')?.addEventListener('change', async (e) => {
+  const select = e.target.closest('.order-status-select');
+  if (!select) return;
+  const row = select.closest('.admin-row');
+  const id = row.dataset.id;
+
+  try {
+    await authedFetch(`${API_BASE}/orders?id=${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: select.value }),
+    });
+    await loadOrdersAdmin();
+  } catch (err) {
+    alert(err.message);
+    await loadOrdersAdmin();
+  }
+});
+
+// ---------- Modal chat pesanan ----------
+let activeChatOrderId = null;
+let chatPollTimer = null;
+let chatLastCount = 0;
+
+function renderChatMessages(messages) {
+  const thread = document.getElementById('oc-thread');
+  if (!messages.length) {
+    thread.innerHTML = '<p class="chat-empty">Belum ada percakapan.</p>';
+    return;
+  }
+  const wasNearBottom = thread.scrollHeight - thread.scrollTop - thread.clientHeight < 60;
+  thread.innerHTML = messages.map((m) => `
+    <div class="chat-bubble from-${m.sender_type === 'admin' ? 'buyer' : (m.sender_type === 'buyer' ? 'admin' : 'system')}">
+      <span class="chat-meta">${escapeHtml(m.sender_name)} · ${formatOrderTime(m.created_at)}</span>
+      ${escapeHtml(m.message)}
+    </div>
+  `).join('');
+  if (wasNearBottom) thread.scrollTop = thread.scrollHeight;
+}
+
+async function loadOrderChatMessages() {
+  if (!activeChatOrderId) return;
+  try {
+    const { data } = await authedFetch(`${API_BASE}/orders?resource=messages&order_id=${activeChatOrderId}`);
+    if (data.length === chatLastCount) return;
+    chatLastCount = data.length;
+    renderChatMessages(data);
+  } catch (err) {
+    // diam-diam gagal, dicoba lagi di polling berikutnya
+  }
+}
+
+function openOrderChat(orderId, code, buyerName) {
+  activeChatOrderId = orderId;
+  chatLastCount = 0;
+  document.getElementById('oc-code').textContent = code;
+  document.getElementById('oc-buyer').textContent = `Pembeli: ${buyerName}`;
+  document.getElementById('oc-thread').innerHTML = '<p class="chat-empty">Memuat percakapan...</p>';
+  document.getElementById('order-chat-modal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  loadOrderChatMessages();
+  if (chatPollTimer) clearInterval(chatPollTimer);
+  chatPollTimer = setInterval(loadOrderChatMessages, 4000);
+}
+
+function closeOrderChat() {
+  document.getElementById('order-chat-modal').classList.add('hidden');
+  document.body.style.overflow = '';
+  activeChatOrderId = null;
+  if (chatPollTimer) clearInterval(chatPollTimer);
+}
+
+document.getElementById('order-chat-close')?.addEventListener('click', closeOrderChat);
+document.getElementById('order-chat-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'order-chat-modal') closeOrderChat();
+});
+
+document.getElementById('oc-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!activeChatOrderId) return;
+  const input = document.getElementById('oc-input');
+  const message = input.value.trim();
+  if (!message) return;
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  input.value = '';
+
+  try {
+    await authedFetch(`${API_BASE}/orders?resource=messages`, {
+      method: 'POST',
+      body: JSON.stringify({ order_id: activeChatOrderId, message }),
+    });
+    await loadOrderChatMessages();
+  } catch (err) {
+    alert(err.message);
+    input.value = message;
+  } finally {
+    submitBtn.disabled = false;
+    input.focus();
+  }
+});
+
 // ---------- Load semua data dashboard ----------
 async function loadAllData() {
   await loadCategoriesAdmin(); // duluan, karena dropdown produk butuh ini
-  await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin(), loadSocialAdmin(), loadHeroBannerAdmin()]);
+  await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin(), loadSocialAdmin(), loadHeroBannerAdmin(), loadOrdersAdmin()]);
 }
 
 // Versi "aman" dari loadAllData(): kalau gagal (mis. cold-start function

@@ -16,6 +16,10 @@ Ini akan:
 > Kalau kamu belum punya akun sama sekali: daftar dulu lewat `akun.html`
 > di situs (tab **Daftar**), baru jalankan SQL di atas dengan email tsb.
 
+Selain itu, jalankan juga file `ADD_ORDERS_CHAT.sql` (sekali saja, dengan
+cara yang sama) — ini bikin tabel `orders` dan `order_messages` untuk
+sistem pesanan + chat yang menggantikan keranjang.
+
 ## 2. Set Environment Variables di Vercel
 
 Tambahkan 3 variable baru ini di **Vercel → Project Settings → Environment Variables**
@@ -79,12 +83,39 @@ terbaca oleh functions.
   padahal nama file aslinya `style.css` — akibatnya styling situs **tidak
   pernah termuat sama sekali**. Sudah diperbaiki jadi `style.css`.
 
+### Sistem keranjang DIHAPUS → diganti Beli Langsung + Chat Pesanan
+- Tombol "+ Keranjang" di kartu produk sekarang jadi **"Beli Sekarang"**.
+  Klik langsung buka modal isi Nama + No. WhatsApp (tanpa perlu akun/login,
+  karena pendaftaran publik memang ditutup).
+- Setelah submit, sistem otomatis bikin **kode pesanan** (mis. `EXS-8K4QZ1`)
+  + token akses rahasia, disimpan ke tabel `orders`.
+- Pembeli langsung diarahkan ke **`pesanan.html`** — halaman ruang chat
+  1-lawan-1 dengan admin/owner (tabel `order_messages`), khusus untuk
+  pesanan itu. Chat di-refresh otomatis tiap 4 detik (polling, tanpa
+  websocket) baik di sisi pembeli maupun admin.
+- Kode + token pesanan disimpan otomatis di `localStorage` browser pembeli
+  (key `exschool_orders`) supaya gampang dibuka lagi; kalau ganti perangkat,
+  pembeli tinggal masukkan manual kode & token di `pesanan.html` (link
+  "Lacak Pesanan" di nav & footer).
+- Admin panel (`admin.html`) punya panel baru **Pesanan & Chat**: daftar
+  semua pesanan, dropdown ubah status (`menunggu` → `diproses` → `dikirim`
+  → `selesai`, atau `dibatalkan`), dan tombol **💬 Chat** untuk buka & balas
+  percakapan tiap pesanan langsung dari situ.
+- 1 endpoint baru saja: `api/orders.js` (menangani pesanan DAN chat
+  sekaligus lewat `?resource=messages`, supaya jumlah Vercel Functions
+  tetap hemat — sama seperti pola `products.js`).
+- Karena belum ada akun multi-toko (semua produk dikelola 1 admin/owner),
+  "chat dengan pemilik produk" di sini = chat dengan admin/owner situs.
+
 ## 4. File baru yang ditambahkan
 
 ```
 akun.html, akun.js              → halaman login/daftar publik
 robots.txt                      → blokir crawler dari /admin
 SETUP_UPGRADE.sql               → migrasi database (jalankan sekali)
+ADD_ORDERS_CHAT.sql             → migrasi tabel orders + order_messages
+api/orders.js                   → API pesanan + chat (publik & admin)
+pesanan.html, pesanan.js        → ruang chat pesanan untuk pembeli
 api/_lib/cloudinary.js          → helper signed upload
 api/upload-signature.js         → endpoint pembuat tiket upload
 api/auth/register.js            → daftar akun publik (role member)

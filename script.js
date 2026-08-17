@@ -135,7 +135,7 @@ function productCardHTML(p) {
           <span class="price">${rupiah(p.price)}</span>
           ${p.old_price ? `<span class="old">${rupiah(p.old_price)}</span>` : ''}
         </div>
-        <button class="addbtn" data-id="${p.id}">+ Keranjang</button>
+        <button class="addbtn" type="button" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price}">Beli Sekarang</button>
       </div>
     </div>
   `;
@@ -247,15 +247,105 @@ async function loadSocialLinks() {
   }
 }
 
-// ---------- Keranjang (sisi klien, sederhana) ----------
-function initCart() {
-  let cartCount = 0;
-  const cartButton = document.getElementById('cart-button');
+// ---------- Beli Sekarang (modal) ----------
+// Menggantikan sistem keranjang lama: klik "Beli Sekarang" di kartu produk
+// langsung buka modal ini, isi nama + WhatsApp, sistem bikin ID pesanan +
+// ruang chat dengan admin — tidak perlu login/akun.
+function saveOrderToLocal(order) {
+  try {
+    const list = JSON.parse(localStorage.getItem('exschool_orders') || '[]');
+    list.unshift({
+      code: order.order_code,
+      token: order.access_token,
+      product_name: order.product_name,
+      created_at: order.created_at,
+    });
+    localStorage.setItem('exschool_orders', JSON.stringify(list.slice(0, 20)));
+  } catch (err) {
+    // localStorage penuh/diblokir browser — tidak fatal, pembeli masih
+    // punya kode pesanan yang ditampilkan di layar.
+  }
+}
+
+function initOrderModal() {
+  const overlay = document.getElementById('order-modal');
+  const closeBtn = document.getElementById('order-modal-close');
+  const stepForm = document.getElementById('order-step-form');
+  const stepSuccess = document.getElementById('order-step-success');
+  const form = document.getElementById('order-form');
+  const errEl = document.getElementById('order-form-error');
+  const nameEl = document.getElementById('order-product-name');
+  const priceEl = document.getElementById('order-product-price');
+  if (!overlay || !form) return;
+
+  let selectedProductId = null;
+
+  function openModal(productId, productName, productPrice) {
+    selectedProductId = productId;
+    nameEl.textContent = productName;
+    priceEl.textContent = rupiah(productPrice);
+    errEl.classList.add('hidden');
+    form.reset();
+    stepForm.classList.remove('hidden');
+    stepSuccess.classList.add('hidden');
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    overlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.addbtn');
     if (!btn) return;
-    cartCount += 1;
-    if (cartButton) cartButton.textContent = `🛒 Keranjang (${cartCount})`;
+    openModal(btn.dataset.id, btn.dataset.name, btn.dataset.price);
+  });
+
+  closeBtn?.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errEl.classList.add('hidden');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Memproses...';
+
+    try {
+      const payload = {
+        product_id: selectedProductId,
+        buyer_name: document.getElementById('order-buyer-name').value.trim(),
+        buyer_phone: document.getElementById('order-buyer-phone').value.trim(),
+        buyer_note: document.getElementById('order-buyer-note').value.trim(),
+      };
+      const res = await fetch(`${API_BASE}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error || 'Gagal membuat pesanan.');
+
+      const order = body.data;
+      saveOrderToLocal(order);
+
+      document.getElementById('order-success-code').textContent = order.order_code;
+      const chatLink = document.getElementById('order-success-chat-link');
+      chatLink.href = `pesanan.html?code=${encodeURIComponent(order.order_code)}&token=${encodeURIComponent(order.access_token)}`;
+
+      stepForm.classList.add('hidden');
+      stepSuccess.classList.remove('hidden');
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.remove('hidden');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Buat Pesanan';
+    }
   });
 }
 
@@ -263,7 +353,7 @@ function initCart() {
 document.addEventListener('DOMContentLoaded', async () => {
   initCategoryFilter();
   initSearch();
-  initCart();
+  initOrderModal();
   await loadHeroBannerImage();
   await loadBanner();
   await loadCategories();

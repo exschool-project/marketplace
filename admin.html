@@ -64,6 +64,27 @@
           <span class="stat-num" id="stat-banners">–</span>
           <span class="stat-label">Banner aktif</span>
         </div>
+        <div class="stat-card brutal-sm">
+          <span class="stat-num" id="stat-orders-new">–</span>
+          <span class="stat-label">Pesanan baru</span>
+        </div>
+      </section>
+
+      <!-- PESANAN -->
+      <section class="admin-panel brutal">
+        <h2>Pesanan &amp; Chat</h2>
+        <p class="panel-sub">Pesanan masuk dari tombol "Beli Sekarang" di beranda. Atur status &amp; balas chat pembeli di sini.</p>
+        <div class="inline-form">
+          <select id="order-status-filter">
+            <option value="">Semua status</option>
+            <option value="menunggu">Menunggu Konfirmasi</option>
+            <option value="diproses">Diproses</option>
+            <option value="dikirim">Dikirim</option>
+            <option value="selesai">Selesai</option>
+            <option value="dibatalkan">Dibatalkan</option>
+          </select>
+        </div>
+        <div id="order-list" class="admin-list"></div>
       </section>
 
       <!-- BANNER -->
@@ -175,6 +196,23 @@
 
     </main>
   </section>
+
+  <!-- MODAL CHAT PESANAN (admin balas pembeli) -->
+  <div id="order-chat-modal" class="order-modal-overlay hidden">
+    <div class="order-modal brutal" style="max-width:520px;">
+      <button type="button" id="order-chat-close" class="order-modal-close" aria-label="Tutup">✕</button>
+      <span class="eyebrow">◆ Chat Pesanan</span>
+      <h2 id="oc-code" style="font-size:1.15rem; margin:8px 0 2px;"></h2>
+      <p style="font-size:.82rem; color:#3E6B85; margin:0 0 14px;" id="oc-buyer"></p>
+      <div class="chat-wrap" style="border:none;">
+        <div id="oc-thread" class="chat-thread" style="max-height:42vh; padding:12px 0;"></div>
+        <form id="oc-form" class="chat-form" style="padding:12px 0 0; border-top:2.5px solid var(--ink);">
+          <input type="text" id="oc-input" placeholder="Balas pesan ke pembeli..." maxlength="2000" required autocomplete="off">
+          <button type="submit" class="btn btn-green brutal-sm">Kirim</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="admin.js"></script>

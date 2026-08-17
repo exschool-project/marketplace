@@ -568,6 +568,166 @@ header.site{
 .why-card h3{ font-size:1.1rem; margin-bottom:8px; }
 .why-card p{ margin:0; font-size:.88rem; color:#A8D4E8; line-height:1.55; }
 
+/* ---------- FIELD (form input dasar, dipakai modal beli & halaman pesanan) ---------- */
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:16px;
+  font-family:'Space Grotesk', sans-serif;
+  font-size:.85rem;
+  font-weight:700;
+}
+.field input, .field select, .field textarea{
+  border:2.5px solid var(--ink);
+  padding:10px 12px;
+  font-family:'Inter', sans-serif;
+  font-size:.9rem;
+  font-weight:400;
+  background:var(--paper);
+}
+.field input:focus, .field select:focus, .field textarea:focus{ outline:none; background:#fff; }
+
+/* ---------- MODAL BELI SEKARANG ---------- */
+.order-modal-overlay{
+  position:fixed; inset:0; z-index:100;
+  background:rgba(11,42,84,.55);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+}
+.order-modal{
+  position:relative;
+  background:var(--card);
+  width:100%; max-width:420px;
+  padding:30px 26px 26px;
+  max-height:90vh;
+  overflow-y:auto;
+}
+.order-modal-close{
+  position:absolute; top:14px; right:14px;
+  width:32px; height:32px;
+  border:2.5px solid var(--ink);
+  background:var(--paper);
+  font-weight:700; cursor:pointer;
+  transition: background-color .15s ease;
+}
+.order-modal-close:hover{ background:var(--blue); color:var(--paper); }
+.order-modal h2{ font-size:1.25rem; margin:10px 0 4px; }
+.order-product-price{
+  font-family:'JetBrains Mono', monospace;
+  font-weight:700; font-size:1.1rem;
+  color:var(--green-deep);
+  margin:0 0 20px;
+}
+.order-form-error{
+  background:#FFE3E3;
+  border:2px solid var(--ink);
+  padding:8px 10px;
+  font-size:.82rem;
+  margin:0 0 14px;
+}
+.order-code-label{ font-size:.85rem; color:#3E6B85; margin:6px 0 2px; }
+.order-code-value{
+  font-size:1.6rem; font-weight:700;
+  letter-spacing:.04em;
+  background:var(--ink); color:var(--gold);
+  display:inline-block;
+  padding:8px 14px;
+  margin:0 0 14px;
+}
+.order-success-note{ font-size:.85rem; color:#3E6B85; margin:0 0 20px; line-height:1.5; }
+
+/* ---------- RUANG CHAT PESANAN (pesanan.html) ---------- */
+.order-lookup-card{
+  background:var(--card);
+  padding:30px 26px;
+  max-width:420px;
+  margin:0 auto;
+}
+.order-status-badge{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.72rem; font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  padding:4px 10px;
+  border:2px solid var(--ink);
+  display:inline-block;
+}
+.order-status-menunggu{ background:#FFF3CD; }
+.order-status-diproses{ background:#D6ECF7; }
+.order-status-dikirim{ background:var(--blue); color:var(--paper); }
+.order-status-selesai{ background:#C9F2D8; }
+.order-status-dibatalkan{ background:#FFB3B3; }
+
+.order-summary{
+  background:var(--card);
+  border-bottom:3px solid var(--ink);
+  padding:18px 20px;
+}
+.order-summary-code{
+  font-family:'JetBrains Mono', monospace;
+  font-weight:700; font-size:1rem;
+  letter-spacing:.03em;
+}
+.order-summary-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:8px; }
+.order-summary-product{ font-weight:700; font-size:.95rem; }
+.order-summary-price{ font-family:'JetBrains Mono', monospace; color:var(--green-deep); font-size:.9rem; }
+
+.chat-wrap{
+  display:flex; flex-direction:column;
+  max-width:640px; margin:0 auto;
+  background:var(--card);
+  border:3px solid var(--ink);
+}
+.chat-thread{
+  display:flex; flex-direction:column; gap:12px;
+  padding:20px; min-height:280px; max-height:52vh; overflow-y:auto;
+}
+.chat-bubble{
+  max-width:78%;
+  padding:9px 13px;
+  border:2px solid var(--ink);
+  font-size:.88rem;
+  line-height:1.45;
+}
+.chat-bubble .chat-meta{
+  display:block;
+  font-family:'JetBrains Mono', monospace;
+  font-size:.65rem;
+  text-transform:uppercase;
+  opacity:.65;
+  margin-bottom:3px;
+}
+.chat-bubble.from-buyer{ align-self:flex-end; background:var(--green); color:var(--paper); }
+.chat-bubble.from-admin{ align-self:flex-start; background:var(--blue); color:var(--paper); }
+.chat-bubble.from-system{ align-self:center; background:var(--paper); color:#3E6B85; font-style:italic; font-size:.78rem; text-align:center; }
+.chat-form{
+  display:flex; gap:10px;
+  padding:14px 16px;
+  border-top:3px solid var(--ink);
+}
+.chat-form input{
+  flex:1;
+  border:2.5px solid var(--ink);
+  padding:10px 12px;
+  font-family:'Inter', sans-serif;
+  font-size:.9rem;
+}
+.chat-form input:focus{ outline:none; }
+.chat-empty{ color:#3E6B85; font-size:.85rem; text-align:center; padding:20px 0; }
+
+.mini-btn{
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:.75rem;
+  padding:7px 12px;
+  border:2px solid var(--ink);
+  background:var(--paper);
+  cursor:pointer;
+  transition: background-color .15s ease;
+}
+.mini-btn:hover{ background:var(--blue); color:var(--paper); }
+
 /* ---------- FOOTER ---------- */
 footer{
   background:var(--blue);

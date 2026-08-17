@@ -25,7 +25,7 @@
       </form>
       <div class="nav-actions">
         <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html">Masuk</a>
-        <button id="cart-button" class="btn btn-ink hover-lift-sm brutal-sm" type="button">🛒 Keranjang</button>
+        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html">📦 Lacak Pesanan</a>
       </div>
     </div>
   </header>
@@ -134,7 +134,7 @@
         <h4>Bantuan</h4>
         <ul>
           <li><a href="#">Pusat Bantuan</a></li>
-          <li><a href="#">Lacak Pesanan</a></li>
+          <li><a href="pesanan.html">Lacak Pesanan</a></li>
         </ul>
       </div>
       <div>
@@ -149,6 +149,47 @@
       <span>Dibuat exschool-project</span>
     </div>
   </footer>
+
+  <!-- MODAL BELI SEKARANG: diisi & dikontrol dari script.js -->
+  <div id="order-modal" class="order-modal-overlay hidden">
+    <div class="order-modal brutal">
+      <button type="button" id="order-modal-close" class="order-modal-close" aria-label="Tutup">✕</button>
+
+      <!-- STEP 1: form data pembeli -->
+      <div id="order-step-form">
+        <span class="eyebrow">◆ Beli Sekarang</span>
+        <h2 id="order-product-name">Nama produk</h2>
+        <p class="order-product-price" id="order-product-price"></p>
+
+        <form id="order-form">
+          <label class="field">
+            <span>Nama kamu</span>
+            <input type="text" id="order-buyer-name" required autocomplete="name" placeholder="Nama lengkap">
+          </label>
+          <label class="field">
+            <span>Nomor WhatsApp</span>
+            <input type="tel" id="order-buyer-phone" required autocomplete="tel" placeholder="08xxxxxxxxxx">
+          </label>
+          <label class="field">
+            <span>Catatan (opsional)</span>
+            <input type="text" id="order-buyer-note" placeholder="Ukuran, warna, dll">
+          </label>
+          <p id="order-form-error" class="order-form-error hidden"></p>
+          <button type="submit" class="btn btn-green brutal-sm hover-lift-sm" style="width:100%;">Buat Pesanan</button>
+        </form>
+      </div>
+
+      <!-- STEP 2: sukses, kasih kode pesanan + tombol ke ruang chat -->
+      <div id="order-step-success" class="hidden">
+        <span class="eyebrow">◆ Pesanan Dibuat</span>
+        <h2>Pesanan kamu berhasil dibuat 🎉</h2>
+        <p class="order-code-label">Kode pesanan kamu:</p>
+        <p class="order-code-value mono" id="order-success-code"></p>
+        <p class="order-success-note">Simpan kode ini. Chat langsung dengan admin buat lanjutin pesanan di ruang chat.</p>
+        <a id="order-success-chat-link" class="btn btn-green brutal-sm hover-lift-sm" style="width:100%; display:block; text-align:center; box-sizing:border-box;" href="#">Buka Ruang Chat →</a>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>

@@ -221,7 +221,7 @@
   margin-bottom:18px;
   flex-wrap:wrap;
 }
-.inline-form input{
+.inline-form input, .inline-form select{
   flex:1;
   min-width:200px;
   border:2.5px solid var(--ink);
@@ -230,7 +230,7 @@
   font-size:.9rem;
   background:var(--paper);
 }
-.inline-form input:focus{ outline:none; background:#fff; }
+.inline-form input:focus, .inline-form select:focus{ outline:none; background:#fff; }
 
 .product-form .form-grid,
 #social-form.form-grid{
