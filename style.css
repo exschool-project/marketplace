@@ -1,0 +1,815 @@
+:root{
+  /* Palet diambil dari logo Yayasan Aqilah Hidayah: navy + emas + putih,
+     ditambah biru sedang dari gradasi ilustrasi di logo. */
+  --blue:#4E93C9;       /* biru sedang, dari gradasi kubah/daun di logo */
+  --blue-deep:#356F9E;  /* versi lebih gelap, buat hover/shadow */
+  --green:#0B2A54;      /* navy — warna dasar cincin logo, jadi warna utama situs */
+  --green-deep:#071D3B; /* navy lebih gelap lagi */
+  --gold:#C9A227;       /* emas — dari cincin luar & bintang di logo */
+  --gold-deep:#A5811C;  /* emas lebih gelap, buat shadow/border */
+  --ink:#0B2A54;        /* border/shadow/teks gelap — samain dgn navy */
+  --paper:#FFFFFF;
+  --card:#FFFFFF;
+  --shadow-w: 6px;
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter', sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+
+.hidden{ display:none !important; }
+
+/* ---------- BANNER GAMBAR (upload, diatur owner) ---------- */
+/* Banner full-width 16:9, nempel dari tepi ke tepi layar, di bawah teks hero.
+   position:absolute + inset:0 bikin gambar selalu pas ngisi ukuran
+   .hero-visual berapa pun tingginya, jadi otomatis ikut device apa aja. */
+.hero-banner-wrap{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  border-top:3px solid var(--ink);
+  border-bottom:3px solid var(--ink);
+  background:linear-gradient(120deg, var(--blue), var(--green));
+  z-index:1;
+}
+.hero-banner-img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
+/* teks ditimpa otomatis di atas gambar lewat overlay, bukan digambar manual di file gambarnya */
+.hero-banner-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:flex-end;
+  padding:clamp(16px, 4vw, 48px);
+  background:linear-gradient(180deg, rgba(11,42,84,0) 45%, rgba(11,42,84,.78) 100%);
+  pointer-events:none;
+}
+.hero-banner-text{ max-width:min(680px, 90%); color:#fff; }
+.hero-banner-title{
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:clamp(1.2rem, 3.6vw, 2.4rem);
+  line-height:1.15;
+  margin:0 0 6px;
+  text-shadow:0 2px 12px rgba(0,0,0,.35);
+}
+.hero-banner-subtitle{
+  font-family:'Inter', sans-serif;
+  font-weight:500;
+  font-size:clamp(.8rem, 1.8vw, 1.1rem);
+  margin:0;
+  opacity:.95;
+  text-shadow:0 1px 8px rgba(0,0,0,.35);
+}
+.hero-banner-title:empty, .hero-banner-subtitle:empty{ display:none; }
+
+/* wadah kartu harga (float-card) supaya tetap bisa diklik di atas gambar */
+.hero-visual-cards{ position:absolute; inset:0; z-index:3; pointer-events:none; }
+.hero-visual-cards .float-card{ pointer-events:auto; }
+
+/* ---------- OVERLAY teks welcome + tombol, MENIMPA gambar hero ----------
+   .hero-visual (position:relative) jadi wadah utama; layer ini
+   position:absolute + inset:0 supaya teks selalu nempel di atas gambar,
+   bukan section terpisah di bawahnya. Gradient di belakang teks biar
+   tetap kebaca di gambar apa pun. Wrapper-nya pointer-events:none supaya
+   area transparan di sekitarnya tidak menghalangi klik ke gambar/kartu
+   di baliknya; tombolnya sendiri diaktifkan lagi lewat pointer-events:auto. */
+.hero-overlay-content{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  padding:clamp(20px, 5vw, 64px);
+  background:linear-gradient(100deg, rgba(11,42,84,.85) 0%, rgba(11,42,84,.6) 38%, rgba(11,42,84,.15) 68%, rgba(11,42,84,0) 88%);
+  pointer-events:none;
+}
+.hero-copy{ max-width:min(560px, 88%); }
+.hero .hero-overlay-content h1{
+  color:#fff;
+  text-shadow:0 2px 14px rgba(0,0,0,.45);
+  overflow-wrap:break-word;
+}
+.hero .hero-overlay-content p.lead{
+  color:#fff;
+  text-shadow:0 1px 10px rgba(0,0,0,.4);
+}
+.hero-overlay-content .hero-ctas a{ pointer-events:auto; }
+
+
+h1, h2, h3, .display{
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  line-height:1.05;
+  margin:0;
+  letter-spacing:-0.02em;
+}
+
+.mono{ font-family:'JetBrains Mono', monospace; }
+a{ color:inherit; text-decoration:none; }
+img{ max-width:100%; display:block; }
+
+/* ---------- utility: brutal box ---------- */
+.brutal{
+  border:3px solid var(--ink);
+  box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--ink);
+}
+.brutal-sm{
+  border:2.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+@media (prefers-reduced-motion: no-preference){
+  .hover-lift{ transition: transform .15s ease, box-shadow .15s ease; }
+  .hover-lift:hover{
+    transform: translate(-3px,-3px);
+    box-shadow: 9px 9px 0 var(--ink);
+  }
+  .hover-lift-sm{ transition: transform .15s ease, box-shadow .15s ease; }
+  .hover-lift-sm:hover{
+    transform: translate(-2px,-2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+}
+:focus-visible{
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ---------- BANNER (marquee) ---------- */
+.banner{
+  background:var(--ink);
+  color:var(--paper);
+  overflow:hidden;
+  white-space:nowrap;
+  border-bottom:3px solid var(--ink);
+  padding:9px 0;
+}
+.banner-track{
+  display:inline-flex;
+  animation: marquee 22s linear infinite;
+}
+.banner-track span{
+  font-family:'JetBrains Mono', monospace;
+  font-weight:700;
+  font-size:.82rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  padding:0 1.4rem;
+  display:inline-flex;
+  align-items:center;
+  gap:1.4rem;
+}
+.banner-track span::after{ content:"◆"; color:var(--gold); }
+@keyframes marquee{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce){
+  .banner-track{ animation:none; }
+}
+
+/* ---------- NAV ---------- */
+header.site{
+  position:sticky; top:0; z-index:50;
+  background:var(--paper);
+  border-bottom:3px solid var(--ink);
+}
+.nav-wrap{
+  max-width:1180px;
+  margin:0 auto;
+  padding:14px 24px;
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+.logo{
+  font-size:1.5rem;
+  font-weight:700;
+  font-family:'Space Grotesk', sans-serif;
+  background:var(--green);
+  color:var(--paper);
+  padding:6px 12px;
+  border:3px solid var(--ink);
+  box-shadow:4px 4px 0 var(--ink);
+  transform:rotate(-2deg);
+  flex-shrink:0;
+}
+.search{
+  flex:1;
+  display:flex;
+  align-items:stretch;
+  max-width:520px;
+}
+.search input{
+  flex:1;
+  border:3px solid var(--ink);
+  border-right:none;
+  border-radius:6px 0 0 6px;
+  padding:10px 14px;
+  font-family:'Inter', sans-serif;
+  font-size:.95rem;
+  background:var(--card);
+  transition: background-color .15s ease;
+}
+.search input:focus{ outline:none; background:#F5FAFD; }
+.search button{
+  border:3px solid var(--ink);
+  border-radius:0 6px 6px 0;
+  background:var(--blue);
+  color:var(--paper);
+  padding:0 18px;
+  font-weight:800;
+  cursor:pointer;
+  font-family:'Space Grotesk', sans-serif;
+  transition: background-color .15s ease, transform .12s ease;
+}
+.search button:hover{ background:var(--blue-deep); }
+.search button:active{ transform:scale(.97); }
+.search button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.nav-actions{
+  margin-left:auto;
+  display:flex;
+  gap:10px;
+  flex-shrink:0;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:.88rem;
+  letter-spacing:.01em;
+  padding:10px 18px;
+  border:3px solid var(--ink);
+  border-radius:6px;
+  background:var(--card);
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease, opacity .15s ease;
+}
+.btn:not(.brutal):not(.brutal-sm):hover{ box-shadow:3px 3px 0 var(--ink); transform:translate(-1px,-1px); }
+.btn:active{ transform:translate(1px,1px); box-shadow:0 0 0 var(--ink) !important; }
+.btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.btn-green{ background:var(--green); color:var(--paper); }
+.btn-green:hover{ background:var(--blue-deep); }
+.btn-blue{ background:var(--blue); color:var(--paper); }
+.btn-blue:hover{ background:var(--blue-deep); }
+.btn-ink{ background:var(--ink); color:var(--paper); }
+.btn-ink:hover{ background:var(--green-deep); }
+
+/* ---------- HERO / BERANDA ---------- */
+/* .hero cuma pembungkus full-width; gambar tetap tepi-ke-tepi (nggak dikotakin
+   1180px) dan teksnya sekarang jadi overlay lewat .hero-overlay-content
+   di dalam .hero-visual, bukan section teks terpisah di atas gambar lagi. */
+.hero{
+  width:100%;
+  margin:24px 0 32px;
+}
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:.78rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  background:var(--ink);
+  color:#BFE3F2;
+  padding:5px 10px;
+  margin-bottom:18px;
+}
+.hero-org{
+  display:inline-flex;
+  align-items:center;
+  font-family:'JetBrains Mono', monospace;
+  font-size:.78rem;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  background:var(--ink);
+  color:var(--gold);
+  padding:5px 10px;
+  margin:10px 0 0;
+}
+.hero h1{ font-size:clamp(2.4rem, 5vw, 4rem); }
+.hero h1 .hl{
+  background:var(--green);
+  color:var(--paper);
+  padding:0 10px;
+  box-decoration-break:clone;
+  -webkit-box-decoration-break:clone;
+}
+.hero p.lead{
+  font-size:1.05rem;
+  max-width:46ch;
+  margin:22px 0 28px;
+  color:var(--ink);
+}
+.hero-ctas{ display:flex; gap:14px; flex-wrap:wrap; }
+.hero-stats{
+  display:flex;
+  gap:28px;
+  margin-top:34px;
+  flex-wrap:wrap;
+}
+.hero-stats .stat b{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:1.7rem;
+  display:block;
+}
+.hero-stats .stat span{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.72rem;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:#3E6B85;
+}
+
+/* hero visual: banner gambar full-width 16:9 + stacked price-tag stickers
+   di atasnya. aspect-ratio bikin tingginya otomatis ikut lebar layar di
+   semua device (HP, tablet, laptop, PC lebar) tanpa breakpoint manual. */
+.hero-visual{
+  position:relative;
+  width:100%;
+  aspect-ratio:16 / 9;
+  max-height:640px;
+  overflow:hidden;
+  /* fallback bg (sama kayak .hero-banner-wrap) biar teks overlay tetap
+     kebaca walau banner gambar belum diupload owner di admin */
+  background:linear-gradient(120deg, var(--blue), var(--green));
+}
+.float-card{
+  position:absolute;
+  background:var(--card);
+  border:3px solid var(--ink);
+  box-shadow:7px 7px 0 var(--ink);
+  padding:16px 18px;
+  width:230px;
+  z-index:3;
+}
+.float-card.c1{ top:20px; left:20px; background:var(--blue); transform:rotate(-6deg); }
+.float-card.c2{ top:140px; right:20px; background:var(--green); color:var(--paper); transform:rotate(4deg); width:200px; }
+.float-card.c3{ bottom:20px; left:60px; background:var(--card); transform:rotate(-3deg); }
+.float-card .tag-hole{
+  width:16px; height:16px; border-radius:50%;
+  background:var(--paper); border:2.5px solid var(--ink);
+  position:absolute; top:-10px; left:16px;
+}
+.float-card .ttl{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1rem; margin-bottom:6px; }
+.float-card .prc{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.1rem; }
+.float-card .prc del{ opacity:.5; font-weight:500; margin-right:6px; font-size:.85rem; }
+@media (max-width:640px){
+  .float-card{ width:180px; padding:12px 14px; }
+  .float-card .ttl{ font-size:.88rem; }
+  .float-card .prc{ font-size:.95rem; }
+  .float-card.c2{ width:160px; }
+}
+
+/* ---------- CATEGORY CHIPS ---------- */
+.cats{
+  max-width:1180px;
+  margin:10px auto 0;
+  padding:0 24px 8px;
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+}
+.chip{
+  flex-shrink:0;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:.85rem;
+  padding:9px 16px;
+  border:2.5px solid var(--ink);
+  border-radius:20px;
+  background:var(--card);
+  cursor:pointer;
+  white-space:nowrap;
+  transition: background-color .15s ease, color .15s ease, transform .15s ease;
+}
+.chip:hover{ background:var(--blue); color:var(--paper); transform:translateY(-1px); }
+.chip:active{ transform:translateY(0); }
+.chip.active{ background:var(--ink); color:var(--paper); }
+.chip:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+
+/* ---------- STATE: loading / kosong / error ---------- */
+.grid-msg{
+  grid-column: 1 / -1;
+  font-family:'JetBrains Mono', monospace;
+  font-size:.85rem;
+  color:#3E6B85;
+  padding:24px 0;
+}
+
+/* ---------- SECTION HEADERS ---------- */
+.section{ max-width:1180px; margin:0 auto; padding:56px 24px; }
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  margin-bottom:28px;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.section-head h2{ font-size:clamp(1.6rem,3vw,2.2rem); }
+.section-head p{ margin:6px 0 0; color:#3E6B85; font-size:.92rem; }
+.section-head .see-all{
+  font-family:'JetBrains Mono', monospace;
+  font-weight:700;
+  font-size:.82rem;
+  text-transform:uppercase;
+  border-bottom:2.5px solid var(--ink);
+  padding-bottom:2px;
+}
+
+/* ---------- PRODUCT GRID (signature price-tag cards) ---------- */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:26px;
+}
+.pcard{
+  position:relative;
+  background:var(--card);
+  border:3px solid var(--ink);
+  box-shadow:6px 6px 0 var(--ink);
+  padding-top:14px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.pcard:nth-child(3n+1){ transform:rotate(-1.3deg); }
+.pcard:nth-child(3n+2){ transform:rotate(0.9deg); }
+.pcard:nth-child(3n+3){ transform:rotate(-0.4deg); }
+.pcard:hover{
+  transform:translate(-3px,-5px) rotate(0deg);
+  box-shadow:9px 10px 0 var(--ink);
+  z-index:2;
+}
+.pcard .hole{
+  width:20px; height:20px; border-radius:50%;
+  background:var(--paper);
+  border:2.5px solid var(--ink);
+  position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+}
+.pcard .thumb{
+  height:150px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.6rem;
+  border-bottom:3px solid var(--ink);
+  overflow:hidden;
+}
+.pcard .thumb img{
+  width:100%; height:100%;
+  object-fit:cover;
+}
+.pcard:nth-child(4n+1) .thumb{ background:var(--blue); }
+.pcard:nth-child(4n+2) .thumb{ background:#D6ECF7; }
+.pcard:nth-child(4n+3) .thumb{ background:#EAF6FF; }
+.pcard:nth-child(4n+4) .thumb{ background:#F0F8FC; }
+.pcard .badge{
+  position:absolute; top:8px; right:8px;
+  background:var(--ink); color:var(--blue);
+  font-family:'JetBrains Mono', monospace; font-size:.65rem; font-weight:700;
+  padding:3px 7px; text-transform:uppercase; letter-spacing:.04em;
+  transform:rotate(4deg);
+}
+.pcard .body{ padding:14px 16px 18px; }
+.pcard .shop{
+  font-family:'JetBrains Mono', monospace; font-size:.68rem; color:#3E6B85;
+  text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px;
+}
+.pcard .name{ font-weight:700; font-size:.95rem; margin-bottom:10px; }
+.pcard .price-row{ display:flex; align-items:baseline; gap:8px; }
+.pcard .price{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.15rem; }
+.pcard .old{ font-family:'JetBrains Mono', monospace; font-size:.78rem; color:#7FA8BD; text-decoration:line-through; }
+.pcard .addbtn{
+  margin-top:12px; width:100%;
+  border:2.5px solid var(--ink);
+  border-radius:6px;
+  background:var(--card);
+  font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:.8rem;
+  padding:9px; cursor:pointer;
+  transition: background-color .15s ease, color .15s ease, transform .12s ease;
+}
+.pcard .addbtn:hover{ background:var(--ink); color:var(--blue); }
+.pcard .addbtn:active{ transform:scale(.97); }
+.pcard .addbtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+
+/* ---------- SKELETON LOADING (bentuknya niru .pcard persis) ---------- */
+@keyframes skeleton-pulse{
+  0%, 100% { opacity:1; }
+  50% { opacity:.55; }
+}
+.pcard-skeleton{
+  position:relative;
+  background:var(--card);
+  border:3px solid var(--ink);
+  box-shadow:6px 6px 0 var(--ink);
+  padding-top:14px;
+}
+.pcard-skeleton .hole{
+  width:20px; height:20px; border-radius:50%;
+  background:var(--paper);
+  border:2.5px solid var(--ink);
+  position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+}
+.pcard-skeleton .thumb{
+  height:150px;
+  border-bottom:3px solid var(--ink);
+  background:#E4F1F7;
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+}
+.pcard-skeleton .body{ padding:14px 16px 18px; display:flex; flex-direction:column; gap:10px; }
+.pcard-skeleton .sk-line{
+  height:10px;
+  background:#D6ECF7;
+  border:1.5px solid var(--ink);
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+}
+.pcard-skeleton .sk-line.sk-shop{ width:40%; height:8px; animation-delay:.05s; }
+.pcard-skeleton .sk-line.sk-name{ width:85%; animation-delay:.1s; }
+.pcard-skeleton .sk-line.sk-price{ width:50%; margin-top:4px; animation-delay:.15s; }
+.pcard-skeleton .sk-btn{
+  margin-top:12px; height:34px;
+  border:2.5px solid var(--ink);
+  background:#F0F8FC;
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+  animation-delay:.2s;
+}
+
+/* ---------- WHY US ---------- */
+.why{ background:var(--ink); color:var(--paper); }
+.why .section-head h2, .why .section-head p{ color:var(--paper); }
+.why .section-head p{ color:#BFE3F2; }
+.why-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.why-card{
+  background:#073852;
+  border:2.5px solid #1B5A7A;
+  padding:24px 20px;
+}
+.why-card .num{
+  font-family:'JetBrains Mono', monospace; font-weight:700; color:#BFE3F2;
+  font-size:.8rem; margin-bottom:14px; display:block;
+}
+.why-card h3{ font-size:1.1rem; margin-bottom:8px; }
+.why-card p{ margin:0; font-size:.88rem; color:#A8D4E8; line-height:1.55; }
+
+/* ---------- FIELD (form input dasar, dipakai modal beli & halaman pesanan) ---------- */
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:16px;
+  font-family:'Space Grotesk', sans-serif;
+  font-size:.85rem;
+  font-weight:700;
+}
+.field input, .field select, .field textarea{
+  border:2.5px solid var(--ink);
+  padding:10px 12px;
+  font-family:'Inter', sans-serif;
+  font-size:.9rem;
+  font-weight:400;
+  background:var(--paper);
+}
+.field input:focus, .field select:focus, .field textarea:focus{ outline:none; background:#fff; }
+
+/* ---------- MODAL BELI SEKARANG ---------- */
+.order-modal-overlay{
+  position:fixed; inset:0; z-index:100;
+  background:rgba(11,42,84,.55);
+  display:flex; align-items:center; justify-content:center;
+  padding:20px;
+}
+.order-modal{
+  position:relative;
+  background:var(--card);
+  width:100%; max-width:420px;
+  padding:30px 26px 26px;
+  max-height:90vh;
+  overflow-y:auto;
+}
+.order-modal-close{
+  position:absolute; top:14px; right:14px;
+  width:32px; height:32px;
+  border:2.5px solid var(--ink);
+  background:var(--paper);
+  font-weight:700; cursor:pointer;
+  transition: background-color .15s ease;
+}
+.order-modal-close:hover{ background:var(--blue); color:var(--paper); }
+.order-modal h2{ font-size:1.25rem; margin:10px 0 4px; }
+.order-product-price{
+  font-family:'JetBrains Mono', monospace;
+  font-weight:700; font-size:1.1rem;
+  color:var(--green-deep);
+  margin:0 0 20px;
+}
+.order-form-error{
+  background:#FFE3E3;
+  border:2px solid var(--ink);
+  padding:8px 10px;
+  font-size:.82rem;
+  margin:0 0 14px;
+}
+.order-code-label{ font-size:.85rem; color:#3E6B85; margin:6px 0 2px; }
+.order-code-value{
+  font-size:1.6rem; font-weight:700;
+  letter-spacing:.04em;
+  background:var(--ink); color:var(--gold);
+  display:inline-block;
+  padding:8px 14px;
+  margin:0 0 14px;
+}
+.order-success-note{ font-size:.85rem; color:#3E6B85; margin:0 0 20px; line-height:1.5; }
+
+/* ---------- RUANG CHAT PESANAN (pesanan.html) ---------- */
+.order-lookup-card{
+  background:var(--card);
+  padding:30px 26px;
+  max-width:420px;
+  margin:0 auto;
+}
+.order-status-badge{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.72rem; font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  padding:4px 10px;
+  border:2px solid var(--ink);
+  display:inline-block;
+}
+.order-status-menunggu{ background:#FFF3CD; }
+.order-status-diproses{ background:#D6ECF7; }
+.order-status-dikirim{ background:var(--blue); color:var(--paper); }
+.order-status-selesai{ background:#C9F2D8; }
+.order-status-dibatalkan{ background:#FFB3B3; }
+
+.order-summary{
+  background:var(--card);
+  border-bottom:3px solid var(--ink);
+  padding:18px 20px;
+}
+.order-summary-code{
+  font-family:'JetBrains Mono', monospace;
+  font-weight:700; font-size:1rem;
+  letter-spacing:.03em;
+}
+.order-summary-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:8px; }
+.order-summary-product{ font-weight:700; font-size:.95rem; }
+.order-summary-price{ font-family:'JetBrains Mono', monospace; color:var(--green-deep); font-size:.9rem; }
+
+.chat-wrap{
+  display:flex; flex-direction:column;
+  max-width:640px; margin:0 auto;
+  background:var(--card);
+  border:3px solid var(--ink);
+}
+.chat-thread{
+  display:flex; flex-direction:column; gap:12px;
+  padding:20px; min-height:280px; max-height:52vh; overflow-y:auto;
+}
+.chat-bubble{
+  max-width:78%;
+  padding:9px 13px;
+  border:2px solid var(--ink);
+  font-size:.88rem;
+  line-height:1.45;
+}
+.chat-bubble .chat-meta{
+  display:block;
+  font-family:'JetBrains Mono', monospace;
+  font-size:.65rem;
+  text-transform:uppercase;
+  opacity:.65;
+  margin-bottom:3px;
+}
+.chat-bubble.from-buyer{ align-self:flex-end; background:var(--green); color:var(--paper); }
+.chat-bubble.from-admin{ align-self:flex-start; background:var(--blue); color:var(--paper); }
+.chat-bubble.from-system{ align-self:center; background:var(--paper); color:#3E6B85; font-style:italic; font-size:.78rem; text-align:center; }
+.chat-form{
+  display:flex; gap:10px;
+  padding:14px 16px;
+  border-top:3px solid var(--ink);
+}
+.chat-form input{
+  flex:1;
+  border:2.5px solid var(--ink);
+  padding:10px 12px;
+  font-family:'Inter', sans-serif;
+  font-size:.9rem;
+}
+.chat-form input:focus{ outline:none; }
+.chat-empty{ color:#3E6B85; font-size:.85rem; text-align:center; padding:20px 0; }
+.chat-closed-banner{
+  margin:0 16px 12px;
+  padding:9px 14px;
+  background:#FFF3CD;
+  border:2px solid var(--ink);
+  font-size:.8rem;
+  text-align:center;
+}
+.chat-form.is-closed{ opacity:.5; pointer-events:none; }
+
+.mini-btn{
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:.75rem;
+  padding:7px 12px;
+  border:2px solid var(--ink);
+  background:var(--paper);
+  cursor:pointer;
+  transition: background-color .15s ease;
+}
+.mini-btn:hover{ background:var(--blue); color:var(--paper); }
+
+/* ---------- FOOTER ---------- */
+footer{
+  background:var(--blue);
+  border-top:3px solid var(--ink);
+  padding:40px 24px 20px;
+}
+.foot-wrap{
+  max-width:1180px; margin:0 auto;
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1fr;
+  gap:30px;
+  padding-bottom:28px;
+}
+.foot-wrap h4{ font-family:'Space Grotesk', sans-serif; font-size:.95rem; margin-bottom:14px; color:var(--green-deep); }
+.foot-wrap ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:9px; }
+.foot-wrap ul a{ font-size:.85rem; color:var(--green-deep); }
+.foot-wrap ul a:hover{ text-decoration:underline; }
+.foot-desc{ font-size:.85rem; max-width:32ch; margin:0; color:var(--green-deep); }
+.social-links{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.social-links a{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.72rem;
+  font-weight:700;
+  text-transform:uppercase;
+  background:var(--ink);
+  color:var(--paper);
+  border:2px solid var(--ink);
+  padding:6px 10px;
+  text-decoration:none;
+}
+.social-links a:hover{ background:var(--paper); color:var(--ink); }
+.foot-bottom{
+  max-width:1180px; margin:0 auto;
+  border-top:2.5px solid var(--ink);
+  padding-top:16px;
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  font-family:'JetBrains Mono', monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em;
+  color:var(--green-deep);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width:900px){
+  .hero{ margin-top:16px; }
+  /* Kotak hero dibikin lebih tinggi (bukan gepeng) supaya teks overlay
+     muat di dalam gambar. object-fit:cover di .hero-banner-img tetap
+     jaga gambar nggak ketarik/distorsi, cuma area yang kelihatan makin
+     tinggi. Teks di-tengah (bukan mepet bawah) + dirapatkan jaraknya
+     biar nggak kelihatan panjang & berantakan di layar sempit. */
+  .hero-visual{ aspect-ratio:4 / 5; max-height:520px; }
+  .hero-overlay-content{
+    align-items:center;
+    padding:22px;
+    background:linear-gradient(180deg, rgba(11,42,84,.35) 0%, rgba(11,42,84,.62) 55%, rgba(11,42,84,.55) 100%);
+  }
+  .hero-copy{ max-width:100%; }
+  .eyebrow{ margin-bottom:12px; }
+  .hero p.lead{ margin:14px 0 20px; }
+  .grid{ grid-template-columns:repeat(2,1fr); }
+  .why-grid{ grid-template-columns:1fr; }
+  .foot-wrap{ grid-template-columns:1fr 1fr; }
+}
+@media (max-width:560px){
+  .search{ display:none; }
+  .hero-visual{ aspect-ratio:1 / 1.15; max-height:460px; }
+  .hero-overlay-content{
+    padding:18px;
+    background:linear-gradient(180deg, rgba(11,42,84,.4) 0%, rgba(11,42,84,.6) 50%, rgba(11,42,84,.52) 100%);
+  }
+  .hero h1{ font-size:clamp(1.5rem, 7vw, 2rem); line-height:1.12; }
+  .hero p.lead{ font-size:.88rem; line-height:1.4; margin:10px 0 16px; max-width:38ch; }
+  .eyebrow{ margin-bottom:10px; padding:4px 9px; font-size:.7rem; }
+  .hero-ctas{ gap:10px; }
+  .grid{ grid-template-columns:1fr 1fr; gap:16px; }
+  .nav-wrap{ gap:10px; }
+  .foot-wrap{ grid-template-columns:1fr; }
+}
