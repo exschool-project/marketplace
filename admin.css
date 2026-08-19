@@ -24,6 +24,24 @@
 }
 .auth-tab.active{ color:var(--ink); border-bottom-color:var(--ink); }
 .auth-form.hidden{ display:none; }
+.auth-tabs{
+  display:flex;
+  margin-bottom:20px;
+  border:2.5px solid var(--ink);
+}
+.auth-tab{
+  flex:1;
+  padding:9px 0;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:.85rem;
+  background:var(--paper);
+  border:none;
+  cursor:pointer;
+  transition: background-color .15s ease, color .15s ease;
+}
+.auth-tab + .auth-tab{ border-left:2.5px solid var(--ink); }
+.auth-tab.active{ background:var(--ink); color:var(--paper); }
 .register-success{
   background:#DCEFF8;
   border:2px solid var(--ink);

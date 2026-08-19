@@ -89,8 +89,9 @@ terbaca oleh functions.
 
 ### Sistem keranjang DIHAPUS → diganti Beli Langsung + Chat Pesanan
 - Tombol "+ Keranjang" di kartu produk sekarang jadi **"Beli Sekarang"**.
-  Klik langsung buka modal isi Nama + No. WhatsApp (tanpa perlu akun/login,
-  karena pendaftaran publik memang ditutup).
+  Klik langsung buka modal isi Nama + No. WhatsApp (tanpa perlu akun/login
+  — checkout tetap sengaja dibikin guest-friendly biar gampang, walau
+  pendaftaran akun publik sudah dibuka lagi).
 - Setelah submit, sistem otomatis bikin **kode pesanan** (mis. `EXS-8K4QZ1`)
   + token akses rahasia, disimpan ke tabel `orders`.
 - Pembeli langsung diarahkan ke **`pesanan.html`** — halaman ruang chat
@@ -168,6 +169,20 @@ terbaca oleh functions.
   background (tiap 6–8 detik), jadi tetap kedeteksi meski CS lagi buka
   chat pesanan lain atau sedang filter status tertentu.
 - Di `pesanan.html`: pembeli dinotifikasi tiap admin/CS membalas.
+
+### Pendaftaran akun publik DIBUKA lagi
+- `akun.html` sekarang punya tab **Masuk / Daftar** lagi. Akun baru dari
+  form ini selalu jadi role `member` (paling rendah) — kalau perlu naik
+  jadi `cs`/`admin`/`owner`, tetap manual lewat panel Manajemen Tim di
+  `admin.html` (khusus owner).
+- `api/auth/register.js` ditulis ulang dari nol (kode lama sempat dihapus
+  total pas pendaftaran ditutup) — pakai Supabase Admin API
+  (`auth.admin.createUser` dengan `email_confirm: true`) supaya akun
+  langsung bisa dipakai login tanpa perlu klik link verifikasi email
+  (situs ini belum ada setup SMTP custom).
+- Baris di tabel `profiles` dibuat pakai `upsert` (bukan `insert` biasa) —
+  jaga-jaga kalau project Supabase kamu punya trigger lain yang otomatis
+  bikin baris profiles kosong tiap ada auth user baru.
 
 ## 4. File baru yang ditambahkan
 

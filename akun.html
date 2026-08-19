@@ -11,17 +11,20 @@
 </head>
 <body class="admin-body">
 
-  <!-- AUTH: login saja — pendaftaran mandiri DITUTUP. Akun cuma bisa
-       dibuat manual oleh owner (lewat Supabase dashboard atau panel
-       Manajemen Tim), bukan lewat form publik. -->
+  <!-- AUTH: tab Masuk / Daftar -->
   <section id="auth-view" class="login-view">
     <div class="login-card brutal">
       <div class="logo" style="margin-bottom:20px;">EX-SCHOOL</div>
 
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" data-tab="login">Masuk</button>
+        <button type="button" class="auth-tab" data-tab="register">Daftar</button>
+      </div>
+
       <!-- FORM MASUK -->
       <form id="login-form" class="auth-form">
         <h1>Masuk ke akunmu</h1>
-        <p class="login-sub">Pendaftaran akun baru saat ini ditutup. Hubungi admin/owner kalau kamu belum punya akun.</p>
+        <p class="login-sub">Belum punya akun? Klik tab "Daftar" di atas.</p>
 
         <label class="field">
           <span>Email</span>
@@ -34,6 +37,28 @@
 
         <p id="login-error" class="login-error" style="display:none;"></p>
         <button type="submit" class="btn btn-green brutal hover-lift" style="width:100%;">Masuk</button>
+      </form>
+
+      <!-- FORM DAFTAR -->
+      <form id="register-form" class="auth-form hidden">
+        <h1>Buat akun baru</h1>
+        <p class="login-sub">Akun baru otomatis role Member.</p>
+
+        <label class="field">
+          <span>Nama lengkap</span>
+          <input type="text" id="register-name" required autocomplete="name">
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input type="email" id="register-email" required autocomplete="username">
+        </label>
+        <label class="field">
+          <span>Kata sandi</span>
+          <input type="password" id="register-password" required autocomplete="new-password" minlength="6">
+        </label>
+
+        <p id="register-error" class="login-error" style="display:none;"></p>
+        <button type="submit" class="btn btn-green brutal hover-lift" style="width:100%;">Daftar</button>
       </form>
 
       <a href="index.html" class="back-link">← Kembali ke beranda</a>

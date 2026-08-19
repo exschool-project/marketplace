@@ -7,7 +7,8 @@ const { withErrorHandling } = require('./_lib/http');
 // (?resource=messages), supaya jumlah Vercel Functions tetap hemat
 // (lihat catatan yang sama di products.js).
 //
-// Pembeli TIDAK login (registrasi publik memang ditutup) — akses ke
+// Pembeli TIDAK perlu login buat checkout (biar gampang tanpa ribet bikin
+// akun dulu) — akses ke
 // pesanan miliknya cukup dengan mencocokkan order_code + access_token
 // yang dikirim balik sekali waktu pesanan dibuat. Admin/owner login
 // biasa lewat Supabase Auth seperti panel lainnya.
