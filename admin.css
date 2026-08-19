@@ -428,8 +428,14 @@
     inset:0;
     z-index:2;
     border-right:none;
+    transform:translateX(0);
+    transition: transform .28s ease;
+    box-shadow:6px 0 14px rgba(11,42,84,.12);
   }
-  .cs-sidebar.cs-sidebar-hidden-mobile{ display:none; }
+  .cs-sidebar.cs-sidebar-hidden-mobile{
+    transform:translateX(-100%);
+    pointer-events:none; /* biar nggak ke-klik pas lagi geser keluar layar */
+  }
   .cs-chat-panel{ width:100%; }
   .cs-back-btn{ display:inline-flex; flex-shrink:0; }
 
@@ -454,4 +460,7 @@
   .cs-empty-state h2{ font-size:1.1rem; }
   .cs-thread{ padding:14px; }
   .chat-bubble{ max-width:88%; font-size:.85rem; }
+}
+@media (max-width:820px) and (prefers-reduced-motion: reduce){
+  .cs-sidebar{ transition:none; }
 }
