@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lacak Pesanan — EX-SCHOOL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+
+  <!-- NAV (ringkas, sama seperti beranda) -->
+  <header class="site">
+    <div class="nav-wrap">
+      <a class="logo" href="index.html" style="text-decoration:none;">EX-SCHOOL</a>
+      <div class="nav-actions" style="margin-left:auto;">
+        <a class="btn btn-ink hover-lift-sm brutal-sm" href="index.html">← Beranda</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width:640px; margin:0 auto; padding:32px 20px 60px;">
+
+    <!-- STEP 1: cari pesanan (kode + token manual, atau otomatis dari link) -->
+    <section id="lookup-view">
+      <div class="order-lookup-card brutal">
+        <span class="eyebrow">◆ Lacak Pesanan</span>
+        <h1 style="font-size:1.4rem; margin:10px 0 6px;">Masuk ke ruang chat pesananmu</h1>
+        <p style="font-size:.85rem; color:#3E6B85; margin:0 0 20px;">Masukkan kode pesanan &amp; token akses yang kamu dapat waktu checkout. Kalau kamu baru saja pesan di perangkat ini, biasanya sudah otomatis terisi.</p>
+
+        <form id="lookup-form">
+          <label class="field">
+            <span>Kode pesanan</span>
+            <input type="text" id="lookup-code" placeholder="EXS-XXXXXX" required autocapitalize="characters">
+          </label>
+          <label class="field">
+            <span>Token akses</span>
+            <input type="text" id="lookup-token" placeholder="Ditampilkan saat checkout" required>
+          </label>
+          <p id="lookup-error" class="order-form-error hidden"></p>
+          <button type="submit" class="btn btn-green brutal-sm hover-lift-sm" style="width:100%;">Buka Pesanan</button>
+        </form>
+
+        <div id="recent-orders" class="hidden" style="margin-top:24px;">
+          <p style="font-family:'JetBrains Mono', monospace; font-size:.7rem; text-transform:uppercase; color:#3E6B85; margin-bottom:10px;">Pesanan terakhir di perangkat ini</p>
+          <div id="recent-orders-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: detail pesanan + chat -->
+    <section id="order-view" class="hidden">
+      <div class="order-summary brutal">
+        <div class="order-summary-code" id="ov-code"></div>
+        <div class="order-summary-row">
+          <span class="order-summary-product" id="ov-product"></span>
+          <span class="order-summary-price" id="ov-price"></span>
+        </div>
+        <div class="order-summary-row">
+          <span id="ov-status" class="order-status-badge"></span>
+          <span style="font-size:.78rem; color:#3E6B85;" id="ov-buyer"></span>
+        </div>
+      </div>
+
+      <div class="chat-wrap" style="margin-top:20px;">
+        <div id="chat-thread" class="chat-thread">
+          <p class="chat-empty">Memuat percakapan...</p>
+        </div>
+        <p id="chat-closed-banner" class="chat-closed-banner hidden">🔒 Pesanan ini sudah selesai/dibatalkan — chat ditutup.</p>
+        <form id="chat-form" class="chat-form">
+          <input type="text" id="chat-input" placeholder="Tulis pesan..." maxlength="2000" required autocomplete="off">
+          <button type="submit" class="btn btn-green brutal-sm">Kirim</button>
+        </form>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+        <button type="button" id="switch-order-btn" class="btn btn-ink brutal-sm hover-lift-sm">← Lihat pesanan lain</button>
+        <button type="button" id="notif-btn" class="btn btn-blue brutal-sm hover-lift-sm">🔔 Aktifkan Notifikasi</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="pesanan.js"></script>
+</body>
+</html>
