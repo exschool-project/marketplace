@@ -812,4 +812,10 @@ footer{
   .grid{ grid-template-columns:1fr 1fr; gap:16px; }
   .nav-wrap{ gap:10px; }
   .foot-wrap{ grid-template-columns:1fr; }
+
+  .chat-thread{ padding:14px; max-height:56vh; }
+  .chat-bubble{ max-width:88%; font-size:.85rem; }
+  .chat-form{ padding:12px; gap:8px; }
+  .chat-form input{ font-size:16px; } /* cegah auto-zoom Safari/Chrome iOS saat fokus */
+  .chat-form .btn{ padding:9px 14px; font-size:.85rem; flex-shrink:0; }
 }

@@ -295,11 +295,24 @@
 .mini-btn:hover{ background:var(--blue); }
 .mini-btn.danger:hover{ background:#FFB3B3; }
 
-/* ---------- CS PANEL (cs.html) — layout 2 kolom ---------- */
+/* ---------- CS PANEL (cs.html) — layout 2 kolom ----------
+   .cs-dashboard-view dibikin flex-column setinggi layar, .admin-header
+   ambil tinggi sesuai kontennya (bisa 1 atau 2 baris di HP), dan .cs-main
+   ngisi sisa ruang yang ada (flex:1). Jadi nggak perlu angka tinggi header
+   yang di-hardcode (rawan meleset kalau header wrap di layar kecil). */
+.cs-dashboard-view{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  height:100dvh;
+}
+.cs-dashboard-view .admin-header{ flex-shrink:0; }
 .cs-main{
   display:flex;
-  height:calc(100vh - 65px); /* 65px = tinggi .admin-header */
+  flex:1;
+  min-height:0;
   max-width:1280px;
+  width:100%;
   margin:0 auto;
   overflow:hidden; /* jangan biarkan seluruh halaman ikut ke-scroll */
 }
@@ -383,11 +396,62 @@
 #cs-closed-banner.chat-closed-banner{ flex-shrink:0; }
 #cs-chat-form.chat-form{ flex-shrink:0; }
 
+/* ---------- Responsive: admin header (dipakai admin.html & cs.html) ---------- */
 @media (max-width:820px){
-  .cs-main{ height:calc(100vh - 105px); position:relative; }
-  .cs-sidebar{ width:100%; position:absolute; inset:0; z-index:2; }
+  .admin-header{
+    flex-wrap:wrap;
+    gap:8px 10px;
+    padding:12px 14px;
+  }
+  .admin-header .logo{ font-size:1.1rem; padding:5px 9px; }
+  .admin-header-right{
+    flex-wrap:wrap;
+    gap:8px;
+    width:100%;
+  }
+  .admin-header-right .btn.brutal-sm{ box-shadow:3px 3px 0 var(--ink); }
+  .admin-header-right .btn{ padding:7px 11px; font-size:.76rem; }
+  .role-badge{ font-size:.62rem; padding:3px 7px; }
+  .admin-name{ font-size:.72rem; }
+}
+@media (max-width:480px){
+  .admin-header-right{ justify-content:flex-start; }
+  .admin-header-right .btn{ flex:1 1 auto; }
+}
+
+/* ---------- Responsive: CS PANEL (cs.html) — 1 kolom di HP, sidebar/chat gantian ---------- */
+@media (max-width:820px){
+  .cs-main{ position:relative; max-width:100%; }
+  .cs-sidebar{
+    width:100%;
+    position:absolute;
+    inset:0;
+    z-index:2;
+    border-right:none;
+  }
   .cs-sidebar.cs-sidebar-hidden-mobile{ display:none; }
   .cs-chat-panel{ width:100%; }
-  .cs-back-btn{ display:inline-flex; }
-  .admin-header{ flex-wrap:wrap; gap:10px; }
+  .cs-back-btn{ display:inline-flex; flex-shrink:0; }
+
+  .cs-sidebar-top{ padding:12px; }
+  .cs-order-row{ padding:11px 12px; }
+  .cs-order-row-name{ font-size:.85rem; }
+  .cs-order-row-preview{ font-size:.74rem; }
+
+  .cs-chat-header{ padding:12px 14px; gap:10px; }
+  .cs-chat-code{ font-size:.8rem; }
+  .cs-chat-product{ font-size:.74rem; }
+  .cs-chat-header-info{ min-width:120px; }
+  .cs-chat-header .team-row-select{ font-size:.72rem; padding:5px 6px; }
+  .cs-chat-buyer{ padding:0 14px 10px; font-size:.76rem; }
+
+  #cs-chat-form.chat-form{ padding:12px; gap:8px; }
+  #cs-chat-form.chat-form input{ font-size:16px; } /* cegah auto-zoom Safari/Chrome iOS saat fokus */
+  #cs-chat-form.chat-form .btn{ padding:10px 14px; font-size:.82rem; flex-shrink:0; }
+}
+@media (max-width:480px){
+  .cs-empty-state{ padding:28px 20px; }
+  .cs-empty-state h2{ font-size:1.1rem; }
+  .cs-thread{ padding:14px; }
+  .chat-bubble{ max-width:88%; font-size:.85rem; }
 }
