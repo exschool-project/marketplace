@@ -176,7 +176,7 @@ module.exports = withErrorHandling(async (req, res) => {
     return;
   }
 
-  // ---------- GET daftar pesanan (khusus admin/owner) ----------
+  // ---------- GET daftar pesanan (khusus cs/admin/owner) ----------
   if (req.method === 'GET') {
     const adminCtx = await getAdminCtxIfAny(req);
     if (!adminCtx) {
@@ -259,7 +259,7 @@ module.exports = withErrorHandling(async (req, res) => {
     return;
   }
 
-  // ---------- PUT — update status pesanan (khusus admin/owner) ----------
+  // ---------- PUT — update status pesanan (khusus cs/admin/owner) ----------
   if (req.method === 'PUT') {
     const { id } = req.query;
     if (!id) {
