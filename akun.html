@@ -80,6 +80,33 @@
         <a href="cs.html" class="btn btn-green brutal hover-lift" style="width:100%; display:block; text-align:center; box-sizing:border-box;">Buka CS Panel →</a>
       </div>
 
+      <!-- FORM UBAH PROFIL: nama, email (gmail dll), kontak opsional -->
+      <form id="profile-edit-form" class="auth-form" style="margin-top:22px; padding-top:20px; border-top:2.5px solid var(--ink);">
+        <h2 style="margin:0 0 4px;">Ubah profil</h2>
+        <p class="login-sub" style="margin-top:0;">Nama & email wajib diisi. Kontak di bawah opsional.</p>
+
+        <label class="field">
+          <span>Nama lengkap</span>
+          <input type="text" id="profile-edit-name" required autocomplete="name">
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input type="email" id="profile-edit-email" required autocomplete="username">
+        </label>
+        <label class="field">
+          <span>Nomor WhatsApp (opsional)</span>
+          <input type="tel" id="profile-edit-phone" autocomplete="tel" placeholder="08xxxxxxxxxx">
+        </label>
+        <label class="field">
+          <span>Kontak lain (opsional)</span>
+          <input type="text" id="profile-edit-other-contact" placeholder="Instagram, Telegram, dll">
+        </label>
+
+        <p id="profile-edit-error" class="login-error" style="display:none;"></p>
+        <p id="profile-edit-success" class="login-sub" style="display:none; color:#1a7d3a; font-weight:700;"></p>
+        <button type="submit" class="btn btn-blue brutal hover-lift" style="width:100%;">Simpan Perubahan</button>
+      </form>
+
       <button id="logout-btn" class="btn btn-ink brutal hover-lift" style="width:100%; margin-top:14px;" type="button">Keluar</button>
       <a href="index.html" class="back-link">← Kembali ke beranda</a>
     </div>

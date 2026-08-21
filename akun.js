@@ -53,6 +53,14 @@ function showProfile(profile) {
   const csLinkWrap = document.getElementById('profile-cs-link');
   const canSeeCsPanel = normalizedRole === 'cs' || normalizedRole === 'admin' || normalizedRole === 'owner';
   csLinkWrap.classList.toggle('hidden', !canSeeCsPanel);
+
+  // Isi form "Ubah profil" dengan data terbaru.
+  document.getElementById('profile-edit-name').value = profile.full_name || '';
+  document.getElementById('profile-edit-email').value = profile.email || '';
+  document.getElementById('profile-edit-phone').value = profile.phone || '';
+  document.getElementById('profile-edit-other-contact').value = profile.other_contact || '';
+  document.getElementById('profile-edit-error').style.display = 'none';
+  document.getElementById('profile-edit-success').style.display = 'none';
 }
 
 // ---------- Tab Masuk / Daftar ----------
@@ -136,6 +144,60 @@ async function handleRegister(e) {
   }
 }
 
+// ---------- Ubah profil (nama, email, kontak opsional) ----------
+async function handleProfileEdit(e) {
+  e.preventDefault();
+  const full_name = document.getElementById('profile-edit-name').value.trim();
+  const email = document.getElementById('profile-edit-email').value.trim();
+  const phone = document.getElementById('profile-edit-phone').value.trim();
+  const other_contact = document.getElementById('profile-edit-other-contact').value.trim();
+  const errEl = document.getElementById('profile-edit-error');
+  const successEl = document.getElementById('profile-edit-success');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+
+  errEl.style.display = 'none';
+  successEl.style.display = 'none';
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Menyimpan...';
+
+  try {
+    const updated = await authedFetch(`${API_BASE}/auth/profile`, {
+      method: 'PATCH',
+      body: JSON.stringify({ full_name, email, phone, other_contact }),
+    });
+
+    // Kalau email diganti, token sesi lama masih bawa klaim email lama —
+    // refresh sesi biar sinkron. Kalau gagal, tetap aman: data di server
+    // sudah benar, cuma tampilan sesi lokal yang mungkin butuh login ulang.
+    if (updated.email_changed) {
+      try {
+        const { data } = await supabaseClient.auth.refreshSession();
+        if (data?.session) session = data.session;
+      } catch (refreshErr) {
+        // biarkan, bukan error fatal
+      }
+    }
+
+    showProfile(updated);
+    if (!updated.contact_saved) {
+      successEl.textContent = 'Nama & email tersimpan. Kontak opsional belum bisa disimpan (migrasi database belum dijalankan) — cek ADD_PROFILE_CONTACT.sql.';
+      successEl.style.color = '#8a5a00';
+    } else {
+      successEl.textContent = updated.email_changed
+        ? 'Profil tersimpan. Email login kamu sudah diperbarui.'
+        : 'Profil tersimpan.';
+      successEl.style.color = '#1a7d3a';
+    }
+    successEl.style.display = 'block';
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Simpan Perubahan';
+  }
+}
+
 // ---------- Logout ----------
 async function handleLogout() {
   await supabaseClient.auth.signOut();
@@ -184,6 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('login-form').addEventListener('submit', handleLogin);
   document.getElementById('register-form').addEventListener('submit', handleRegister);
+  document.getElementById('profile-edit-form').addEventListener('submit', handleProfileEdit);
   document.getElementById('logout-btn').addEventListener('click', handleLogout);
 
   await checkExistingSession();

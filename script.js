@@ -349,11 +349,32 @@ function initOrderModal() {
   });
 }
 
+// ---------- Nav: tombol Masuk -> Profil kalau udah login ----------
+async function initNavAccountButton() {
+  const btn = document.getElementById('nav-account-btn');
+  if (!btn || !window.supabase) return;
+
+  try {
+    const config = await fetchJSON(`${API_BASE}/config`);
+    const supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (data.session) {
+      btn.textContent = '👤 Profil';
+      btn.setAttribute('aria-label', 'Profil akun saya');
+    }
+  } catch (err) {
+    // Gagal cek sesi (mis. offline) -> biarkan tombol default "Masuk",
+    // klik ke akun.html tetap kerja normal (dia cek sesi ulang di sana).
+  }
+}
+
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', async () => {
   initCategoryFilter();
   initSearch();
   initOrderModal();
+  initNavAccountButton();
   await loadHeroBannerImage();
   await loadBanner();
   await loadCategories();
