@@ -98,10 +98,10 @@ function initNotifyButton() {
   }
   const sync = () => {
     if (Notification.permission === 'granted') {
-      btn.textContent = '🔔 Notifikasi Aktif';
+      btn.innerHTML = `${ICONS.bell} Notifikasi Aktif`;
       btn.disabled = true;
     } else {
-      btn.textContent = '🔔 Aktifkan Notifikasi';
+      btn.innerHTML = `${ICONS.bell} Aktifkan Notifikasi`;
       btn.disabled = false;
     }
   };

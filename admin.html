@@ -42,8 +42,8 @@
       <div class="admin-header-right">
         <span id="role-badge" class="role-badge"></span>
         <span id="admin-name" class="admin-name mono"></span>
-        <a href="cs.html" class="btn btn-blue brutal-sm hover-lift-sm">💬 CS Panel</a>
-        <button id="notif-btn" type="button" class="btn btn-ink brutal-sm hover-lift-sm">🔔 Aktifkan Notifikasi</button>
+        <a href="cs.html" class="btn btn-blue brutal-sm hover-lift-sm"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5z"/></svg> CS Panel</a>
+        <button id="notif-btn" type="button" class="btn btn-ink brutal-sm hover-lift-sm"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg> Aktifkan Notifikasi</button>
         <button id="logout-btn" class="btn btn-ink brutal-sm hover-lift-sm" type="button">Keluar</button>
       </div>
     </header>
@@ -121,7 +121,7 @@
             <label class="field"><span>Nama toko</span><input type="text" id="product-shop" required></label>
             <label class="field"><span>Harga (Rp)</span><input type="number" id="product-price" min="0" required></label>
             <label class="field"><span>Harga coret (opsional)</span><input type="number" id="product-old-price" min="0"></label>
-            <label class="field"><span>Ikon / emoji (fallback)</span><input type="text" id="product-icon" placeholder="📦" maxlength="4"></label>
+            <label class="field"><span>Ikon / emoji (opsional)</span><input type="text" id="product-icon" placeholder="Kosongkan buat ikon default" maxlength="4"></label>
             <label class="field"><span>Kategori</span><select id="product-category"></select></label>
             <label class="field"><span>Label (opsional)</span><input type="text" id="product-badge" placeholder="Diskon / Baru"></label>
           </div>
@@ -202,13 +202,13 @@
   <!-- MODAL CHAT PESANAN (admin balas pembeli) -->
   <div id="order-chat-modal" class="order-modal-overlay hidden">
     <div class="order-modal brutal" style="max-width:520px;">
-      <button type="button" id="order-chat-close" class="order-modal-close" aria-label="Tutup">✕</button>
+      <button type="button" id="order-chat-close" class="order-modal-close" aria-label="Tutup"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
       <span class="eyebrow">◆ Chat Pesanan</span>
       <h2 id="oc-code" style="font-size:1.15rem; margin:8px 0 2px;"></h2>
       <p style="font-size:.82rem; color:#3E6B85; margin:0 0 14px;" id="oc-buyer"></p>
       <div class="chat-wrap" style="border:none;">
         <div id="oc-thread" class="chat-thread" style="max-height:42vh; padding:12px 0;"></div>
-        <p id="oc-closed-banner" class="chat-closed-banner hidden">🔒 Pesanan ini sudah selesai/dibatalkan — chat ditutup. Ubah status dulu buat buka lagi.</p>
+        <p id="oc-closed-banner" class="chat-closed-banner hidden"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Pesanan ini sudah selesai/dibatalkan — chat ditutup. Ubah status dulu buat buka lagi.</p>
         <form id="oc-form" class="chat-form" style="padding:12px 0 0; border-top:2.5px solid var(--ink);">
           <input type="text" id="oc-input" placeholder="Balas pesan ke pembeli..." maxlength="2000" required autocomplete="off">
           <button type="submit" class="btn btn-green brutal-sm">Kirim</button>
@@ -218,6 +218,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="icons.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

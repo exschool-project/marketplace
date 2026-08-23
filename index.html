@@ -25,7 +25,7 @@
       </form>
       <div class="nav-actions">
         <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html" id="nav-account-btn">Masuk</a>
-        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html">📦 Riwayat Pesanan</a>
+        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg> Riwayat</a>
       </div>
     </div>
   </header>
@@ -153,7 +153,7 @@
   <!-- MODAL BELI SEKARANG: diisi & dikontrol dari script.js -->
   <div id="order-modal" class="order-modal-overlay hidden">
     <div class="order-modal brutal">
-      <button type="button" id="order-modal-close" class="order-modal-close" aria-label="Tutup">✕</button>
+      <button type="button" id="order-modal-close" class="order-modal-close" aria-label="Tutup"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
 
       <!-- STEP 1: form data pembeli -->
       <div id="order-step-form">
@@ -182,7 +182,7 @@
       <!-- STEP 2: sukses, kasih kode pesanan + tombol ke ruang chat -->
       <div id="order-step-success" class="hidden">
         <span class="eyebrow">◆ Pesanan Dibuat</span>
-        <h2>Pesanan kamu berhasil dibuat 🎉</h2>
+        <h2><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg> Pesanan kamu berhasil dibuat</h2>
         <p class="order-code-label">Kode pesanan kamu:</p>
         <p class="order-code-value mono" id="order-success-code"></p>
         <p class="order-success-note">Simpan kode ini. Chat langsung dengan admin buat lanjutin pesanan di ruang chat.</p>
@@ -192,6 +192,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="icons.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

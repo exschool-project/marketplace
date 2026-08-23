@@ -67,7 +67,7 @@
         <div id="chat-thread" class="chat-thread">
           <p class="chat-empty">Memuat percakapan...</p>
         </div>
-        <p id="chat-closed-banner" class="chat-closed-banner hidden">🔒 Pesanan ini sudah selesai/dibatalkan — chat ditutup.</p>
+        <p id="chat-closed-banner" class="chat-closed-banner hidden"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Pesanan ini sudah selesai/dibatalkan — chat ditutup.</p>
         <form id="chat-form" class="chat-form">
           <input type="text" id="chat-input" placeholder="Tulis pesan..." maxlength="2000" required autocomplete="off">
           <button type="submit" class="btn btn-green brutal-sm">Kirim</button>
@@ -76,12 +76,13 @@
 
       <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
         <button type="button" id="switch-order-btn" class="btn btn-ink brutal-sm hover-lift-sm">← Lihat pesanan lain</button>
-        <button type="button" id="notif-btn" class="btn btn-blue brutal-sm hover-lift-sm">🔔 Aktifkan Notifikasi</button>
+        <button type="button" id="notif-btn" class="btn btn-blue brutal-sm hover-lift-sm"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg> Aktifkan Notifikasi</button>
       </div>
     </section>
 
   </main>
 
+  <script src="icons.js"></script>
   <script src="pesanan.js"></script>
 </body>
 </html>

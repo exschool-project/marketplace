@@ -127,7 +127,7 @@ function productCardHTML(p) {
     <div class="pcard">
       <div class="hole"></div>
       ${p.badge ? `<span class="badge">${escapeHtml(p.badge)}</span>` : ''}
-      <div class="thumb">${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy">` : escapeHtml(p.icon || '📦')}</div>
+      <div class="thumb">${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy">` : (p.icon ? escapeHtml(p.icon) : ICONS.box)}</div>
       <div class="body">
         <div class="shop">${escapeHtml(p.shop_name)}</div>
         <div class="name">${escapeHtml(p.name)}</div>
@@ -360,7 +360,7 @@ async function initNavAccountButton() {
     const { data } = await supabaseClient.auth.getSession();
 
     if (data.session) {
-      btn.textContent = '👤 Profil';
+      btn.innerHTML = `${ICONS.user} Profil`;
       btn.setAttribute('aria-label', 'Profil akun saya');
     }
   } catch (err) {

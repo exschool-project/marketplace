@@ -43,7 +43,7 @@
         <span id="role-badge" class="role-badge"></span>
         <span id="admin-name" class="admin-name mono"></span>
         <a href="admin.html" id="admin-panel-link" class="btn btn-blue brutal-sm hover-lift-sm">Admin Panel</a>
-        <button id="notif-btn" type="button" class="btn btn-ink brutal-sm hover-lift-sm">🔔 Aktifkan Notifikasi</button>
+        <button id="notif-btn" type="button" class="btn btn-ink brutal-sm hover-lift-sm"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg> Aktifkan Notifikasi</button>
         <button id="logout-btn" class="btn btn-ink brutal-sm hover-lift-sm" type="button">Keluar</button>
       </div>
     </header>
@@ -88,7 +88,7 @@
 
           <div id="cs-thread" class="chat-thread cs-thread"></div>
 
-          <p id="cs-closed-banner" class="chat-closed-banner hidden">🔒 Pesanan ini sudah selesai/dibatalkan — chat ditutup. Ubah status di atas buat buka lagi.</p>
+          <p id="cs-closed-banner" class="chat-closed-banner hidden"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Pesanan ini sudah selesai/dibatalkan — chat ditutup. Ubah status di atas buat buka lagi.</p>
           <form id="cs-chat-form" class="chat-form">
             <input type="text" id="cs-chat-input" placeholder="Balas pesan ke pembeli..." maxlength="2000" required autocomplete="off">
             <button type="submit" class="btn btn-green brutal-sm">Kirim</button>
@@ -99,6 +99,7 @@
   </section>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="icons.js"></script>
   <script src="cs.js"></script>
 </body>
 </html>

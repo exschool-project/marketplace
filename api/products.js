@@ -101,7 +101,7 @@ module.exports = withErrorHandling(async (req, res) => {
         shop_name: String(shop_name).trim(),
         price: Number(price),
         old_price: old_price === undefined || old_price === '' ? null : Number(old_price),
-        icon: icon && String(icon).trim() ? String(icon).trim() : '📦',
+        icon: icon && String(icon).trim() ? String(icon).trim() : null,
         image_url: image_url && String(image_url).trim() ? String(image_url).trim() : null,
         category_id: category_id || null,
         badge: badge && String(badge).trim() ? String(badge).trim() : null,

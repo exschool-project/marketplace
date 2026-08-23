@@ -250,6 +250,7 @@ header.site{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  gap:7px;
   font-family:'Space Grotesk', sans-serif;
   font-weight:700;
   font-size:.88rem;
@@ -270,6 +271,19 @@ header.site{
 .btn-blue:hover{ background:var(--blue-deep); }
 .btn-ink{ background:var(--ink); color:var(--paper); }
 .btn-ink:hover{ background:var(--green-deep); }
+
+/* Ikon SVG inline (gantiin emoji) — ukurannya ngikutin font-size elemen
+   pembungkusnya (1em) jadi otomatis pas di tombol kecil maupun judul
+   besar, dan warnanya ngikutin currentColor (teks) tanpa perlu diatur
+   manual tiap pemakaian. */
+.icon-inline{
+  width:1.05em;
+  height:1.05em;
+  display:inline-block;
+  vertical-align:-0.16em;
+  flex-shrink:0;
+}
+button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 
 /* ---------- HERO / BERANDA ---------- */
 /* .hero cuma pembungkus full-width; gambar tetap tepi-ke-tepi (nggak dikotakin
@@ -606,6 +620,7 @@ header.site{
 .order-modal-close{
   position:absolute; top:14px; right:14px;
   width:32px; height:32px;
+  display:flex; align-items:center; justify-content:center;
   border:2.5px solid var(--ink);
   background:var(--paper);
   font-weight:700; cursor:pointer;

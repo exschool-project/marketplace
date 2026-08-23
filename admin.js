@@ -331,7 +331,7 @@ function initProductImageInput() {
 
     try {
       pendingImageUrl = await uploadImageToCloudinary(file, 'ex-school/products', statusEl);
-      statusEl.textContent = 'Berhasil diunggah ✓';
+      statusEl.innerHTML = `Berhasil diunggah ${ICONS.check}`;
     } catch (err) {
       statusEl.textContent = `Gagal: ${err.message}`;
       pendingImageUrl = null;
@@ -346,7 +346,7 @@ async function loadProductsAdmin() {
   list.innerHTML = data.map((p) => `
     <div class="admin-row" data-id="${p.id}">
       ${p.image_url ? `<img class="admin-row-thumb" src="${escapeHtml(p.image_url)}" alt="">` : ''}
-      <span class="admin-row-text">${p.image_url ? '' : escapeHtml(p.icon || '📦') + ' '}${escapeHtml(p.name)} — Rp${Number(p.price).toLocaleString('id-ID')}</span>
+      <span class="admin-row-text">${p.image_url ? '' : (p.icon ? escapeHtml(p.icon) + ' ' : ICONS.box + ' ')}${escapeHtml(p.name)} — Rp${Number(p.price).toLocaleString('id-ID')}</span>
       <span class="admin-row-tag">${p.is_active ? 'Aktif' : 'Nonaktif'}</span>
       ${p.is_featured ? '<span class="role-badge role-owner">POPULER</span>' : ''}
       <button class="mini-btn toggle-featured">${p.is_featured ? 'Batal Populer' : 'Jadikan Populer'}</button>
@@ -379,7 +379,7 @@ async function handleProductSubmit(e) {
     old_price: form.querySelector('#product-old-price').value
       ? Number(form.querySelector('#product-old-price').value)
       : null,
-    icon: form.querySelector('#product-icon').value.trim() || '📦',
+    icon: form.querySelector('#product-icon').value.trim() || '',
     image_url: pendingImageUrl || null,
     category_id: form.querySelector('#product-category').value || null,
     badge: form.querySelector('#product-badge').value.trim() || null,
@@ -546,7 +546,7 @@ function initHeroBannerImageInput() {
 
     try {
       pendingHeroBannerUrl = await uploadImageToCloudinary(file, 'ex-school/hero-banners', statusEl);
-      statusEl.textContent = 'Berhasil diunggah ✓';
+      statusEl.innerHTML = `Berhasil diunggah ${ICONS.check}`;
     } catch (err) {
       statusEl.textContent = `Gagal: ${err.message}`;
       pendingHeroBannerUrl = null;
@@ -662,10 +662,10 @@ function initNotifyButton() {
   }
   const sync = () => {
     if (Notification.permission === 'granted') {
-      btn.textContent = '🔔 Notifikasi Aktif';
+      btn.innerHTML = `${ICONS.bell} Notifikasi Aktif`;
       btn.disabled = true;
     } else {
-      btn.textContent = '🔔 Aktifkan Notifikasi';
+      btn.innerHTML = `${ICONS.bell} Aktifkan Notifikasi`;
       btn.disabled = false;
     }
   };
@@ -735,7 +735,7 @@ async function loadOrdersAdmin() {
       <select class="team-row-select order-status-select">
         ${Object.entries(ORDER_STATUS_LABEL).map(([val, label]) => `<option value="${val}" ${o.status === val ? 'selected' : ''}>${label}</option>`).join('')}
       </select>
-      <button class="mini-btn open-order-chat" type="button">💬 Chat</button>
+      <button class="mini-btn open-order-chat" type="button">${ICONS.chat} Chat</button>
     </div>
   `).join('') || '<p class="empty-msg">Belum ada pesanan masuk.</p>';
 
