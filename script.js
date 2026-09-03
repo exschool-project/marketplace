@@ -1,5 +1,10 @@
 const API_BASE = '/api';
 
+// Sesi login (kalau ada) — dipakai buat nandain pesanan checkout punya
+// akun siapa (opsional, checkout tanpa login tetap jalan normal). Diisi
+// oleh initNavAccountButton() pas halaman dimuat.
+let currentSession = null;
+
 // ---------- Util ----------
 function rupiah(value) {
   return 'Rp' + Math.round(Number(value) / 1000) + 'rb';
@@ -324,7 +329,10 @@ function initOrderModal() {
       };
       const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: Object.assign(
+          { 'Content-Type': 'application/json' },
+          currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {}
+        ),
         body: JSON.stringify(payload),
       });
       const body = await res.json().catch(() => ({}));
@@ -352,7 +360,7 @@ function initOrderModal() {
 // ---------- Nav: tombol Masuk -> Profil kalau udah login ----------
 async function initNavAccountButton() {
   const btn = document.getElementById('nav-account-btn');
-  if (!btn || !window.supabase) return;
+  if (!window.supabase) return;
 
   try {
     const config = await fetchJSON(`${API_BASE}/config`);
@@ -360,12 +368,16 @@ async function initNavAccountButton() {
     const { data } = await supabaseClient.auth.getSession();
 
     if (data.session) {
-      btn.innerHTML = `${ICONS.user} Profil`;
-      btn.setAttribute('aria-label', 'Profil akun saya');
+      currentSession = data.session;
+      if (btn) {
+        btn.innerHTML = `${ICONS.user} Profil`;
+        btn.setAttribute('aria-label', 'Profil akun saya');
+      }
     }
   } catch (err) {
     // Gagal cek sesi (mis. offline) -> biarkan tombol default "Masuk",
     // klik ke akun.html tetap kerja normal (dia cek sesi ulang di sana).
+    // currentSession tetap null -> checkout jalan seperti biasa (guest).
   }
 }
 

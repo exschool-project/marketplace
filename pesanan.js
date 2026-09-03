@@ -5,6 +5,11 @@ let currentToken = null;
 let pollTimer = null;
 let lastMessageCount = 0;
 
+// Sesi login (opsional) — kalau ada, riwayat pesanan otomatis
+// ditampilkan tanpa perlu kode+token manual.
+let supabaseClient = null;
+let session = null;
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = String(str ?? '');
@@ -21,6 +26,40 @@ function formatTime(iso) {
   } catch (err) {
     return '';
   }
+}
+
+// ---------- Sesi login (opsional) ----------
+async function initSession() {
+  if (!window.supabase) return;
+  try {
+    const res = await fetch(`${API_BASE}/config`);
+    const config = await res.json();
+    if (!res.ok) return;
+    supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    const { data } = await supabaseClient.auth.getSession();
+    session = data.session || null;
+  } catch (err) {
+    // Gagal cek sesi (mis. offline) -> anggap belum login, jalur lookup
+    // manual (kode+token) tetap kerja normal seperti biasa.
+    session = null;
+  }
+}
+
+async function authedFetch(url, options = {}) {
+  const token = session?.access_token;
+  const headers = Object.assign(
+    { 'Content-Type': 'application/json' },
+    options.headers,
+    token ? { Authorization: `Bearer ${token}` } : {}
+  );
+  const res = await fetch(url, { ...options, headers });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(body.error || 'Terjadi kesalahan.');
+    err.status = res.status;
+    throw err;
+  }
+  return body;
 }
 
 const STATUS_LABEL = {
@@ -85,14 +124,35 @@ function initNotifyButton() {
 }
 
 // ---------- View switching ----------
+function showMyOrders() {
+  document.getElementById('my-orders-view').classList.remove('hidden');
+  document.getElementById('lookup-view').classList.add('hidden');
+  document.getElementById('order-view').classList.add('hidden');
+  if (pollTimer) clearInterval(pollTimer);
+  loadMyOrders();
+}
+
 function showLookup() {
+  document.getElementById('my-orders-view').classList.add('hidden');
   document.getElementById('lookup-view').classList.remove('hidden');
   document.getElementById('order-view').classList.add('hidden');
   if (pollTimer) clearInterval(pollTimer);
   renderRecentOrders();
+
+  // Kalau ternyata lagi login, ganti ajakan "masuk dulu" jadi link balik
+  // ke riwayat pesanan otomatis (biar gak ngajak login yang udah login).
+  const hint = document.getElementById('lookup-login-hint');
+  if (session) {
+    hint.innerHTML = '<a href="#" id="back-to-my-orders">← Kembali ke riwayat pesanan kamu</a>';
+    document.getElementById('back-to-my-orders').addEventListener('click', (e) => {
+      e.preventDefault();
+      showMyOrders();
+    });
+  }
 }
 
 function showOrder() {
+  document.getElementById('my-orders-view').classList.add('hidden');
   document.getElementById('lookup-view').classList.add('hidden');
   document.getElementById('order-view').classList.remove('hidden');
 }
@@ -126,6 +186,47 @@ document.getElementById('recent-orders-list').addEventListener('click', (e) => {
   const btn = e.target.closest('.recent-order-btn');
   if (!btn) return;
   openOrder(btn.dataset.code, btn.dataset.token);
+});
+
+// ---------- Riwayat pesanan otomatis (user login) ----------
+async function loadMyOrders() {
+  const subEl = document.getElementById('my-orders-sub');
+  const listEl = document.getElementById('my-orders-list');
+  subEl.textContent = 'Memuat riwayat pesanan...';
+  listEl.innerHTML = '';
+
+  try {
+    const body = await authedFetch(`${API_BASE}/orders?mine=1`);
+    const orders = body.data || [];
+
+    if (!orders.length) {
+      subEl.textContent = 'Belum ada pesanan yang dibuat sambil login. Pesanan baru yang kamu buat dalam keadaan login bakal otomatis muncul di sini.';
+      return;
+    }
+
+    subEl.textContent = `${orders.length} pesanan ditemukan di akun kamu.`;
+    listEl.innerHTML = orders.map((o) => `
+      <button type="button" class="mini-btn my-order-btn" data-code="${escapeHtml(o.order_code)}" data-token="${escapeHtml(o.access_token)}" style="text-align:left; width:100%; display:flex; flex-direction:column; gap:3px;">
+        <span style="display:flex; justify-content:space-between; gap:8px; width:100%;">
+          <strong>${escapeHtml(o.order_code)}</strong>
+          <span class="order-status-badge order-status-${o.status}" style="font-size:.68rem;">${STATUS_LABEL[o.status] || o.status}</span>
+        </span>
+        <span style="font-size:.8rem; color:#3E6B85;">${escapeHtml(o.product_name)} · ${rupiah(o.product_price)}</span>
+      </button>
+    `).join('');
+  } catch (err) {
+    subEl.textContent = `Gagal memuat riwayat pesanan: ${err.message}`;
+  }
+}
+
+document.getElementById('my-orders-list').addEventListener('click', (e) => {
+  const btn = e.target.closest('.my-order-btn');
+  if (!btn) return;
+  openOrder(btn.dataset.code, btn.dataset.token);
+});
+
+document.getElementById('lookup-other-btn').addEventListener('click', () => {
+  showLookup();
 });
 
 // ---------- Muat & render pesanan + chat ----------
@@ -250,7 +351,8 @@ document.getElementById('lookup-form').addEventListener('submit', async (e) => {
 document.getElementById('switch-order-btn').addEventListener('click', () => {
   currentOrder = null;
   currentToken = null;
-  showLookup();
+  if (session) showMyOrders();
+  else showLookup();
 });
 
 // ---------- Kirim pesan ----------
@@ -289,16 +391,22 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
 });
 
 // ---------- Init ----------
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initNotifyButton();
+  await initSession();
+
   const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
   const token = params.get('token');
 
   if (code && token) {
+    // Link langsung (mis. dari halaman sukses checkout) -> buka pesanan
+    // itu langsung, apapun status login-nya.
     document.getElementById('lookup-code').value = code;
     document.getElementById('lookup-token').value = token;
     openOrder(code, token);
+  } else if (session) {
+    showMyOrders();
   } else {
     showLookup();
   }

@@ -22,6 +22,19 @@
 
   <main style="max-width:640px; margin:0 auto; padding:32px 20px 60px;">
 
+    <!-- STEP 0: kalau lagi login, tampilkan riwayat pesanan OTOMATIS -->
+    <section id="my-orders-view" class="hidden">
+      <div class="order-lookup-card brutal">
+        <span class="eyebrow">◆ Riwayat Pesanan</span>
+        <h1 style="font-size:1.4rem; margin:10px 0 6px;">Pesanan kamu</h1>
+        <p style="font-size:.85rem; color:#3E6B85; margin:0 0 20px;" id="my-orders-sub">Memuat riwayat pesanan...</p>
+
+        <div id="my-orders-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+
+        <button type="button" id="lookup-other-btn" class="mini-btn" style="margin-top:18px; width:100%; text-align:center;">Cari pesanan pakai kode lain →</button>
+      </div>
+    </section>
+
     <!-- STEP 1: cari pesanan (kode + token manual, atau otomatis dari link) -->
     <section id="lookup-view">
       <div class="order-lookup-card brutal">
@@ -46,6 +59,10 @@
           <p style="font-family:'JetBrains Mono', monospace; font-size:.7rem; text-transform:uppercase; color:#3E6B85; margin-bottom:10px;">Pesanan terakhir di perangkat ini</p>
           <div id="recent-orders-list" style="display:flex; flex-direction:column; gap:8px;"></div>
         </div>
+
+        <p id="lookup-login-hint" class="login-sub" style="margin:20px 0 0; text-align:center;">
+          Sudah pernah pesan sambil login? <a href="akun.html">Masuk</a> biar riwayat pesananmu otomatis muncul di sini.
+        </p>
       </div>
     </section>
 
@@ -82,6 +99,7 @@
 
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="icons.js"></script>
   <script src="pesanan.js"></script>
 </body>

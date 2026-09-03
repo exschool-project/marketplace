@@ -37,6 +37,14 @@ async function insertOrder(supabase, payload, attempt = 0) {
     if (error.code === '23505' && attempt < 5) {
       return insertOrder(supabase, payload, attempt + 1);
     }
+    // 42703 = undefined_column — migrasi ADD_ORDERS_USER_ID.sql belum
+    // dijalankan di database ini. Jangan sampai checkout (fitur inti)
+    // ikut rusak gara-gara satu kolom opsional belum ada — coba lagi
+    // tanpa user_id, biar guest checkout tetap jalan seperti biasa.
+    if (error.code === '42703' && 'user_id' in payload) {
+      const { user_id, ...payloadWithoutUserId } = payload;
+      return insertOrder(supabase, payloadWithoutUserId, attempt);
+    }
     throw new Error(error.message);
   }
   return data;
@@ -177,6 +185,40 @@ module.exports = withErrorHandling(async (req, res) => {
     return;
   }
 
+  // ---------- GET riwayat pesanan MILIK SENDIRI (user login) ----------
+  // Beda dari daftar pesanan admin/cs di bawah (yang nampilin SEMUA
+  // pesanan) — ini cuma pesanan punya user yang lagi login, dipakai
+  // pesanan.html biar riwayat pesanan otomatis muncul tanpa perlu
+  // masukin kode+token manual. Login biasa (role member) sudah cukup,
+  // tidak perlu role cs/admin.
+  if (req.method === 'GET' && req.query.mine === '1') {
+    const ctx = await getUserFromRequest(req);
+    if (!ctx.user) {
+      res.status(401).json({ error: 'Sesi tidak valid. Silakan masuk kembali.' });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('orders_with_last_message')
+      .select('*')
+      .eq('user_id', ctx.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      // 42703 = kolom user_id belum ada (migrasi ADD_ORDERS_USER_ID.sql
+      // belum dijalankan) -> anggap aja belum ada riwayat, jangan bikin
+      // halaman Riwayat Pesanan error total buat user yang login.
+      if (error.code === '42703') {
+        res.status(200).json({ data: [], migration_pending: true });
+        return;
+      }
+      res.status(500).json({ error: error.message });
+      return;
+    }
+    res.status(200).json({ data });
+    return;
+  }
+
   // ---------- GET daftar pesanan (khusus cs/admin/owner) ----------
   if (req.method === 'GET') {
     const adminCtx = await getAdminCtxIfAny(req);
@@ -206,7 +248,7 @@ module.exports = withErrorHandling(async (req, res) => {
     return;
   }
 
-  // ---------- POST — buat pesanan baru (publik, tanpa login) ----------
+  // ---------- POST — buat pesanan baru (publik, tanpa login WAJIB) ----------
   if (req.method === 'POST') {
     const { product_id, buyer_name, buyer_phone, buyer_note } = req.body || {};
 
@@ -222,6 +264,13 @@ module.exports = withErrorHandling(async (req, res) => {
       res.status(400).json({ error: 'Nomor WhatsApp wajib diisi.' });
       return;
     }
+
+    // Checkout TETAP boleh tanpa login (guest) — token Bearer di sini
+    // sifatnya opsional, cuma dipakai buat nandain pesanan ini punya
+    // akun siapa (kalau pembelinya kebetulan lagi login), biar nanti
+    // otomatis muncul di Riwayat Pesanan tanpa perlu kode+token manual.
+    const ctx = await getUserFromRequest(req);
+    const user_id = ctx?.user?.id || null;
 
     const { data: product, error: productError } = await supabase
       .from('products')
@@ -247,6 +296,7 @@ module.exports = withErrorHandling(async (req, res) => {
       buyer_phone: String(buyer_phone).trim(),
       buyer_note: buyer_note && String(buyer_note).trim() ? String(buyer_note).trim() : null,
       status: 'menunggu',
+      user_id,
     });
 
     await supabase.from('order_messages').insert({
