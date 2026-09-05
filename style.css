@@ -1,19 +1,23 @@
 :root{
-  /* Palet baru: nuansa biru (laut → muda), hitam, dan putih — brutalist
-     border/shadow sekarang pakai hitam pekat, bukan navy, biar kontrasnya
-     lebih tegas di semua elemen. --accent (biru muda) menggantikan emas
-     lama sebagai warna aksen terang di atas background gelap. */
-  --blue-light:#8FCBEF; /* biru muda — aksen, background lembut, teks di atas gelap */
+  /* Palet premium: nuansa biru laut yang lebih dalam & kaya, dipadu
+     navy-charcoal (bukan hitam pekat) supaya kesan mewah & lembut di
+     mata, bukan comic/brutalist keras. Kontras teks vs background sudah
+     dicek semua ≥ 4.5:1 (standar WCAG AA) biar gampang dibaca. */
+  --blue-light:#E4F3FC; /* biru sangat muda — background lembut (testimoni, dsb) */
   --blue:#1D6FB8;       /* biru — warna sekunder, tombol/badge */
-  --blue-deep:#14507F;  /* biru lebih gelap, buat hover */
-  --green:#0B3556;      /* biru laut (sea blue) — warna utama situs, dominan */
-  --green-deep:#062338; /* biru laut lebih gelap lagi */
-  --accent:#8FCBEF;      /* dulu "gold" (emas) — sekarang biru muda */
-  --accent-deep:#1D6FB8; /* dulu "gold-deep" — sekarang biru */
-  --ink:#0A0A0A;         /* hitam — border/shadow/teks utama */
+  --blue-deep:#124876;  /* biru lebih gelap, buat hover, lebih dalam & premium */
+  --green:#0A2E4D;      /* biru laut (sea blue) — warna utama situs, dominan */
+  --green-deep:#071F33; /* biru laut lebih gelap lagi — dipakai utk footer premium */
+  --accent:#8FCBEF;      /* biru muda — aksen terang di atas background gelap */
+  --accent-deep:#1D6FB8;
+  --ink:#13273D;         /* navy-charcoal — border/shadow/teks utama, lebih premium drpd hitam pekat */
   --paper:#FFFFFF;
   --card:#FFFFFF;
-  --shadow-w: 6px;
+  --muted:#4A7592;       /* teks sekunder — dipakai ganti abu-biru lama biar lebih gampang dibaca */
+  --shadow-w: 5px;
+  --shadow-ambient: 0 14px 32px rgba(11,31,51,.16); /* bayangan lembut tambahan biar berkesan "mengambang", bukan datar keras */
+  --radius: 14px;
+  --radius-sm: 9px;
 }
 
 *{ box-sizing:border-box; }
@@ -126,25 +130,27 @@ h1, h2, h3, .display{
 a{ color:inherit; text-decoration:none; }
 img{ max-width:100%; display:block; }
 
-/* ---------- utility: brutal box ---------- */
+/* ---------- utility: kotak signature (border tegas + bayangan lembut) ---------- */
 .brutal{
   border:3px solid var(--ink);
-  box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--ink);
+  border-radius:var(--radius);
+  box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--ink), var(--shadow-ambient);
 }
 .brutal-sm{
   border:2.5px solid var(--ink);
-  box-shadow: 4px 4px 0 var(--ink);
+  border-radius:var(--radius-sm);
+  box-shadow: 4px 4px 0 var(--ink), var(--shadow-ambient);
 }
 @media (prefers-reduced-motion: no-preference){
-  .hover-lift{ transition: transform .15s ease, box-shadow .15s ease; }
+  .hover-lift{ transition: transform .18s ease, box-shadow .18s ease; }
   .hover-lift:hover{
     transform: translate(-3px,-3px);
-    box-shadow: 9px 9px 0 var(--ink);
+    box-shadow: 9px 9px 0 var(--ink), var(--shadow-ambient);
   }
-  .hover-lift-sm{ transition: transform .15s ease, box-shadow .15s ease; }
+  .hover-lift-sm{ transition: transform .18s ease, box-shadow .18s ease; }
   .hover-lift-sm:hover{
     transform: translate(-2px,-2px);
-    box-shadow: 6px 6px 0 var(--ink);
+    box-shadow: 6px 6px 0 var(--ink), var(--shadow-ambient);
   }
 }
 :focus-visible{
@@ -207,8 +213,9 @@ header.site{
   color:var(--paper);
   padding:6px 12px;
   border:3px solid var(--ink);
+  border-radius:var(--radius-sm);
   box-shadow:4px 4px 0 var(--ink);
-  transform:rotate(-2deg);
+  transform:rotate(-1deg);
   flex-shrink:0;
 }
 .search{
@@ -221,7 +228,7 @@ header.site{
   flex:1;
   border:3px solid var(--ink);
   border-right:none;
-  border-radius:6px 0 0 6px;
+  border-radius:var(--radius-sm) 0 0 var(--radius-sm);
   padding:10px 14px;
   font-family:'Inter', sans-serif;
   font-size:.95rem;
@@ -231,7 +238,7 @@ header.site{
 .search input:focus{ outline:none; background:#F5FAFD; }
 .search button{
   border:3px solid var(--ink);
-  border-radius:0 6px 6px 0;
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
   background:var(--blue);
   color:var(--paper);
   padding:0 18px;
@@ -276,7 +283,7 @@ header.site{
 .testimoni-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
 .testimoni-card{
   background:var(--card);
-  padding:24px 22px;
+  padding:26px 24px;
   display:flex;
   flex-direction:column;
   gap:16px;
@@ -286,7 +293,7 @@ header.site{
 .testimoni-quote::after{ content:"”"; }
 .testimoni-author{ display:flex; flex-direction:column; }
 .testimoni-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:.92rem; }
-.testimoni-role{ font-family:'JetBrains Mono', monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--blue-deep); }
+.testimoni-role{ font-family:'JetBrains Mono', monospace; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--green-deep); }
 @media (max-width:900px){
   .testimoni-grid{ grid-template-columns:1fr; }
 }
@@ -310,14 +317,14 @@ header.site{
   font-weight:700;
   font-size:.88rem;
   letter-spacing:.01em;
-  padding:10px 18px;
+  padding:11px 20px;
   border:3px solid var(--ink);
-  border-radius:6px;
+  border-radius:var(--radius-sm);
   background:var(--card);
   cursor:pointer;
-  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease, opacity .15s ease;
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, opacity .18s ease;
 }
-.btn:not(.brutal):not(.brutal-sm):hover{ box-shadow:3px 3px 0 var(--ink); transform:translate(-1px,-1px); }
+.btn:not(.brutal):not(.brutal-sm):hover{ box-shadow:3px 3px 0 var(--ink), var(--shadow-ambient); transform:translate(-1px,-1px); }
 .btn:active{ transform:translate(1px,1px); box-shadow:0 0 0 var(--ink) !important; }
 .btn:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
 .btn-green{ background:var(--green); color:var(--paper); }
@@ -407,7 +414,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 .profile-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
 .profile-card{
   background:var(--card);
-  padding:24px 22px;
+  padding:26px 24px;
 }
 .profile-card .num{
   display:inline-block;
@@ -444,7 +451,8 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   letter-spacing:.08em;
   background:var(--ink);
   color:#BFE3F2;
-  padding:5px 10px;
+  border-radius:999px;
+  padding:5px 12px;
   margin-bottom:18px;
 }
 .hero-org{
@@ -457,7 +465,8 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   text-transform:uppercase;
   background:var(--ink);
   color:var(--accent);
-  padding:5px 10px;
+  border-radius:999px;
+  padding:5px 12px;
   margin:10px 0 0;
 }
 .hero h1{ font-size:clamp(2.4rem, 5vw, 4rem); }
@@ -491,7 +500,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   font-size:.72rem;
   text-transform:uppercase;
   letter-spacing:.05em;
-  color:#3E6B85;
+  color:var(--muted);
 }
 
 /* hero visual: banner gambar full-width 16:9 + stacked price-tag stickers
@@ -511,14 +520,15 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   position:absolute;
   background:var(--card);
   border:3px solid var(--ink);
-  box-shadow:7px 7px 0 var(--ink);
+  border-radius:var(--radius);
+  box-shadow:7px 7px 0 var(--ink), var(--shadow-ambient);
   padding:16px 18px;
   width:230px;
   z-index:3;
 }
-.float-card.c1{ top:20px; left:20px; background:var(--blue); transform:rotate(-6deg); }
-.float-card.c2{ top:140px; right:20px; background:var(--green); color:var(--paper); transform:rotate(4deg); width:200px; }
-.float-card.c3{ bottom:20px; left:60px; background:var(--card); transform:rotate(-3deg); }
+.float-card.c1{ top:20px; left:20px; background:var(--blue); transform:rotate(-3deg); }
+.float-card.c2{ top:140px; right:20px; background:var(--green); color:var(--paper); transform:rotate(2deg); width:200px; }
+.float-card.c3{ bottom:20px; left:60px; background:var(--card); transform:rotate(-1.5deg); }
 .float-card .tag-hole{
   width:16px; height:16px; border-radius:50%;
   background:var(--paper); border:2.5px solid var(--ink);
@@ -566,7 +576,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   grid-column: 1 / -1;
   font-family:'JetBrains Mono', monospace;
   font-size:.85rem;
-  color:#3E6B85;
+  color:var(--muted);
   padding:24px 0;
 }
 
@@ -581,7 +591,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   flex-wrap:wrap;
 }
 .section-head h2{ font-size:clamp(1.6rem,3vw,2.2rem); }
-.section-head p{ margin:6px 0 0; color:#3E6B85; font-size:.92rem; }
+.section-head p{ margin:6px 0 0; color:var(--muted); font-size:.92rem; }
 .section-head .see-all{
   font-family:'JetBrains Mono', monospace;
   font-weight:700;
@@ -601,16 +611,17 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   position:relative;
   background:var(--card);
   border:3px solid var(--ink);
-  box-shadow:6px 6px 0 var(--ink);
+  border-radius:var(--radius);
+  box-shadow:6px 6px 0 var(--ink), var(--shadow-ambient);
   padding-top:14px;
-  transition: transform .15s ease, box-shadow .15s ease;
+  transition: transform .18s ease, box-shadow .18s ease;
 }
-.pcard:nth-child(3n+1){ transform:rotate(-1.3deg); }
-.pcard:nth-child(3n+2){ transform:rotate(0.9deg); }
-.pcard:nth-child(3n+3){ transform:rotate(-0.4deg); }
+.pcard:nth-child(3n+1){ transform:rotate(-0.6deg); }
+.pcard:nth-child(3n+2){ transform:rotate(0.4deg); }
+.pcard:nth-child(3n+3){ transform:rotate(-0.2deg); }
 .pcard:hover{
   transform:translate(-3px,-5px) rotate(0deg);
-  box-shadow:9px 10px 0 var(--ink);
+  box-shadow:9px 10px 0 var(--ink), var(--shadow-ambient);
   z-index:2;
 }
 .pcard .hole{
@@ -624,6 +635,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   display:flex; align-items:center; justify-content:center;
   font-size:2.6rem;
   border-bottom:3px solid var(--ink);
+  border-radius:calc(var(--radius) - 3px) calc(var(--radius) - 3px) 0 0;
   overflow:hidden;
 }
 .pcard .thumb img{
@@ -643,13 +655,13 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 }
 .pcard .body{ padding:14px 16px 18px; }
 .pcard .shop{
-  font-family:'JetBrains Mono', monospace; font-size:.68rem; color:#3E6B85;
+  font-family:'JetBrains Mono', monospace; font-size:.68rem; color:var(--muted);
   text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px;
 }
 .pcard .name{ font-weight:700; font-size:.95rem; margin-bottom:10px; }
 .pcard .price-row{ display:flex; align-items:baseline; gap:8px; }
 .pcard .price{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.15rem; }
-.pcard .old{ font-family:'JetBrains Mono', monospace; font-size:.78rem; color:#7FA8BD; text-decoration:line-through; }
+.pcard .old{ font-family:'JetBrains Mono', monospace; font-size:.78rem; color:var(--muted); text-decoration:line-through; }
 .pcard .addbtn{
   margin-top:12px; width:100%;
   border:2.5px solid var(--ink);
@@ -672,7 +684,8 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   position:relative;
   background:var(--card);
   border:3px solid var(--ink);
-  box-shadow:6px 6px 0 var(--ink);
+  border-radius:var(--radius);
+  box-shadow:6px 6px 0 var(--ink), var(--shadow-ambient);
   padding-top:14px;
 }
 .pcard-skeleton .hole{
@@ -684,6 +697,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 .pcard-skeleton .thumb{
   height:150px;
   border-bottom:3px solid var(--ink);
+  border-radius:calc(var(--radius) - 3px) calc(var(--radius) - 3px) 0 0;
   background:#E4F1F7;
   animation:skeleton-pulse 1.4s ease-in-out infinite;
 }
@@ -711,10 +725,13 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 .why .section-head p{ color:#BFE3F2; }
 .why-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
 .why-card{
-  background:#073852;
+  background:#0E3A5C;
   border:2.5px solid #1B5A7A;
-  padding:24px 20px;
+  border-radius:var(--radius);
+  padding:26px 22px;
+  transition: transform .18s ease, background-color .18s ease;
 }
+.why-card:hover{ background:#124876; transform:translateY(-3px); }
 .why-card .num{
   font-family:'JetBrains Mono', monospace; font-weight:700; color:#BFE3F2;
   font-size:.8rem; margin-bottom:14px; display:block;
@@ -734,24 +751,28 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 }
 .field input, .field select, .field textarea{
   border:2.5px solid var(--ink);
+  border-radius:var(--radius-sm);
   padding:10px 12px;
   font-family:'Inter', sans-serif;
   font-size:.9rem;
   font-weight:400;
   background:var(--paper);
+  transition: background-color .15s ease, border-color .15s ease;
 }
-.field input:focus, .field select:focus, .field textarea:focus{ outline:none; background:#fff; }
+.field input:focus, .field select:focus, .field textarea:focus{ outline:none; background:#fff; border-color:var(--blue); }
 
 /* ---------- MODAL BELI SEKARANG ---------- */
 .order-modal-overlay{
   position:fixed; inset:0; z-index:100;
-  background:rgba(11,42,84,.55);
+  background:rgba(11,31,51,.6);
   display:flex; align-items:center; justify-content:center;
   padding:20px;
 }
 .order-modal{
   position:relative;
   background:var(--card);
+  border-radius:var(--radius);
+  box-shadow: 0 24px 60px rgba(11,31,51,.35);
   width:100%; max-width:420px;
   padding:30px 26px 26px;
   max-height:90vh;
@@ -762,6 +783,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   width:32px; height:32px;
   display:flex; align-items:center; justify-content:center;
   border:2.5px solid var(--ink);
+  border-radius:var(--radius-sm);
   background:var(--paper);
   font-weight:700; cursor:pointer;
   transition: background-color .15s ease;
@@ -777,20 +799,22 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 .order-form-error{
   background:#FFE3E3;
   border:2px solid var(--ink);
+  border-radius:var(--radius-sm);
   padding:8px 10px;
   font-size:.82rem;
   margin:0 0 14px;
 }
-.order-code-label{ font-size:.85rem; color:#3E6B85; margin:6px 0 2px; }
+.order-code-label{ font-size:.85rem; color:var(--muted); margin:6px 0 2px; }
 .order-code-value{
   font-size:1.6rem; font-weight:700;
   letter-spacing:.04em;
   background:var(--ink); color:var(--accent);
+  border-radius:var(--radius-sm);
   display:inline-block;
   padding:8px 14px;
   margin:0 0 14px;
 }
-.order-success-note{ font-size:.85rem; color:#3E6B85; margin:0 0 20px; line-height:1.5; }
+.order-success-note{ font-size:.85rem; color:var(--muted); margin:0 0 20px; line-height:1.5; }
 
 /* ---------- RUANG CHAT PESANAN (pesanan.html) ---------- */
 .order-lookup-card{
@@ -806,6 +830,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   letter-spacing:.03em;
   padding:4px 10px;
   border:2px solid var(--ink);
+  border-radius:999px;
   display:inline-block;
 }
 .order-status-menunggu{ background:#FFF3CD; }
@@ -833,6 +858,9 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   max-width:640px; margin:0 auto;
   background:var(--card);
   border:3px solid var(--ink);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-ambient);
+  overflow:hidden;
 }
 .chat-thread{
   display:flex; flex-direction:column; gap:12px;
@@ -842,6 +870,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   max-width:78%;
   padding:9px 13px;
   border:2px solid var(--ink);
+  border-radius:var(--radius-sm);
   font-size:.88rem;
   line-height:1.45;
 }
@@ -855,7 +884,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 }
 .chat-bubble.from-buyer{ align-self:flex-end; background:var(--green); color:var(--paper); }
 .chat-bubble.from-admin{ align-self:flex-start; background:var(--blue); color:var(--paper); }
-.chat-bubble.from-system{ align-self:center; background:var(--paper); color:#3E6B85; font-style:italic; font-size:.78rem; text-align:center; }
+.chat-bubble.from-system{ align-self:center; background:var(--paper); color:var(--muted); font-style:italic; font-size:.78rem; text-align:center; }
 .chat-form{
   display:flex; gap:10px;
   padding:14px 16px;
@@ -864,17 +893,19 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 .chat-form input{
   flex:1;
   border:2.5px solid var(--ink);
+  border-radius:var(--radius-sm);
   padding:10px 12px;
   font-family:'Inter', sans-serif;
   font-size:.9rem;
 }
-.chat-form input:focus{ outline:none; }
-.chat-empty{ color:#3E6B85; font-size:.85rem; text-align:center; padding:20px 0; }
+.chat-form input:focus{ outline:none; border-color:var(--blue); }
+.chat-empty{ color:var(--muted); font-size:.85rem; text-align:center; padding:20px 0; }
 .chat-closed-banner{
   margin:0 16px 12px;
   padding:9px 14px;
   background:#FFF3CD;
   border:2px solid var(--ink);
+  border-radius:var(--radius-sm);
   font-size:.8rem;
   text-align:center;
 }
@@ -886,6 +917,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   font-size:.75rem;
   padding:7px 12px;
   border:2px solid var(--ink);
+  border-radius:var(--radius-sm);
   background:var(--paper);
   cursor:pointer;
   transition: background-color .15s ease;
@@ -893,10 +925,13 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 .mini-btn:hover{ background:var(--blue); color:var(--paper); }
 
 /* ---------- FOOTER ---------- */
+/* Footer gelap premium: background navy dalam + teks putih/biru muda,
+   kontrasnya tinggi & gampang dibaca (sebelumnya teks navy gelap di atas
+   biru sedang, kontras cuma ~2.4:1 — susah dibaca). */
 footer{
-  background:var(--blue);
+  background:var(--green-deep);
   border-top:3px solid var(--ink);
-  padding:40px 24px 20px;
+  padding:48px 24px 20px;
 }
 .foot-wrap{
   max-width:1180px; margin:0 auto;
@@ -905,31 +940,33 @@ footer{
   gap:30px;
   padding-bottom:28px;
 }
-.foot-wrap h4{ font-family:'Space Grotesk', sans-serif; font-size:.95rem; margin-bottom:14px; color:var(--green-deep); }
+.foot-wrap h4{ font-family:'Space Grotesk', sans-serif; font-size:.95rem; margin-bottom:14px; color:var(--paper); }
 .foot-wrap ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:9px; }
-.foot-wrap ul a{ font-size:.85rem; color:var(--green-deep); }
-.foot-wrap ul a:hover{ text-decoration:underline; }
-.foot-desc{ font-size:.85rem; max-width:32ch; margin:0; color:var(--green-deep); }
+.foot-wrap ul a{ font-size:.85rem; color:#BFE0F5; transition:color .15s ease; }
+.foot-wrap ul a:hover{ color:var(--paper); text-decoration:underline; }
+.foot-desc{ font-size:.85rem; max-width:32ch; margin:0; color:#BFE0F5; line-height:1.6; }
 .social-links{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
 .social-links a{
   font-family:'JetBrains Mono', monospace;
   font-size:.72rem;
   font-weight:700;
   text-transform:uppercase;
-  background:var(--ink);
+  background:rgba(255,255,255,.08);
   color:var(--paper);
-  border:2px solid var(--ink);
+  border:2px solid rgba(255,255,255,.35);
+  border-radius:var(--radius-sm);
   padding:6px 10px;
   text-decoration:none;
+  transition: background-color .15s ease, border-color .15s ease;
 }
-.social-links a:hover{ background:var(--paper); color:var(--ink); }
+.social-links a:hover{ background:var(--paper); color:var(--green-deep); border-color:var(--paper); }
 .foot-bottom{
   max-width:1180px; margin:0 auto;
-  border-top:2.5px solid var(--ink);
+  border-top:2px solid rgba(255,255,255,.18);
   padding-top:16px;
   display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
   font-family:'JetBrains Mono', monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em;
-  color:var(--green-deep);
+  color:#9CC5DE;
 }
 
 /* ---------- RESPONSIVE ---------- */
