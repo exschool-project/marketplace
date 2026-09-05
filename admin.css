@@ -60,7 +60,7 @@
   width:60px; height:60px;
   flex-shrink:0;
   border-radius:999px;
-  background:var(--gold);
+  background:var(--accent);
   color:var(--ink);
   border:2.5px solid #fff;
   display:flex; align-items:center; justify-content:center;
@@ -195,7 +195,7 @@
 }
 
 /* ---------- Role badges ----------
-   OWNER = emas (paling menonjol), ADMIN = biru sedang, CS = biru tua
+   OWNER = biru muda (paling menonjol), ADMIN = biru sedang, CS = biru tua
    (biar beda level kelihatan jelas), MEMBER polos putih. */
 .role-badge{
   font-family:'JetBrains Mono', monospace;
@@ -206,7 +206,7 @@
   border:2px solid var(--ink);
   letter-spacing:.03em;
 }
-.role-owner{ background:var(--gold); color:var(--ink); }
+.role-owner{ background:var(--accent); color:var(--ink); }
 .role-admin{ background:var(--blue); color:var(--paper); }
 .role-cs{ background:var(--blue-deep); color:var(--paper); }
 .role-member{ background:var(--paper); }
@@ -326,7 +326,7 @@
 }
 
 /* ---------- Owner-only panel accent ---------- */
-.owner-only{ border-color:var(--gold-deep); box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--gold-deep); }
+.owner-only{ border-color:var(--accent-deep); box-shadow: var(--shadow-w) var(--shadow-w) 0 var(--accent-deep); }
 
 /* ---------- Product image upload/preview ---------- */
 .image-preview{

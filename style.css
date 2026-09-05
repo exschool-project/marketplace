@@ -1,13 +1,16 @@
 :root{
-  /* Palet diambil dari logo Yayasan Aqilah Hidayah: navy + emas + putih,
-     ditambah biru sedang dari gradasi ilustrasi di logo. */
-  --blue:#4E93C9;       /* biru sedang, dari gradasi kubah/daun di logo */
-  --blue-deep:#356F9E;  /* versi lebih gelap, buat hover/shadow */
-  --green:#0B2A54;      /* navy — warna dasar cincin logo, jadi warna utama situs */
-  --green-deep:#071D3B; /* navy lebih gelap lagi */
-  --gold:#C9A227;       /* emas — dari cincin luar & bintang di logo */
-  --gold-deep:#A5811C;  /* emas lebih gelap, buat shadow/border */
-  --ink:#0B2A54;        /* border/shadow/teks gelap — samain dgn navy */
+  /* Palet baru: nuansa biru (laut → muda), hitam, dan putih — brutalist
+     border/shadow sekarang pakai hitam pekat, bukan navy, biar kontrasnya
+     lebih tegas di semua elemen. --accent (biru muda) menggantikan emas
+     lama sebagai warna aksen terang di atas background gelap. */
+  --blue-light:#8FCBEF; /* biru muda — aksen, background lembut, teks di atas gelap */
+  --blue:#1D6FB8;       /* biru — warna sekunder, tombol/badge */
+  --blue-deep:#14507F;  /* biru lebih gelap, buat hover */
+  --green:#0B3556;      /* biru laut (sea blue) — warna utama situs, dominan */
+  --green-deep:#062338; /* biru laut lebih gelap lagi */
+  --accent:#8FCBEF;      /* dulu "gold" (emas) — sekarang biru muda */
+  --accent-deep:#1D6FB8; /* dulu "gold-deep" — sekarang biru */
+  --ink:#0A0A0A;         /* hitam — border/shadow/teks utama */
   --paper:#FFFFFF;
   --card:#FFFFFF;
   --shadow-w: 6px;
@@ -173,7 +176,7 @@ img{ max-width:100%; display:block; }
   align-items:center;
   gap:1.4rem;
 }
-.banner-track span::after{ content:"◆"; color:var(--gold); }
+.banner-track span::after{ content:"◆"; color:var(--accent); }
 @keyframes marquee{
   from{ transform:translateX(0); }
   to{ transform:translateX(-50%); }
@@ -239,13 +242,65 @@ header.site{
 }
 .search button:hover{ background:var(--blue-deep); }
 .search button:active{ transform:scale(.97); }
-.search button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.search button:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
 .nav-actions{
   margin-left:auto;
   display:flex;
   gap:10px;
   flex-shrink:0;
 }
+
+/* ---------- NAV khusus HALAMAN UTAMA (landing) ---------- */
+.site-landing .nav-wrap{ gap:28px; }
+.landing-nav{
+  display:flex;
+  gap:22px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:.82rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.landing-nav a{ padding:4px 0; border-bottom:2.5px solid transparent; transition:border-color .15s ease; }
+.landing-nav a:hover{ border-color:var(--green); }
+.nav-back{ font-size:.82rem; }
+@media (max-width:900px){
+  .landing-nav{ display:none; }
+}
+@media (max-width:680px){
+  .nav-back{ display:none; }
+}
+
+/* ---------- TESTIMONI (halaman utama) ---------- */
+.testimoni{ background:var(--blue-light); }
+.testimoni-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.testimoni-card{
+  background:var(--card);
+  padding:24px 22px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.testimoni-quote{ margin:0; font-size:.92rem; line-height:1.6; color:var(--ink); }
+.testimoni-quote::before{ content:"“"; }
+.testimoni-quote::after{ content:"”"; }
+.testimoni-author{ display:flex; flex-direction:column; }
+.testimoni-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:.92rem; }
+.testimoni-role{ font-family:'JetBrains Mono', monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em; color:var(--blue-deep); }
+@media (max-width:900px){
+  .testimoni-grid{ grid-template-columns:1fr; }
+}
+
+/* ---------- CTA STRIP (halaman utama) ---------- */
+.cta-strip{
+  background:var(--ink);
+  color:var(--paper);
+  text-align:center;
+  padding:clamp(40px, 7vw, 72px) 24px;
+}
+.cta-strip-wrap{ max-width:560px; margin:0 auto; }
+.cta-strip h2{ color:var(--paper); font-size:clamp(1.5rem, 3.4vw, 2.2rem); }
+.cta-strip p{ color:var(--blue-light); margin:12px 0 26px; font-size:.95rem; }
 .btn{
   display:inline-flex;
   align-items:center;
@@ -264,7 +319,7 @@ header.site{
 }
 .btn:not(.brutal):not(.brutal-sm):hover{ box-shadow:3px 3px 0 var(--ink); transform:translate(-1px,-1px); }
 .btn:active{ transform:translate(1px,1px); box-shadow:0 0 0 var(--ink) !important; }
-.btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.btn:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
 .btn-green{ background:var(--green); color:var(--paper); }
 .btn-green:hover{ background:var(--blue-deep); }
 .btn-blue{ background:var(--blue); color:var(--paper); }
@@ -295,16 +350,16 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   text-align:center;
 }
 .intro-wrap{ max-width:760px; margin:0 auto; }
-.eyebrow-light{ background:var(--gold); color:var(--green-deep); }
+.eyebrow-light{ background:var(--accent); color:var(--green-deep); }
 .intro-title{ font-size:clamp(2rem, 5vw, 3.4rem); color:var(--paper); }
-.intro-title .hl{ background:var(--gold); color:var(--green-deep); padding:0 10px; }
+.intro-title .hl{ background:var(--accent); color:var(--green-deep); padding:0 10px; }
 .intro-org{
   font-family:'JetBrains Mono', monospace;
   font-size:.82rem;
   font-weight:700;
   text-transform:uppercase;
   letter-spacing:.05em;
-  color:var(--gold);
+  color:var(--accent);
   margin:14px 0 0;
 }
 .intro-lead{
@@ -332,7 +387,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   font-size:.72rem;
   text-transform:uppercase;
   letter-spacing:.05em;
-  color:var(--gold);
+  color:var(--accent);
 }
 .intro-ctas{
   display:flex;
@@ -348,6 +403,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 }
 
 /* ---------- PROFIL: visi / misi / komitmen ---------- */
+.profile-desc{ max-width:72ch; color:var(--ink); font-size:.95rem; line-height:1.7; margin:0 0 28px; }
 .profile-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
 .profile-card{
   background:var(--card);
@@ -361,7 +417,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   text-transform:uppercase;
   letter-spacing:.06em;
   background:var(--ink);
-  color:var(--gold);
+  color:var(--accent);
   padding:4px 10px;
   margin-bottom:12px;
 }
@@ -400,7 +456,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   letter-spacing:.06em;
   text-transform:uppercase;
   background:var(--ink);
-  color:var(--gold);
+  color:var(--accent);
   padding:5px 10px;
   margin:10px 0 0;
 }
@@ -503,7 +559,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 .chip:hover{ background:var(--blue); color:var(--paper); transform:translateY(-1px); }
 .chip:active{ transform:translateY(0); }
 .chip.active{ background:var(--ink); color:var(--paper); }
-.chip:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.chip:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
 
 /* ---------- STATE: loading / kosong / error ---------- */
 .grid-msg{
@@ -605,7 +661,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 }
 .pcard .addbtn:hover{ background:var(--ink); color:var(--blue); }
 .pcard .addbtn:active{ transform:scale(.97); }
-.pcard .addbtn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+.pcard .addbtn:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
 
 /* ---------- SKELETON LOADING (bentuknya niru .pcard persis) ---------- */
 @keyframes skeleton-pulse{
@@ -729,7 +785,7 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 .order-code-value{
   font-size:1.6rem; font-weight:700;
   letter-spacing:.04em;
-  background:var(--ink); color:var(--gold);
+  background:var(--ink); color:var(--accent);
   display:inline-block;
   padding:8px 14px;
   margin:0 0 14px;
