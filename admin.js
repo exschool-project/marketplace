@@ -307,14 +307,23 @@ document.getElementById('category-list')?.addEventListener('click', async (e) =>
   }
 });
 
-// ---------- Upload gambar (Cloudinary, signed upload) — dipakai bersama
-// oleh form produk dan form banner gambar ----------
+// ---------- Upload gambar/video (Cloudinary, signed upload) — dipakai
+// bersama oleh form produk (khusus gambar) dan form banner gambar/video ----------
 async function uploadImageToCloudinary(file, folder, statusEl) {
-  if (statusEl) statusEl.textContent = 'Mengunggah ke Cloudinary...';
+  const { url } = await uploadMediaToCloudinary(file, folder, statusEl);
+  return url;
+}
+
+// Versi umum yang mendeteksi jenis file (gambar/video) dari file.type,
+// lalu minta tiket upload sesuai resource_type-nya dan mengembalikan
+// { url, mediaType } supaya pemanggil tahu media_type yang mau disimpan.
+async function uploadMediaToCloudinary(file, folder, statusEl) {
+  const mediaType = file.type && file.type.startsWith('video/') ? 'video' : 'image';
+  if (statusEl) statusEl.textContent = `Mengunggah ${mediaType === 'video' ? 'video' : 'gambar'} ke Cloudinary...`;
 
   const ticket = await authedFetch(`${API_BASE}/upload-signature`, {
     method: 'POST',
-    body: JSON.stringify({ folder }),
+    body: JSON.stringify({ folder, resourceType: mediaType }),
   });
 
   const form = new FormData();
@@ -328,7 +337,7 @@ async function uploadImageToCloudinary(file, folder, statusEl) {
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(body.error?.message || 'Upload ke Cloudinary gagal.');
 
-  return body.secure_url;
+  return { url: body.secure_url, mediaType };
 }
 
 function initProductImageInput() {
@@ -543,13 +552,15 @@ document.getElementById('social-list')?.addEventListener('click', async (e) => {
   }
 });
 
-// ---------- Banner Gambar (khusus owner) ----------
+// ---------- Banner Gambar/Video (khusus owner) ----------
 let pendingHeroBannerUrl = null;
+let pendingHeroBannerMediaType = 'image';
 
 function initHeroBannerImageInput() {
   const input = document.getElementById('hero-banner-image');
   const previewWrap = document.getElementById('hero-banner-preview');
   const previewImg = document.getElementById('hero-banner-preview-img');
+  const previewVideo = document.getElementById('hero-banner-preview-video');
   const statusEl = document.getElementById('hero-banner-status');
 
   input?.addEventListener('change', async () => {
@@ -560,12 +571,24 @@ function initHeroBannerImageInput() {
       return;
     }
 
+    const isVideo = file.type && file.type.startsWith('video/');
     previewWrap.classList.remove('hidden');
-    previewImg.src = URL.createObjectURL(file);
+    const objectUrl = URL.createObjectURL(file);
+    if (isVideo) {
+      previewImg.classList.add('hidden');
+      previewVideo?.classList.remove('hidden');
+      if (previewVideo) previewVideo.src = objectUrl;
+    } else {
+      previewVideo?.classList.add('hidden');
+      previewImg.classList.remove('hidden');
+      previewImg.src = objectUrl;
+    }
 
     try {
-      pendingHeroBannerUrl = await uploadImageToCloudinary(file, 'ex-school/hero-banners', statusEl);
-      statusEl.innerHTML = `Berhasil diunggah ${ICONS.check}`;
+      const { url, mediaType } = await uploadMediaToCloudinary(file, 'ex-school/hero-banners', statusEl);
+      pendingHeroBannerUrl = url;
+      pendingHeroBannerMediaType = mediaType;
+      statusEl.innerHTML = `Berhasil diunggah (${mediaType === 'video' ? 'video' : 'gambar'}) ${ICONS.check}`;
     } catch (err) {
       statusEl.textContent = `Gagal: ${err.message}`;
       pendingHeroBannerUrl = null;
@@ -581,23 +604,25 @@ async function loadHeroBannerAdmin() {
 
   list.innerHTML = data.map((b) => `
     <div class="admin-row" data-id="${b.id}">
-      <img class="admin-row-thumb" src="${escapeHtml(b.image_url)}" alt="">
+      ${b.media_type === 'video'
+        ? `<video class="admin-row-thumb" src="${escapeHtml(b.image_url)}" muted></video>`
+        : `<img class="admin-row-thumb" src="${escapeHtml(b.image_url)}" alt="">`}
       <span class="admin-row-text">
-        ${b.title ? escapeHtml(b.title) : '<span class="admin-row-sub">Tanpa judul</span>'}
+        ${b.media_type === 'video' ? '🎬 ' : '🖼️ '}${b.title ? escapeHtml(b.title) : '<span class="admin-row-sub">Tanpa judul</span>'}
         ${b.link_url ? `· ${escapeHtml(b.link_url)}` : ''}
       </span>
       <span class="admin-row-tag">${b.is_active ? 'Aktif' : 'Nonaktif'}</span>
       <button class="mini-btn toggle-hero-banner" type="button">${b.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
       <button class="mini-btn danger delete-hero-banner" type="button">Hapus</button>
     </div>
-  `).join('') || '<p class="empty-msg">Belum ada banner gambar.</p>';
+  `).join('') || '<p class="empty-msg">Belum ada banner gambar/video.</p>';
 }
 
 async function handleHeroBannerSubmit(e) {
   e.preventDefault();
 
   if (!pendingHeroBannerUrl) {
-    alert('Tunggu gambar selesai diunggah dulu (atau pilih gambar).');
+    alert('Tunggu gambar/video selesai diunggah dulu (atau pilih filenya).');
     return;
   }
 
@@ -608,6 +633,7 @@ async function handleHeroBannerSubmit(e) {
     method: 'POST',
     body: JSON.stringify({
       image_url: pendingHeroBannerUrl,
+      media_type: pendingHeroBannerMediaType,
       link_url: linkInput.value.trim() || null,
       title: titleInput.value.trim() || null,
       subtitle: subtitleInput.value.trim() || null,
@@ -616,6 +642,7 @@ async function handleHeroBannerSubmit(e) {
 
   document.getElementById('hero-banner-form').reset();
   pendingHeroBannerUrl = null;
+  pendingHeroBannerMediaType = 'image';
   document.getElementById('hero-banner-preview').classList.add('hidden');
   await loadHeroBannerAdmin();
 }

@@ -43,10 +43,14 @@ async function loadBanner() {
   }
 }
 
-// ---------- Banner Gambar (upload, diatur owner) ----------
+// ---------- Banner Gambar/Video (upload, diatur owner) ----------
+// Media banner bisa berupa GAMBAR (image_url + media_type 'image', default
+// buat data lama) ATAU VIDEO (media_type 'video') — cuma satu yang
+// ditampilkan sekaligus, sisanya disembunyikan lewat class .hidden.
 async function loadHeroBannerImage() {
   const wrap = document.getElementById('hero-banner-wrap');
   const img = document.getElementById('hero-banner-img');
+  const video = document.getElementById('hero-banner-video');
   const titleEl = document.getElementById('hero-banner-title');
   const subtitleEl = document.getElementById('hero-banner-subtitle');
   if (!wrap || !img) return;
@@ -58,8 +62,23 @@ async function loadHeroBannerImage() {
       return;
     }
     const banner = data[0]; // yang paling atas urutannya
-    img.src = banner.image_url;
-    img.alt = banner.title || 'Banner';
+    const isVideo = banner.media_type === 'video';
+
+    if (isVideo && video) {
+      video.src = banner.image_url;
+      video.load();
+      video.classList.remove('hidden');
+      img.classList.add('hidden');
+    } else {
+      img.src = banner.image_url;
+      img.alt = banner.title || 'Banner';
+      img.classList.remove('hidden');
+      if (video) {
+        video.classList.add('hidden');
+        video.removeAttribute('src');
+      }
+    }
+
     if (titleEl) titleEl.textContent = banner.title || '';
     if (subtitleEl) subtitleEl.textContent = banner.subtitle || '';
     if (banner.link_url) {
@@ -72,6 +91,25 @@ async function loadHeroBannerImage() {
     wrap.classList.remove('hidden');
   } catch (err) {
     wrap.classList.add('hidden');
+  }
+}
+
+// ---------- Statistik di section Pengenalan ----------
+async function loadIntroStats() {
+  const productsEl = document.getElementById('intro-stat-products');
+  const categoriesEl = document.getElementById('intro-stat-categories');
+  if (!productsEl && !categoriesEl) return;
+
+  try {
+    const [{ data: products }, { data: categories }] = await Promise.all([
+      fetchJSON(`${API_BASE}/products`),
+      fetchJSON(`${API_BASE}/categories`),
+    ]);
+    if (productsEl) productsEl.textContent = `${products?.length ?? 0}+`;
+    if (categoriesEl) categoriesEl.textContent = `${categories?.length ?? 0}+`;
+  } catch (err) {
+    if (productsEl) productsEl.textContent = '–';
+    if (categoriesEl) categoriesEl.textContent = '–';
   }
 }
 
@@ -387,6 +425,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSearch();
   initOrderModal();
   initNavAccountButton();
+  loadIntroStats();
   await loadHeroBannerImage();
   await loadBanner();
   await loadCategories();

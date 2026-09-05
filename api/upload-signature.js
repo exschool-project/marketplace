@@ -26,6 +26,13 @@ module.exports = withErrorHandling(async (req, res) => {
   const rawFolder = (req.body && req.body.folder) || 'ex-school/products';
   const folder = String(rawFolder).replace(/[^a-zA-Z0-9/_-]/g, '').slice(0, 100) || 'ex-school/products';
 
+  // resource_type nentuin endpoint Cloudinary yang dipakai (image/upload
+  // vs video/upload) — dikirim dari client sesuai jenis file yang dipilih
+  // (foto atau video). Tidak ikut ditandatangani karena bukan parameter
+  // yang dikirim ke Cloudinary, cuma dipakai buat susun uploadUrl di sini.
+  const rawResourceType = (req.body && req.body.resourceType) || 'image';
+  const resourceType = rawResourceType === 'video' ? 'video' : 'image';
+
   const timestamp = Math.round(Date.now() / 1000);
   const signature = buildSignature({ timestamp, folder }, config.apiSecret);
 
@@ -35,6 +42,7 @@ module.exports = withErrorHandling(async (req, res) => {
     apiKey: config.apiKey,
     cloudName: config.cloudName,
     folder,
-    uploadUrl: `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
+    resourceType,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${config.cloudName}/${resourceType}/upload`,
   });
 });

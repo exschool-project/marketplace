@@ -167,15 +167,16 @@
 
       <!-- BANNER GAMBAR: hanya dirender & diisi kalau role === owner -->
       <section id="hero-banner-panel" class="admin-panel brutal owner-only hidden">
-        <h2>Banner Gambar <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
-        <p class="panel-sub">Gambar yang tampil di paling atas halaman utama, di bawah pita banner teks. Judul &amp; sub-judul akan ditimpa otomatis di atas gambar (bukan diedit manual di file gambarnya) dan menyesuaikan ukuran layar HP/tablet/desktop.</p>
+        <h2>Banner Gambar/Video <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
+        <p class="panel-sub">Gambar ATAU video yang tampil di paling atas halaman utama, di bawah pita banner teks. Judul &amp; sub-judul akan ditimpa otomatis di atasnya (bukan diedit manual di file medianya) dan menyesuaikan ukuran layar HP/tablet/desktop. Video otomatis diputar berulang tanpa suara.</p>
         <form id="hero-banner-form">
           <label class="field">
-            <span>Gambar banner (Cloudinary)</span>
-            <input type="file" id="hero-banner-image" accept="image/*" required>
+            <span>Gambar atau video banner (Cloudinary)</span>
+            <input type="file" id="hero-banner-image" accept="image/*,video/*" required>
           </label>
           <div id="hero-banner-preview" class="image-preview hidden">
             <img id="hero-banner-preview-img" alt="Pratinjau banner">
+            <video id="hero-banner-preview-video" class="hidden" muted loop autoplay playsinline></video>
             <span id="hero-banner-status" class="mono"></span>
           </div>
           <label class="field">

@@ -30,17 +30,86 @@
     </div>
   </header>
 
-  <!-- BERANDA / HERO -->
+  <!-- PENGENALAN / TENTANG KAMI: profil resmi Yayasan Aqilah Hidayah, tampil
+       PALING ATAS sebelum halaman belanja, biar kesan awal situs ini kayak
+       website profesional yayasan dulu, baru masuk ke marketplace-nya. -->
+  <section class="intro" id="pengenalan">
+    <div class="intro-wrap">
+      <span class="eyebrow eyebrow-light">◆ Tentang Kami</span>
+      <h1 class="intro-title">Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
+      <p class="intro-org">Sebuah program di bawah naungan Yayasan Aqilah Hidayah</p>
+      <p class="intro-lead">
+        EX-SCHOOL adalah marketplace resmi yang dikelola Yayasan Aqilah Hidayah
+        untuk mendukung kemandirian ekonomi umat lewat perdagangan yang jujur,
+        transparan, dan bermanfaat. Setiap transaksi di sini turut menopang
+        program pendidikan dan sosial yayasan — belanja jadi ladang amal.
+      </p>
+      <div class="intro-stats">
+        <div class="stat">
+          <b id="intro-stat-products">–</b>
+          <span>Produk terdaftar</span>
+        </div>
+        <div class="stat">
+          <b id="intro-stat-categories">–</b>
+          <span>Kategori</span>
+        </div>
+        <div class="stat">
+          <b>100%</b>
+          <span>Untuk toko lokal</span>
+        </div>
+      </div>
+      <div class="intro-ctas">
+        <a href="#beranda" class="btn btn-green hover-lift brutal">Mulai Belanja ↓</a>
+        <a href="#pengenalan-detail" class="btn btn-ink hover-lift-sm brutal-sm">Kenali Kami Lebih Jauh</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFIL / VISI-MISI: detail pengenalan yayasan, ditaruh terpisah dari
+       hero copy singkat di atas biar yang cuma mau lihat sekilas nggak
+       kepanjangan, tapi yang mau baca lebih jauh tinggal scroll dikit. -->
+  <section class="section profile" id="pengenalan-detail">
+    <div class="section-head">
+      <div>
+        <h2>Kenapa ada EX-SCHOOL</h2>
+        <p>Marketplace dengan misi sosial dari Yayasan Aqilah Hidayah.</p>
+      </div>
+    </div>
+    <div class="profile-grid">
+      <div class="profile-card brutal-sm">
+        <span class="num">Visi</span>
+        <p>Menjadi wadah usaha yang mandiri, amanah, dan memberi manfaat luas
+          bagi umat lewat perdagangan yang halal dan berkah.</p>
+      </div>
+      <div class="profile-card brutal-sm">
+        <span class="num">Misi</span>
+        <p>Mendukung toko-toko lokal terpercaya, membuka lapangan kerja, dan
+          menyalurkan sebagian hasil usaha untuk program pendidikan &amp;
+          sosial yayasan.</p>
+      </div>
+      <div class="profile-card brutal-sm">
+        <span class="num">Komitmen</span>
+        <p>Harga jujur, kualitas terjaga, dan pelayanan yang cepat tanggap
+          lewat ruang chat langsung dengan tim kami.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BERANDA / HALAMAN BELANJA: mulai dari sini tampilan berubah jadi
+       "halaman belanja profesional" — hero produk, kategori, dan grid
+       produk seperti marketplace pada umumnya. -->
   <main>
     <!-- Hero overlay: gambar/banner jadi background utama (position:relative pada
          .hero-visual), teks & tombol "Mulai Belanja" MENIMPA gambar lewat
          .hero-overlay-content (position:absolute). aspect-ratio pada .hero-visual
          bikin tingginya otomatis ikut lebar layar di semua device, diisi dari
-         /api/hero-banners. -->
+         /api/hero-banners. Media banner bisa berupa GAMBAR atau VIDEO
+         (lihat #hero-banner-media di script.js). -->
     <section class="hero" id="beranda">
       <div class="hero-visual" id="hero-visual">
         <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
           <img id="hero-banner-img" class="hero-banner-img" alt="Banner" loading="lazy">
+          <video id="hero-banner-video" class="hero-banner-img hidden" autoplay muted loop playsinline></video>
           <div class="hero-banner-overlay">
             <div class="hero-banner-text">
               <h2 id="hero-banner-title" class="hero-banner-title"></h2>

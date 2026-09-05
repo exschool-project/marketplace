@@ -34,17 +34,19 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await requireOwner(req, res);
     if (!ctx) return;
 
-    const { image_url, link_url, title, subtitle, is_active = true, sort_order = 0 } = req.body || {};
+    const { image_url, media_type = 'image', link_url, title, subtitle, is_active = true, sort_order = 0 } = req.body || {};
 
     if (!image_url || !String(image_url).trim()) {
-      res.status(400).json({ error: 'Gambar banner wajib diunggah dulu.' });
+      res.status(400).json({ error: 'Gambar/video banner wajib diunggah dulu.' });
       return;
     }
+    const normalizedMediaType = media_type === 'video' ? 'video' : 'image';
 
     const { data, error } = await supabase
       .from('hero_banners')
       .insert({
         image_url: String(image_url).trim(),
+        media_type: normalizedMediaType,
         link_url: link_url && String(link_url).trim() ? String(link_url).trim() : null,
         title: title && String(title).trim() ? String(title).trim() : null,
         subtitle: subtitle && String(subtitle).trim() ? String(subtitle).trim() : null,
@@ -70,9 +72,10 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await requireOwner(req, res);
     if (!ctx) return;
 
-    const { image_url, link_url, title, subtitle, is_active, sort_order } = req.body || {};
+    const { image_url, media_type, link_url, title, subtitle, is_active, sort_order } = req.body || {};
     const updates = {};
     if (image_url !== undefined) updates.image_url = String(image_url).trim();
+    if (media_type !== undefined) updates.media_type = media_type === 'video' ? 'video' : 'image';
     if (link_url !== undefined) updates.link_url = link_url ? String(link_url).trim() : null;
     if (title !== undefined) updates.title = title ? String(title).trim() : null;
     if (subtitle !== undefined) updates.subtitle = subtitle ? String(subtitle).trim() : null;

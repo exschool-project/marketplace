@@ -336,7 +336,8 @@
   margin:-6px 0 16px;
   font-size:.78rem;
 }
-.image-preview img{
+.image-preview img,
+.image-preview video{
   width:64px; height:64px;
   object-fit:cover;
   border:2.5px solid var(--ink);

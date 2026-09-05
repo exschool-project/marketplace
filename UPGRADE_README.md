@@ -184,6 +184,38 @@ terbaca oleh functions.
   jaga-jaga kalau project Supabase kamu punya trigger lain yang otomatis
   bikin baris profiles kosong tiap ada auth user baru.
 
+## 3b. Upgrade terbaru: Halaman Pengenalan + Banner Video
+
+### Section "Pengenalan" di paling atas beranda
+- `index.html` sekarang punya 2 section baru di paling atas, SEBELUM
+  halaman belanja (`#beranda`): section `#pengenalan` (profil singkat +
+  statistik jumlah produk/kategori + tombol "Mulai Belanja") dan
+  `#pengenalan-detail` (Visi / Misi / Komitmen yayasan).
+- Tombol "Mulai Belanja" di section ini scroll ke `#beranda` (halaman
+  belanja yang sudah ada, tidak berubah alurnya).
+- Angka statistik (jumlah produk & kategori) diisi otomatis lewat
+  `loadIntroStats()` di `script.js`, ambil dari `/api/products` &
+  `/api/categories` yang sudah ada — tidak perlu endpoint baru.
+- Teks profil (visi/misi/deskripsi yayasan) masih placeholder generik —
+  edit langsung isinya di `index.html` (section `#pengenalan` dan
+  `#pengenalan-detail`) sesuai profil asli Yayasan Aqilah Hidayah.
+
+### Banner Gambar sekarang bisa VIDEO juga
+- Input file di panel **Banner Gambar/Video** (`admin.html`, khusus
+  owner) sekarang terima `image/*,video/*`. Sistem otomatis mendeteksi
+  jenis file dan mengunggahnya ke Cloudinary lewat endpoint yang sesuai
+  (`image/upload` atau `video/upload`).
+- **Wajib jalankan SQL baru**: `ADD_HERO_BANNER_MEDIA_TYPE.sql` — nambah
+  kolom `media_type` (`'image'` / `'video'`, default `'image'`) di
+  tabel `hero_banners`. Aman dijalankan meski sudah ada banner lama
+  (otomatis dianggap `'image'`).
+- Di beranda (`index.html`), banner video otomatis diputar (autoplay,
+  muted, loop, tanpa kontrol) menggantikan `<img>` kalau `media_type`
+  banner yang aktif adalah `'video'`.
+- `api/upload-signature.js` sekarang menerima `resourceType` di body
+  request (`'image'` atau `'video'`) untuk menentukan endpoint
+  Cloudinary yang ditandatangani.
+
 ## 4. File baru yang ditambahkan
 
 ```
@@ -193,6 +225,7 @@ SETUP_UPGRADE.sql               → migrasi database (jalankan sekali)
 ADD_ORDERS_CHAT.sql             → migrasi tabel orders + order_messages
 ADD_ORDERS_LAST_MESSAGE.sql     → view orders_with_last_message (buat CS Panel)
 ADD_ROLE_CS.sql                 → migrasi role cs di tabel profiles
+ADD_HERO_BANNER_MEDIA_TYPE.sql  → migrasi media_type di hero_banners (video)
 api/orders.js                   → API pesanan + chat (publik & admin)
 pesanan.html, pesanan.js        → ruang chat pesanan untuk pembeli
 cs.html, cs.js                  → CS Panel — balas chat pembeli sampai selesai

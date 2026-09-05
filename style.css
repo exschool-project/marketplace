@@ -286,6 +286,90 @@ header.site{
 button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 
 /* ---------- HERO / BERANDA ---------- */
+/* ---------- PENGENALAN / TENTANG KAMI (profil yayasan, di atas hero belanja) ---------- */
+.intro{
+  width:100%;
+  padding:clamp(48px, 8vw, 96px) 24px clamp(56px, 9vw, 100px);
+  background:linear-gradient(150deg, var(--green) 0%, var(--green-deep) 70%);
+  color:var(--paper);
+  text-align:center;
+}
+.intro-wrap{ max-width:760px; margin:0 auto; }
+.eyebrow-light{ background:var(--gold); color:var(--green-deep); }
+.intro-title{ font-size:clamp(2rem, 5vw, 3.4rem); color:var(--paper); }
+.intro-title .hl{ background:var(--gold); color:var(--green-deep); padding:0 10px; }
+.intro-org{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.82rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:var(--gold);
+  margin:14px 0 0;
+}
+.intro-lead{
+  font-size:1.02rem;
+  line-height:1.65;
+  color:#D7E8F2;
+  max-width:62ch;
+  margin:22px auto 0;
+}
+.intro-stats{
+  display:flex;
+  justify-content:center;
+  gap:36px;
+  flex-wrap:wrap;
+  margin:36px 0 8px;
+}
+.intro-stats .stat b{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:1.8rem;
+  display:block;
+  color:var(--paper);
+}
+.intro-stats .stat span{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.72rem;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  color:var(--gold);
+}
+.intro-ctas{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-top:30px;
+}
+@media (max-width:640px){
+  .intro-stats{ gap:24px; }
+  .intro-ctas{ flex-direction:column; align-items:stretch; }
+  .intro-ctas .btn{ text-align:center; }
+}
+
+/* ---------- PROFIL: visi / misi / komitmen ---------- */
+.profile-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.profile-card{
+  background:var(--card);
+  padding:24px 22px;
+}
+.profile-card .num{
+  display:inline-block;
+  font-family:'JetBrains Mono', monospace;
+  font-weight:700;
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  background:var(--ink);
+  color:var(--gold);
+  padding:4px 10px;
+  margin-bottom:12px;
+}
+.profile-card p{ margin:0; font-size:.92rem; line-height:1.6; color:var(--ink); }
+@media (max-width:900px){
+  .profile-grid{ grid-template-columns:1fr; }
+}
+
 /* .hero cuma pembungkus full-width; gambar tetap tepi-ke-tepi (nggak dikotakin
    1180px) dan teksnya sekarang jadi overlay lewat .hero-overlay-content
    di dalam .hero-visual, bukan section teks terpisah di atas gambar lagi. */
