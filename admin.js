@@ -7,6 +7,18 @@ let pendingImageUrl = null;
 
 const ROLE_LEVEL = { member: 1, cs: 2, admin: 3, owner: 4 };
 
+// ---------- Cache profil (anti-kedip login pas pindah halaman) ----------
+// Disimpan di sessionStorage (bukan localStorage) -> otomatis hilang kalau
+// tab/browser ditutup. Key sama kayak cs.js & akun.js, biar login sekali
+// langsung kerasa instan di halaman panel lain dalam tab yang sama.
+const PROFILE_CACHE_KEY = 'exschool_profile_cache';
+function cacheProfile(profile) {
+  try { sessionStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile)); } catch (e) { /* abaikan */ }
+}
+function clearCachedProfile() {
+  try { sessionStorage.removeItem(PROFILE_CACHE_KEY); } catch (e) { /* abaikan */ }
+}
+
 // Normalisasi role di sisi client juga (samakan dengan server) — kalau
 // tidak, role yang formatnya tak terduga (mis. "Admin" dengan huruf besar)
 // akan bikin ROLE_LEVEL[...] jadi undefined, dan "undefined < 2" itu SELALU
@@ -30,6 +42,7 @@ async function fetchProfileAndEnforceRole() {
     err.status = 403;
     throw err;
   }
+  cacheProfile(profile); // buat instan pas pindah ke cs.html/akun.html nanti
   return profile;
 }
 
@@ -163,6 +176,7 @@ async function handleLogin(e) {
 async function handleLogout() {
   await supabaseClient.auth.signOut();
   session = null;
+  clearCachedProfile();
   if (orderListPollTimer) clearInterval(orderListPollTimer);
   showLogin();
 }
@@ -170,6 +184,7 @@ async function handleLogout() {
 async function checkExistingSession() {
   const { data } = await supabaseClient.auth.getSession();
   if (!data.session) {
+    clearCachedProfile();
     showLogin();
     return;
   }
@@ -182,12 +197,16 @@ async function checkExistingSession() {
       // Sesi memang tidak valid / role tidak cukup — logout beneran.
       await supabaseClient.auth.signOut();
       session = null;
+      clearCachedProfile();
       showLogin(err.status === 403 ? 'Akun ini bukan admin atau owner.' : '');
       return;
     }
     // Server gangguan / error — sesi Supabase-nya masih valid, jangan logout.
-    // Tampilkan pesan asli dari server biar penyebabnya jelas.
-    showLogin(err.message || 'Gagal menghubungi server. Muat ulang halaman untuk coba lagi.');
+    // Kalau dashboard udah sempat tampil dari cache, biarkan tetap tampil
+    // (jangan malah lempar balik ke layar login gara-gara gangguan sesaat).
+    if (!window.__cachedProfile) {
+      showLogin(err.message || 'Gagal menghubungi server. Muat ulang halaman untuk coba lagi.');
+    }
     return;
   }
 
@@ -931,10 +950,16 @@ async function safeLoadAllData() {
 
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', async () => {
+  // Anti-kedip: kalau head-script nemu profil ke-cache yang rolenya
+  // cukup (admin/owner), tampilkan dashboard-nya SEKARANG (data lama,
+  // sekilas), sambil checkExistingSession() di bawah tetap verifikasi
+  // ulang ke server & refresh datanya.
+  if (window.__cachedProfile) showDashboard(window.__cachedProfile);
+
   try {
     await initSupabase();
   } catch (err) {
-    showLogin(err.message);
+    if (!window.__cachedProfile) showLogin(err.message);
     return;
   }
 

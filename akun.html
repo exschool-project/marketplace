@@ -8,6 +8,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=2">
 <link rel="stylesheet" href="admin.css?v=2">
+<style>
+  /* Anti-kedip: kalau ada profil ke-cache (dari halaman panel manapun
+     dalam tab yang sama), langsung tampilkan Profil, gak perlu nunggu
+     verifikasi sesi ke server dulu. Diverifikasi ulang tetap jalan di
+     background lewat akun.js. */
+  html.staff-cached-session #auth-view{ display:none !important; }
+  html.staff-cached-session #profile-view{ display:block !important; }
+</style>
+<script>
+(function(){
+  try {
+    var raw = sessionStorage.getItem('exschool_profile_cache');
+    if (!raw) return;
+    var profile = JSON.parse(raw);
+    document.documentElement.classList.add('staff-cached-session');
+    window.__cachedProfile = profile;
+  } catch (e) { /* sessionStorage diblokir / data korup -> abaikan, jalur normal tetap jalan */ }
+})();
+</script>
 </head>
 <body class="admin-body">
 
@@ -66,24 +85,70 @@
   </section>
 
   <!-- PROFIL (setelah login) -->
-  <section id="profile-view" class="login-view hidden">
-    <div class="login-card brutal">
-      <div class="logo" style="margin-bottom:20px;">EX-SCHOOL</div>
-      <h1 id="profile-name">Halo!</h1>
-      <p class="login-sub" id="profile-email"></p>
-      <span id="profile-role-badge" class="role-badge"></span>
+  <section id="profile-view" class="profile-page hidden">
+    <div class="profile-shell">
 
-      <div id="profile-admin-link" class="hidden" style="margin-top:20px;">
-        <a href="admin.html" class="btn btn-blue brutal hover-lift" style="width:100%; display:block; text-align:center; box-sizing:border-box;">Buka Admin Panel →</a>
-      </div>
-      <div id="profile-cs-link" class="hidden" style="margin-top:14px;">
-        <a href="cs.html" class="btn btn-green brutal hover-lift" style="width:100%; display:block; text-align:center; box-sizing:border-box;">Buka CS Panel →</a>
+      <!-- Header: avatar + nama + role -->
+      <div class="profile-header brutal">
+        <div class="profile-avatar" id="profile-avatar">?</div>
+        <div class="profile-header-info">
+          <h1 id="profile-name">Halo!</h1>
+          <p class="profile-email" id="profile-email"></p>
+          <span id="profile-role-badge" class="role-badge"></span>
+        </div>
       </div>
 
-      <!-- FORM UBAH PROFIL: nama, email (gmail dll), kontak opsional -->
-      <form id="profile-edit-form" class="auth-form" style="margin-top:22px; padding-top:20px; border-top:2.5px solid var(--ink);">
-        <h2 style="margin:0 0 4px;">Ubah profil</h2>
-        <p class="login-sub" style="margin-top:0;">Nama & email wajib diisi. Kontak di bawah opsional.</p>
+      <!-- Akses cepat ke panel (cuma muncul kalau rolenya cukup) -->
+      <div class="profile-quick-links">
+        <a href="admin.html" id="profile-admin-link" class="profile-quick-link hidden">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="1.5"/><path d="M8 20h8M12 18v2"/></svg>
+          <span>
+            <strong>Admin Panel</strong>
+            <small>Kelola produk, banner &amp; tim</small>
+          </span>
+        </a>
+        <a href="cs.html" id="profile-cs-link" class="profile-quick-link hidden">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+          <span>
+            <strong>CS Panel</strong>
+            <small>Balas chat pesanan pembeli</small>
+          </span>
+        </a>
+      </div>
+
+      <!-- Informasi akun: mode TAMPIL (default) -->
+      <div class="profile-card brutal" id="profile-info-card">
+        <div class="profile-card-head">
+          <h2>Informasi Akun</h2>
+          <button type="button" id="profile-edit-toggle" class="mini-btn">Edit Profil</button>
+        </div>
+        <dl class="profile-info-list">
+          <div>
+            <dt>Nama lengkap</dt>
+            <dd id="profile-info-name">—</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd id="profile-info-email">—</dd>
+          </div>
+          <div>
+            <dt>Nomor WhatsApp</dt>
+            <dd id="profile-info-phone">—</dd>
+          </div>
+          <div>
+            <dt>Kontak lain</dt>
+            <dd id="profile-info-other">—</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Informasi akun: mode UBAH (disembunyikan sampai "Edit Profil" diklik) -->
+      <form id="profile-edit-form" class="profile-card brutal hidden">
+        <div class="profile-card-head">
+          <h2>Ubah Profil</h2>
+          <button type="button" id="profile-edit-cancel" class="mini-btn">Batal</button>
+        </div>
+        <p class="login-sub" style="margin-top:0;">Nama &amp; email wajib diisi. Kontak di bawah opsional.</p>
 
         <label class="field">
           <span>Nama lengkap</span>
@@ -104,11 +169,13 @@
 
         <p id="profile-edit-error" class="login-error" style="display:none;"></p>
         <p id="profile-edit-success" class="login-sub" style="display:none; color:#1a7d3a; font-weight:700;"></p>
-        <button type="submit" class="btn btn-blue brutal hover-lift" style="width:100%;">Simpan Perubahan</button>
+        <button type="submit" class="btn btn-blue brutal-sm hover-lift-sm" style="width:100%;">Simpan Perubahan</button>
       </form>
 
-      <button id="logout-btn" class="btn btn-ink brutal hover-lift" style="width:100%; margin-top:14px;" type="button">Keluar</button>
-      <a href="index.html" class="back-link">← Kembali ke beranda</a>
+      <div class="profile-footer-actions">
+        <button id="logout-btn" class="btn btn-ink brutal-sm hover-lift-sm" type="button">Keluar</button>
+        <a href="index.html" class="back-link" style="margin:0;">← Kembali ke beranda</a>
+      </div>
     </div>
   </section>
 

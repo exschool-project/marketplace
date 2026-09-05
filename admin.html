@@ -9,6 +9,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=2">
 <link rel="stylesheet" href="admin.css?v=2">
+<style>
+  /* Anti-kedip: sama seperti cs.html, tapi butuh role admin/owner. */
+  html.staff-cached-session #login-view{ display:none !important; }
+  html.staff-cached-session #dashboard-view{ display:block !important; }
+</style>
+<script>
+(function(){
+  try {
+    var raw = sessionStorage.getItem('exschool_profile_cache');
+    if (!raw) return;
+    var profile = JSON.parse(raw);
+    var LEVEL = { member: 1, cs: 2, admin: 3, owner: 4 };
+    var level = LEVEL[String(profile.role || '').trim().toLowerCase()] || 0;
+    if (level >= LEVEL.admin) {
+      document.documentElement.classList.add('staff-cached-session');
+      window.__cachedProfile = profile;
+    }
+  } catch (e) { /* sessionStorage diblokir / data korup -> abaikan, jalur normal tetap jalan */ }
+})();
+</script>
 </head>
 <body class="admin-body">
 

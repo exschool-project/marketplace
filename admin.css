@@ -35,6 +35,117 @@
   vertical-align:middle;
 }
 
+/* ---------- Halaman Profil (akun.html) ---------- */
+.profile-page{
+  min-height:100vh;
+  padding:40px 20px 60px;
+  background:var(--paper);
+}
+.profile-shell{
+  max-width:620px;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+.profile-header{
+  background:var(--green);
+  color:#fff;
+  padding:26px 24px;
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+.profile-avatar{
+  width:60px; height:60px;
+  flex-shrink:0;
+  border-radius:999px;
+  background:var(--gold);
+  color:var(--ink);
+  border:2.5px solid #fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+  font-size:1.5rem;
+  text-transform:uppercase;
+}
+.profile-header-info h1{ font-size:1.3rem; margin:0 0 2px; color:#fff; }
+.profile-header-info .profile-email{ font-size:.82rem; color:#CFE0EF; margin:0 0 8px; word-break:break-all; }
+
+.profile-quick-links{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:12px;
+}
+.profile-quick-link{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:var(--card);
+  border:2.5px solid var(--ink);
+  padding:14px 16px;
+  box-shadow:4px 4px 0 var(--ink);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.profile-quick-link:hover{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--ink); }
+.profile-quick-link .icon-inline{ width:1.6em; height:1.6em; flex-shrink:0; color:var(--blue-deep); }
+.profile-quick-link strong{ display:block; font-size:.9rem; }
+.profile-quick-link small{ display:block; font-size:.74rem; color:#3E6B85; margin-top:2px; }
+
+.profile-card{
+  background:var(--card);
+  padding:22px 24px;
+}
+.profile-card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px;
+}
+.profile-card-head h2{ font-size:1.05rem; margin:0; }
+
+.profile-info-list{ margin:0; display:flex; flex-direction:column; gap:14px; }
+.profile-info-list > div{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:12px;
+  padding-bottom:14px;
+  border-bottom:1.5px dashed #C9DCE9;
+}
+.profile-info-list > div:last-child{ border-bottom:none; padding-bottom:0; }
+.profile-info-list dt{
+  font-family:'JetBrains Mono', monospace;
+  font-size:.68rem;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  color:#3E6B85;
+  flex-shrink:0;
+}
+.profile-info-list dd{
+  margin:0;
+  font-weight:700;
+  font-size:.88rem;
+  text-align:right;
+  word-break:break-word;
+}
+
+.profile-footer-actions{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+@media (max-width:480px){
+  .profile-header{ flex-direction:column; text-align:center; }
+  .profile-info-list > div{ flex-direction:column; align-items:flex-start; gap:3px; }
+  .profile-info-list dd{ text-align:left; }
+  .profile-footer-actions{ flex-direction:column-reverse; align-items:stretch; }
+  .profile-footer-actions .back-link{ text-align:center; }
+}
+
 /* ---------- Auth tabs (akun.html) ---------- */
 .auth-tabs{
   display:flex;

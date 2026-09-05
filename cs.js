@@ -14,6 +14,19 @@ let chatPollTimer = null;
 let chatLastCount = 0;
 
 const ROLE_LEVEL = { member: 1, cs: 2, admin: 3, owner: 4 };
+
+// ---------- Cache profil (anti-kedip login pas pindah halaman) ----------
+// Disimpan di sessionStorage (bukan localStorage) -> otomatis hilang kalau
+// tab/browser ditutup, jadi gak numpuk data basi selamanya. Dipakai bareng
+// oleh cs.html, admin.html, akun.html (key sama), supaya login sekali di
+// salah satu halaman langsung kerasa di halaman lain dalam tab yang sama.
+const PROFILE_CACHE_KEY = 'exschool_profile_cache';
+function cacheProfile(profile) {
+  try { sessionStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile)); } catch (e) { /* abaikan */ }
+}
+function clearCachedProfile() {
+  try { sessionStorage.removeItem(PROFILE_CACHE_KEY); } catch (e) { /* abaikan */ }
+}
 const STATUS_LABEL = {
   menunggu: 'Menunggu Konfirmasi',
   diproses: 'Diproses',
@@ -200,6 +213,7 @@ async function fetchProfileAndEnforceRole() {
     err.status = 403;
     throw err;
   }
+  cacheProfile(profile); // buat instan pas pindah ke admin.html/akun.html nanti
   return profile;
 }
 
@@ -247,12 +261,14 @@ async function handleLogin(e) {
 async function handleLogout() {
   await supabaseClient.auth.signOut();
   session = null;
+  clearCachedProfile();
   showLogin();
 }
 
 async function checkExistingSession() {
   const { data } = await supabaseClient.auth.getSession();
   if (!data.session) {
+    clearCachedProfile();
     showLogin();
     return;
   }
@@ -264,10 +280,16 @@ async function checkExistingSession() {
     if (err.status === 401 || err.status === 403) {
       await supabaseClient.auth.signOut();
       session = null;
+      clearCachedProfile();
       showLogin(err.status === 403 ? 'Akun ini bukan CS, admin, atau owner.' : '');
       return;
     }
-    showLogin(err.message || 'Gagal menghubungi server. Muat ulang halaman untuk coba lagi.');
+    // Server gangguan sesaat -> JANGAN hapus cache & jangan paksa ke layar
+    // login kalau kita sudah sempat tampilkan dashboard dari cache barusan
+    // (biar gak jadi kedip login->dashboard->login yang malah lebih ganggu).
+    if (!window.__cachedProfile) {
+      showLogin(err.message || 'Gagal menghubungi server. Muat ulang halaman untuk coba lagi.');
+    }
     return;
   }
   await startCsDashboard();
@@ -490,10 +512,17 @@ async function startCsDashboard() {
 
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', async () => {
+  // Anti-kedip: kalau head-script tadi udah nemu profil ke-cache yang
+  // rolenya cukup, tampilkan dashboard-nya SEKARANG (data lama, sekilas),
+  // sambil checkExistingSession() di bawah tetap verifikasi ulang ke
+  // server & refresh datanya. Kalau ternyata cache-nya udah gak valid
+  // (sesi habis / role berubah), checkExistingSession() yang koreksi.
+  if (window.__cachedProfile) showDashboard(window.__cachedProfile);
+
   try {
     await initSupabase();
   } catch (err) {
-    showLogin(err.message);
+    if (!window.__cachedProfile) showLogin(err.message);
     return;
   }
 

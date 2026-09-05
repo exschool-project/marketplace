@@ -3,6 +3,18 @@ const API_BASE = '/api';
 let supabaseClient = null;
 let session = null;
 
+// ---------- Cache profil (anti-kedip login pas pindah halaman) ----------
+// Key sama kayak cs.js & admin.js — login sekali di panel manapun langsung
+// kerasa instan di sini juga, dalam tab yang sama. Hilang otomatis kalau
+// tab/browser ditutup (sessionStorage, bukan localStorage).
+const PROFILE_CACHE_KEY = 'exschool_profile_cache';
+function cacheProfile(profile) {
+  try { sessionStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile)); } catch (e) { /* abaikan */ }
+}
+function clearCachedProfile() {
+  try { sessionStorage.removeItem(PROFILE_CACHE_KEY); } catch (e) { /* abaikan */ }
+}
+
 async function authedFetch(url, options = {}) {
   const token = session?.access_token;
   const headers = Object.assign(
@@ -36,8 +48,20 @@ function showAuth() {
 function showProfile(profile) {
   document.getElementById('auth-view').classList.add('hidden');
   document.getElementById('profile-view').classList.remove('hidden');
+  populateProfileFields(profile);
+  // Balik ke mode TAMPIL tiap kali profil baru ditampilkan (mis. abis
+  // login) — jangan nyangkut di mode edit.
+  setProfileEditMode(false);
+}
+
+// Isi ulang semua field (mode tampil & form edit) tanpa ganggu mode yang
+// lagi aktif — dipakai showProfile() (abis login) DAN handleProfileEdit()
+// (abis simpan, biar pesan "tersimpan" di form sempat kelihatan dulu
+// sebelum otomatis balik ke mode tampil).
+function populateProfileFields(profile) {
   document.getElementById('profile-name').textContent = `Halo, ${profile.full_name || 'kamu'}!`;
   document.getElementById('profile-email').textContent = profile.email;
+  document.getElementById('profile-avatar').textContent = (profile.full_name || profile.email || '?').trim().charAt(0);
 
   const normalizedRole = String(profile.role || '').trim().toLowerCase();
 
@@ -54,14 +78,33 @@ function showProfile(profile) {
   const canSeeCsPanel = normalizedRole === 'cs' || normalizedRole === 'admin' || normalizedRole === 'owner';
   csLinkWrap.classList.toggle('hidden', !canSeeCsPanel);
 
-  // Isi form "Ubah profil" dengan data terbaru.
+  // Mode TAMPIL (kartu "Informasi Akun") — nilai dari server dianggap paling benar.
+  document.getElementById('profile-info-name').textContent = profile.full_name || '—';
+  document.getElementById('profile-info-email').textContent = profile.email || '—';
+  document.getElementById('profile-info-phone').textContent = profile.phone || '—';
+  document.getElementById('profile-info-other').textContent = profile.other_contact || '—';
+
+  // Isi form "Ubah profil" juga (buat kalau user langsung klik Edit).
   document.getElementById('profile-edit-name').value = profile.full_name || '';
   document.getElementById('profile-edit-email').value = profile.email || '';
   document.getElementById('profile-edit-phone').value = profile.phone || '';
   document.getElementById('profile-edit-other-contact').value = profile.other_contact || '';
-  document.getElementById('profile-edit-error').style.display = 'none';
-  document.getElementById('profile-edit-success').style.display = 'none';
 }
+
+// ---------- Toggle mode Tampil <-> Ubah di kartu "Informasi Akun" ----------
+let profileEditAutoCloseTimer = null;
+function setProfileEditMode(editing) {
+  clearTimeout(profileEditAutoCloseTimer);
+  document.getElementById('profile-info-card').classList.toggle('hidden', editing);
+  document.getElementById('profile-edit-form').classList.toggle('hidden', !editing);
+  if (editing) {
+    document.getElementById('profile-edit-error').style.display = 'none';
+    document.getElementById('profile-edit-success').style.display = 'none';
+  }
+}
+
+document.getElementById('profile-edit-toggle').addEventListener('click', () => setProfileEditMode(true));
+document.getElementById('profile-edit-cancel').addEventListener('click', () => setProfileEditMode(false));
 
 // ---------- Tab Masuk / Daftar ----------
 function switchAuthTab(tab) {
@@ -90,6 +133,7 @@ async function handleLogin(e) {
     if (error) throw new Error('Email atau kata sandi salah.');
     session = data.session;
     const profile = await authedFetch(`${API_BASE}/auth/profile`);
+    cacheProfile(profile);
     showProfile(profile);
   } catch (err) {
     errEl.textContent = err.message;
@@ -134,6 +178,7 @@ async function handleRegister(e) {
     }
     session = data.session;
     const profile = await authedFetch(`${API_BASE}/auth/profile`);
+    cacheProfile(profile);
     showProfile(profile);
   } catch (err) {
     errEl.textContent = err.message;
@@ -178,7 +223,8 @@ async function handleProfileEdit(e) {
       }
     }
 
-    showProfile(updated);
+    populateProfileFields(updated);
+    cacheProfile(updated);
     if (!updated.contact_saved) {
       successEl.textContent = 'Nama & email tersimpan. Kontak opsional belum bisa disimpan (migrasi database belum dijalankan) — cek ADD_PROFILE_CONTACT.sql.';
       successEl.style.color = '#8a5a00';
@@ -189,6 +235,11 @@ async function handleProfileEdit(e) {
       successEl.style.color = '#1a7d3a';
     }
     successEl.style.display = 'block';
+    // Kasih waktu sebentar biar pesan "tersimpan" kelihatan dulu, baru
+    // otomatis balik ke mode tampil (kartu "Informasi Akun"). Timer-nya
+    // otomatis dibatalkan kalau user keburu klik Edit/Batal lagi (lihat
+    // setProfileEditMode).
+    profileEditAutoCloseTimer = setTimeout(() => setProfileEditMode(false), 1400);
   } catch (err) {
     errEl.textContent = err.message;
     errEl.style.display = 'block';
@@ -202,6 +253,7 @@ async function handleProfileEdit(e) {
 async function handleLogout() {
   await supabaseClient.auth.signOut();
   session = null;
+  clearCachedProfile();
   showAuth();
 }
 
@@ -209,38 +261,52 @@ async function handleLogout() {
 async function checkExistingSession() {
   const { data } = await supabaseClient.auth.getSession();
   if (!data.session) {
+    clearCachedProfile();
     showAuth();
     return;
   }
   session = data.session;
   try {
     const profile = await authedFetch(`${API_BASE}/auth/profile`);
+    cacheProfile(profile);
     showProfile(profile);
   } catch (err) {
     if (err.status === 401 || err.status === 403) {
       // Sesi memang tidak valid — logout beneran, kembali ke form login.
       await supabaseClient.auth.signOut();
       session = null;
+      clearCachedProfile();
       showAuth();
       return;
     }
     // Server gangguan / error — sesi Supabase-nya masih valid, jangan logout
-    // paksa. Tampilkan pesan ASLI dari server (bukan teks generik) di form
-    // login supaya kelihatan jelas ini bukan "belum pernah login".
-    const errEl = document.getElementById('login-error');
-    errEl.textContent = `Gagal memuat profil: ${err.message || 'server tidak merespons'}. Sesi kamu masih tersimpan, coba muat ulang halaman.`;
-    errEl.style.display = 'block';
-    showAuth();
+    // paksa. Kalau profil udah sempat tampil dari cache, biarkan tetap
+    // tampil (jangan malah lempar balik ke form login gara-gara gangguan
+    // sesaat) — cukup kasih tahu lewat pesan error di form kalau memang
+    // belum ada apa-apa yang tampil.
+    if (!window.__cachedProfile) {
+      const errEl = document.getElementById('login-error');
+      errEl.textContent = `Gagal memuat profil: ${err.message || 'server tidak merespons'}. Sesi kamu masih tersimpan, coba muat ulang halaman.`;
+      errEl.style.display = 'block';
+      showAuth();
+    }
   }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Anti-kedip: kalau head-script nemu profil ke-cache, tampilkan Profil
+  // SEKARANG (data lama, sekilas), sambil checkExistingSession() di bawah
+  // tetap verifikasi ulang ke server & refresh datanya.
+  if (window.__cachedProfile) showProfile(window.__cachedProfile);
+
   try {
     await initSupabase();
   } catch (err) {
-    const errEl = document.getElementById('login-error');
-    errEl.textContent = err.message;
-    errEl.style.display = 'block';
+    if (!window.__cachedProfile) {
+      const errEl = document.getElementById('login-error');
+      errEl.textContent = err.message;
+      errEl.style.display = 'block';
+    }
     return;
   }
 
