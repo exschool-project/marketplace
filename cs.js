@@ -320,7 +320,7 @@ function renderOrderList() {
   wrap.innerHTML = filtered.map((o) => `
     <button type="button" class="cs-order-row ${o.id === activeOrderId ? 'active' : ''} ${orderNeedsReply(o) ? 'needs-reply' : ''}" data-id="${o.id}">
       <div class="cs-order-row-top">
-        <span class="cs-order-row-code mono">${escapeHtml(o.order_code)}</span>
+        <span class="cs-order-row-code mono">${orderNeedsReply(o) ? '<span class="unread-dot" title="Perlu dibalas"></span>' : ''}${escapeHtml(o.order_code)}</span>
         <span class="order-status-badge order-status-${o.status}" style="font-size:.62rem; padding:2px 7px;">${STATUS_LABEL[o.status] || o.status}</span>
       </div>
       <div class="cs-order-row-name">${escapeHtml(o.buyer_name)} · ${escapeHtml(o.product_name)}</div>
@@ -331,7 +331,6 @@ function renderOrderList() {
     </button>
   `).join('');
 
-  const statEl = document.querySelector('title');
   const needReplyCount = allOrders.filter(orderNeedsReply).length;
   document.title = needReplyCount > 0 ? `(${needReplyCount}) CS — EX-SCHOOL` : 'CS — EX-SCHOOL';
 }

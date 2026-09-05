@@ -2,6 +2,39 @@
 
 .admin-body{ background:var(--paper); }
 
+/* Badge notifikasi belum dibaca — lingkaran merah kecil dgn angka,
+   nempel di pojok kanan-atas elemen yang dikasih class "has-badge"
+   (elemen itu perlu position:relative, sudah termasuk di sini). */
+.has-badge{ position:relative; }
+.unread-badge{
+  position:absolute;
+  top:-8px; right:-8px;
+  min-width:19px; height:19px;
+  padding:0 4px;
+  border-radius:999px;
+  background:#E53935;
+  color:#fff;
+  border:2px solid var(--ink);
+  font-family:'JetBrains Mono', monospace;
+  font-size:.65rem;
+  font-weight:700;
+  line-height:15px;
+  text-align:center;
+  pointer-events:none;
+}
+/* Titik merah kecil di baris pesanan yang perlu dibalas (dipasang di
+   dalam elemen yang position:relative, mis. cs-order-row-code /
+   admin-row-text). */
+.unread-dot{
+  display:inline-block;
+  width:8px; height:8px;
+  border-radius:999px;
+  background:#E53935;
+  margin-right:5px;
+  flex-shrink:0;
+  vertical-align:middle;
+}
+
 /* ---------- Auth tabs (akun.html) ---------- */
 .auth-tabs{
   display:flex;
@@ -272,6 +305,7 @@
   padding:10px 12px;
   flex-wrap:wrap;
 }
+.admin-row.needs-reply{ background:#FFF8E4; border-color:#E5A700; }
 .admin-row-text{ flex:1; font-size:.88rem; font-weight:500; min-width:160px; }
 .admin-row-sub{ color:#3E6B85; font-size:.78rem; }
 .admin-row-tag{

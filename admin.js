@@ -718,18 +718,48 @@ function formatOrderTime(iso) {
   }
 }
 
+// Pesanan dianggap "perlu dibalas" kalau masih aktif (bukan selesai/
+// dibatalkan) dan pesan terakhirnya BUKAN dari admin/CS — sama
+// persis kayak logika di cs.js, biar badge-nya konsisten di kedua panel.
+function orderNeedsReply(o) {
+  return o.status !== 'selesai' && o.status !== 'dibatalkan' && o.last_sender_type && o.last_sender_type !== 'admin';
+}
+
+// Update badge merah di tombol "CS Panel" + judul tab browser, dipanggil
+// tiap kali daftar pesanan di-refresh (termasuk pas silent-poll).
+function updateUnreadBadge(orders) {
+  const count = orders.filter(orderNeedsReply).length;
+
+  document.title = count > 0 ? `(${count}) Admin — EX-SCHOOL` : 'Admin — EX-SCHOOL';
+
+  const link = document.getElementById('cs-panel-link');
+  if (!link) return;
+  let badge = link.querySelector('.unread-badge');
+  if (count > 0) {
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'unread-badge';
+      link.appendChild(badge);
+    }
+    badge.textContent = count > 99 ? '99+' : String(count);
+  } else if (badge) {
+    badge.remove();
+  }
+}
+
 async function loadOrdersAdmin() {
   const statusFilter = document.getElementById('order-status-filter')?.value || '';
   const { data: allData } = await authedFetch(`${API_BASE}/orders`);
   detectAndNotifyOrderMessages(allData);
+  updateUnreadBadge(allData);
 
   const data = statusFilter ? allData.filter((o) => o.status === statusFilter) : allData;
   const list = document.getElementById('order-list');
 
   list.innerHTML = data.map((o) => `
-    <div class="admin-row" data-id="${o.id}" data-code="${escapeHtml(o.order_code)}" data-buyer="${escapeHtml(o.buyer_name)}" data-status="${o.status}">
+    <div class="admin-row ${orderNeedsReply(o) ? 'needs-reply' : ''}" data-id="${o.id}" data-code="${escapeHtml(o.order_code)}" data-buyer="${escapeHtml(o.buyer_name)}" data-status="${o.status}">
       <span class="admin-row-text">
-        <span class="mono">${escapeHtml(o.order_code)}</span> — ${escapeHtml(o.product_name)} · Rp${Number(o.product_price).toLocaleString('id-ID')}
+        ${orderNeedsReply(o) ? '<span class="unread-dot" title="Perlu dibalas"></span>' : ''}<span class="mono">${escapeHtml(o.order_code)}</span> — ${escapeHtml(o.product_name)} · Rp${Number(o.product_price).toLocaleString('id-ID')}
         <span class="admin-row-sub">${escapeHtml(o.buyer_name)} · ${escapeHtml(o.buyer_phone)} · ${formatOrderTime(o.created_at)}</span>
       </span>
       <select class="team-row-select order-status-select">
