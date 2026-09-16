@@ -3,130 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EX-SCHOOL — Yayasan Aqilah Hidayah</title>
+<title>EX-SCHOOL — Marketplace Global</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 
-  <!-- NAV: halaman utama (profil), BUKAN halaman belanja. Link "Belanja
-       Sekarang" mengarah ke belanja.html, halaman yang terpisah total. -->
-  <header class="site site-landing">
+  <!-- BANNER: diisi dari /api/banner -->
+  <div class="banner" role="banner">
+    <div class="banner-track" id="banner-track"></div>
+  </div>
+
+  <!-- NAV -->
+  <header class="site">
     <div class="nav-wrap">
-      <a class="logo" href="index.html">EX-SCHOOL</a>
-      <nav class="landing-nav" aria-label="Navigasi halaman utama">
-        <a href="#beranda">Beranda</a>
-        <a href="#tentang">Tentang</a>
-        <a href="#testimoni">Testimoni</a>
-      </nav>
+      <div class="logo">EX-SCHOOL</div>
+      <form class="search" role="search" id="search-form">
+        <input type="text" id="search-input" placeholder="Cari produk, toko, atau kategori...">
+        <button type="submit" aria-label="Cari">CARI</button>
+      </form>
       <div class="nav-actions">
+        <a class="btn btn-green hover-lift-sm brutal-sm" href="belanja.html">Belanja</a>
         <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html" id="nav-account-btn">Masuk</a>
-        <a class="btn btn-green hover-lift-sm brutal-sm" href="belanja.html">Belanja Sekarang</a>
+        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg> Riwayat</a>
       </div>
     </div>
   </header>
 
+  <!-- BERANDA / HERO -->
   <main>
-    <!-- BERANDA: pengenalan resmi EX-SCHOOL / Yayasan Aqilah Hidayah. -->
-    <section class="intro" id="beranda">
-      <div class="intro-wrap">
-        <span class="eyebrow eyebrow-light">◆ Yayasan Aqilah Hidayah</span>
-        <h1 class="intro-title">Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
-        <p class="intro-org">Marketplace resmi dengan misi pendidikan &amp; sosial</p>
-        <p class="intro-lead">
-          EX-SCHOOL adalah marketplace resmi yang dikelola Yayasan Aqilah Hidayah
-          untuk mendukung kemandirian ekonomi umat lewat perdagangan yang jujur,
-          transparan, dan bermanfaat. Setiap transaksi di sini turut menopang
-          program pendidikan dan sosial yayasan — belanja jadi ladang amal.
-        </p>
-        <div class="intro-stats">
-          <div class="stat">
-            <b id="intro-stat-products">–</b>
-            <span>Produk terdaftar</span>
-          </div>
-          <div class="stat">
-            <b id="intro-stat-categories">–</b>
-            <span>Kategori</span>
-          </div>
-          <div class="stat">
-            <b>100%</b>
-            <span>Untuk toko lokal</span>
+    <!-- Hero overlay: gambar/banner jadi background utama (position:relative pada
+         .hero-visual), teks & tombol "Mulai Belanja" MENIMPA gambar lewat
+         .hero-overlay-content (position:absolute). aspect-ratio pada .hero-visual
+         bikin tingginya otomatis ikut lebar layar di semua device, diisi dari
+         /api/hero-banners. -->
+    <section class="hero" id="beranda">
+      <div class="hero-visual" id="hero-visual">
+        <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
+          <img id="hero-banner-img" class="hero-banner-img" alt="Banner" loading="lazy">
+          <div class="hero-banner-overlay">
+            <div class="hero-banner-text">
+              <h2 id="hero-banner-title" class="hero-banner-title"></h2>
+              <p id="hero-banner-subtitle" class="hero-banner-subtitle"></p>
+            </div>
           </div>
         </div>
-        <div class="intro-ctas">
-          <a href="belanja.html" class="btn btn-green hover-lift brutal">Belanja Sekarang →</a>
-          <a href="#tentang" class="btn btn-ink hover-lift-sm brutal-sm">Kenali Kami Lebih Jauh</a>
+
+        <div class="hero-overlay-content">
+          <div class="hero-copy">
+            <span class="eyebrow">◆ Beranda </span>
+            <h1>Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
+            <p class="hero-org">Yayasan Aqilah Hidayah</p>
+            <p class="lead">Marketplace buat kamu yang cari barang bagus, harga jujur, dan pengiriman cepat — dari toko-toko lokal terpercaya di seluruh Indonesia.</p>
+            <div class="hero-ctas">
+              <a href="belanja.html" class="btn btn-green hover-lift brutal">Mulai Belanja</a>
+            </div>
+          </div>
+        </div>
+
+        <div id="hero-visual-cards" class="hero-visual-cards">
+          <!-- Diisi dari /api/products?featured=true (produk populer pilihan owner) -->
         </div>
       </div>
     </section>
 
-    <!-- TENTANG: profil, visi, misi, komitmen yayasan. -->
-    <section class="section profile" id="tentang">
-      <div class="section-head">
-        <div>
-          <h2>Tentang EX-SCHOOL</h2>
-          <p>Marketplace dengan misi sosial dari Yayasan Aqilah Hidayah.</p>
-        </div>
-      </div>
-      <p class="profile-desc">
-        Berawal dari kebutuhan yayasan untuk membuka sumber pendanaan yang
-        mandiri, EX-SCHOOL hadir sebagai wadah bagi toko-toko lokal terpercaya
-        untuk berjualan sekaligus berbagi manfaat. Setiap transaksi yang
-        terjadi di sini turut mendukung program pendidikan dan sosial yang
-        dijalankan Yayasan Aqilah Hidayah.
-      </p>
-      <div class="profile-grid">
-        <div class="profile-card brutal-sm">
-          <span class="num">Visi</span>
-          <p>Menjadi wadah usaha yang mandiri, amanah, dan memberi manfaat luas
-            bagi umat lewat perdagangan yang halal dan berkah.</p>
-        </div>
-        <div class="profile-card brutal-sm">
-          <span class="num">Misi</span>
-          <p>Mendukung toko-toko lokal terpercaya, membuka lapangan kerja, dan
-            menyalurkan sebagian hasil usaha untuk program pendidikan &amp;
-            sosial yayasan.</p>
-        </div>
-        <div class="profile-card brutal-sm">
-          <span class="num">Komitmen</span>
-          <p>Harga jujur, kualitas terjaga, dan pelayanan yang cepat tanggap
-            lewat ruang chat langsung dengan tim kami.</p>
-        </div>
-      </div>
-    </section>
+    <!-- CATEGORY CHIPS + PRODUCT GRID lengkap sekarang ada di belanja.html
+         (banner/hero cuma di beranda, biar halaman belanja bersih & fokus
+         tanpa banner — lihat belanja.html). -->
 
-    <!-- TESTIMONI: kutipan dari pembeli/mitra toko. Konten masih contoh —
-         gampang diganti manual di sini kalau sudah ada testimoni asli. -->
-    <section class="testimoni" id="testimoni">
+    <!-- WHY US -->
+    <section class="why">
       <div class="section">
         <div class="section-head">
           <div>
-            <h2>Apa kata mereka</h2>
-            <p>Cerita dari pembeli dan mitra toko yang sudah bergabung.</p>
+            <h2>Kenapa belanja di EX-SCHOOL</h2>
+            <p>Bukan cuma marketplace, ini rumah buat toko-toko lokal.</p>
           </div>
         </div>
-        <div class="testimoni-grid">
-          <div class="testimoni-card brutal-sm">
-            <p class="testimoni-quote">"Belanja di EX-SCHOOL enak banget, harganya jujur dan chat langsung dibalas admin. Senang juga tahu belanja di sini ikut bantu program yayasan."</p>
-            <div class="testimoni-author">
-              <span class="testimoni-name">Ratna W.</span>
-              <span class="testimoni-role">Pembeli</span>
-            </div>
+        <div class="why-grid">
+          <div class="why-card">
+            <span class="num">01 / Ongkir</span>
+            <h3>Gratis ongkir tiap hari</h3>
+            <p>Minimal belanja 50rb, ongkir ditanggung buat semua kota di Indonesia.</p>
           </div>
-          <div class="testimoni-card brutal-sm">
-            <p class="testimoni-quote">"Sejak gabung jadi mitra toko, jangkauan pembeli kami jadi lebih luas. Prosesnya jelas dan tim EX-SCHOOL responsif."</p>
-            <div class="testimoni-author">
-              <span class="testimoni-name">Fajar S.</span>
-              <span class="testimoni-role">Mitra Toko</span>
-            </div>
+          <div class="why-card">
+            <span class="num">02 / Jaminan</span>
+            <h3>Uang kembali 100%</h3>
+            <p>Barang gak sesuai? Ajukan komplain dan dana otomatis balik ke kamu.</p>
           </div>
-          <div class="testimoni-card brutal-sm">
-            <p class="testimoni-quote">"Konsepnya bagus, belanja sambil ikut mendukung kegiatan sosial yayasan. Pengirimannya juga cepat."</p>
-            <div class="testimoni-author">
-              <span class="testimoni-name">Dewi A.</span>
-              <span class="testimoni-role">Pembeli</span>
-            </div>
+          <div class="why-card">
+            <span class="num">03 / Lokal</span>
+            <h3>Dukung toko sekitar</h3>
+            <p>Setiap transaksi langsung ke penjual lokal, tanpa perantara ribet.</p>
           </div>
         </div>
       </div>
@@ -134,10 +103,12 @@
 
     <!-- CTA STRIP -->
     <section class="cta-strip">
-      <div class="cta-strip-wrap">
-        <h2>Siap mulai belanja?</h2>
-        <p>Ratusan produk dari toko-toko lokal terpercaya menunggu kamu.</p>
-        <a href="belanja.html" class="btn btn-green hover-lift brutal">Buka Halaman Belanja →</a>
+      <div class="cta-strip-inner">
+        <div>
+          <h2>Siap belanja?</h2>
+          <p>Ratusan produk dari toko-toko lokal terpercaya nunggu buat kamu jelajahi.</p>
+        </div>
+        <a href="belanja.html" class="btn btn-green hover-lift brutal">Lihat Semua Produk →</a>
       </div>
     </section>
   </main>
@@ -147,15 +118,14 @@
     <div class="foot-wrap">
       <div>
         <div class="logo" style="display:inline-block; margin-bottom:12px;">EX-SCHOOL</div>
-        <p class="foot-desc">Marketplace resmi Yayasan Aqilah Hidayah — belanja jujur, jadi ladang amal.</p>
+        <p class="foot-desc">Marketplace lokal buat kamu belanja apa aja, dari toko kepercayaan sendiri.</p>
         <div id="social-links" class="social-links"></div>
       </div>
       <div>
-        <h4>Halaman</h4>
+        <h4>Belanja</h4>
         <ul>
-          <li><a href="#tentang">Tentang Kami</a></li>
-          <li><a href="#testimoni">Testimoni</a></li>
-          <li><a href="belanja.html">Belanja</a></li>
+          <li><a href="belanja.html#kategori">Kategori</a></li>
+          <li><a href="belanja.html">Semua Produk</a></li>
         </ul>
       </div>
       <div>
@@ -166,9 +136,9 @@
         </ul>
       </div>
       <div>
-        <h4>Akun</h4>
+        <h4>Perusahaan</h4>
         <ul>
-          <li><a href="akun.html">Masuk / Daftar</a></li>
+          <li><a href="#">Tentang Kami</a></li>
         </ul>
       </div>
     </div>
@@ -180,7 +150,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="icons.js"></script>
-  <script src="common.js"></script>
-  <script src="landing.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

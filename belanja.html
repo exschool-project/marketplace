@@ -4,27 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Belanja — EX-SCHOOL</title>
+<meta name="description" content="Jelajahi semua produk dari toko-toko lokal terpercaya di EX-SCHOOL.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 
-  <!-- BANNER: diisi dari /api/banner -->
-  <div class="banner" role="banner">
-    <div class="banner-track" id="banner-track"></div>
-  </div>
-
-  <!-- NAV: halaman belanja, terpisah dari halaman utama (index.html). -->
+  <!-- NAV (sama seperti beranda — TANPA strip banner promo & TANPA hero.
+       Banner cuma ada di beranda; halaman ini murni buat belanja, jadi
+       dibikin bersih & fokus ke produk. -->
   <header class="site">
     <div class="nav-wrap">
-      <a class="logo" href="index.html">EX-SCHOOL</a>
+      <a href="index.html" class="logo" style="text-decoration:none;">EX-SCHOOL</a>
       <form class="search" role="search" id="search-form">
         <input type="text" id="search-input" placeholder="Cari produk, toko, atau kategori...">
         <button type="submit" aria-label="Cari">CARI</button>
       </form>
       <div class="nav-actions">
-        <a class="btn btn-ink hover-lift-sm brutal-sm nav-back" href="index.html">← Halaman Utama</a>
         <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html" id="nav-account-btn">Masuk</a>
         <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg> Riwayat</a>
       </div>
@@ -32,85 +29,24 @@
   </header>
 
   <main>
-    <!-- Hero overlay: gambar/banner jadi background utama (position:relative pada
-         .hero-visual), teks & tombol "Mulai Belanja" MENIMPA gambar lewat
-         .hero-overlay-content (position:absolute). aspect-ratio pada .hero-visual
-         bikin tingginya otomatis ikut lebar layar di semua device, diisi dari
-         /api/hero-banners. Media banner bisa berupa GAMBAR atau VIDEO. -->
-    <section class="hero" id="beranda-belanja">
-      <div class="hero-visual" id="hero-visual">
-        <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
-          <img id="hero-banner-img" class="hero-banner-img" alt="Banner" loading="lazy">
-          <video id="hero-banner-video" class="hero-banner-img hidden" autoplay muted loop playsinline></video>
-          <div class="hero-banner-overlay">
-            <div class="hero-banner-text">
-              <h2 id="hero-banner-title" class="hero-banner-title"></h2>
-              <p id="hero-banner-subtitle" class="hero-banner-subtitle"></p>
-            </div>
-          </div>
-        </div>
-
-        <div class="hero-overlay-content">
-          <div class="hero-copy">
-            <span class="eyebrow">◆ Belanja</span>
-            <h1>Cari <span class="hl">Barang Favorit</span> Kamu</h1>
-            <p class="hero-org">EX-SCHOOL Marketplace</p>
-            <p class="lead">Barang bagus, harga jujur, dan pengiriman cepat — dari toko-toko lokal terpercaya di seluruh Indonesia.</p>
-            <div class="hero-ctas">
-              <a href="#produk" class="btn btn-green hover-lift brutal">Lihat Produk</a>
-            </div>
-          </div>
-        </div>
-
-        <div id="hero-visual-cards" class="hero-visual-cards">
-          <!-- Diisi dari /api/products?featured=true (produk populer pilihan owner) -->
-        </div>
+    <!-- SHOP HEAD: breadcrumb + judul halaman, pengganti hero/banner —
+         area tenang & rapi, khas halaman katalog di situs premium. -->
+    <div class="shop-head">
+      <div class="shop-head-inner">
+        <p class="shop-breadcrumb"><a href="index.html">Beranda</a> <span>/</span> Belanja</p>
+        <h1>Belanja</h1>
+        <p class="shop-head-sub">Semua produk dari toko-toko lokal terpercaya — kualitas terjamin, harga jujur.</p>
       </div>
-    </section>
+    </div>
 
     <!-- CATEGORY CHIPS: diisi dari /api/categories -->
     <div id="kategori"></div>
     <nav class="cats" id="category-nav" aria-label="Kategori produk"></nav>
 
-
     <!-- PRODUCT GRID: diisi dari /api/products -->
-    <section class="section" id="produk">
-      <div class="section-head">
-        <div>
-          <h2>Lagi rame dicari</h2>
-          <p>Produk pilihan dari toko-toko dengan rating tertinggi.</p>
-        </div>
-      </div>
+    <section class="section shop-section" id="produk">
+      <p class="shop-result-count" id="shop-result-count"></p>
       <div class="grid" id="product-grid"></div>
-    </section>
-
-    <!-- WHY US -->
-    <section class="why">
-      <div class="section">
-        <div class="section-head">
-          <div>
-            <h2>Kenapa belanja di EX-SCHOOL</h2>
-            <p>Bukan cuma marketplace, ini rumah buat toko-toko lokal.</p>
-          </div>
-        </div>
-        <div class="why-grid">
-          <div class="why-card">
-            <span class="num">01 / Ongkir</span>
-            <h3>Gratis ongkir tiap hari</h3>
-            <p>Minimal belanja 50rb, ongkir ditanggung buat semua kota di Indonesia.</p>
-          </div>
-          <div class="why-card">
-            <span class="num">02 / Jaminan</span>
-            <h3>Uang kembali 100%</h3>
-            <p>Barang gak sesuai? Ajukan komplain dan dana otomatis balik ke kamu.</p>
-          </div>
-          <div class="why-card">
-            <span class="num">03 / Lokal</span>
-            <h3>Dukung toko sekitar</h3>
-            <p>Setiap transaksi langsung ke penjual lokal, tanpa perantara ribet.</p>
-          </div>
-        </div>
-      </div>
     </section>
   </main>
 
@@ -137,10 +73,9 @@
         </ul>
       </div>
       <div>
-        <h4>Yayasan</h4>
+        <h4>Perusahaan</h4>
         <ul>
-          <li><a href="index.html">Halaman Utama</a></li>
-          <li><a href="index.html#tentang">Tentang Kami</a></li>
+          <li><a href="index.html">Tentang Kami</a></li>
         </ul>
       </div>
     </div>
@@ -193,7 +128,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="icons.js"></script>
-  <script src="common.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

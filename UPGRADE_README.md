@@ -184,79 +184,6 @@ terbaca oleh functions.
   jaga-jaga kalau project Supabase kamu punya trigger lain yang otomatis
   bikin baris profiles kosong tiap ada auth user baru.
 
-## 3b. Upgrade terbaru: Halaman Pengenalan + Banner Video
-
-### Section "Pengenalan" di paling atas beranda
-- `index.html` sekarang punya 2 section baru di paling atas, SEBELUM
-  halaman belanja (`#beranda`): section `#pengenalan` (profil singkat +
-  statistik jumlah produk/kategori + tombol "Mulai Belanja") dan
-  `#pengenalan-detail` (Visi / Misi / Komitmen yayasan).
-- Tombol "Mulai Belanja" di section ini scroll ke `#beranda` (halaman
-  belanja yang sudah ada, tidak berubah alurnya).
-- Angka statistik (jumlah produk & kategori) diisi otomatis lewat
-  `loadIntroStats()` di `script.js`, ambil dari `/api/products` &
-  `/api/categories` yang sudah ada — tidak perlu endpoint baru.
-- Teks profil (visi/misi/deskripsi yayasan) masih placeholder generik —
-  edit langsung isinya di `index.html` (section `#pengenalan` dan
-  `#pengenalan-detail`) sesuai profil asli Yayasan Aqilah Hidayah.
-
-### Banner Gambar sekarang bisa VIDEO juga
-- Input file di panel **Banner Gambar/Video** (`admin.html`, khusus
-  owner) sekarang terima `image/*,video/*`. Sistem otomatis mendeteksi
-  jenis file dan mengunggahnya ke Cloudinary lewat endpoint yang sesuai
-  (`image/upload` atau `video/upload`).
-- **Wajib jalankan SQL baru**: `ADD_HERO_BANNER_MEDIA_TYPE.sql` — nambah
-  kolom `media_type` (`'image'` / `'video'`, default `'image'`) di
-  tabel `hero_banners`. Aman dijalankan meski sudah ada banner lama
-  (otomatis dianggap `'image'`).
-- Di beranda (`index.html`), banner video otomatis diputar (autoplay,
-  muted, loop, tanpa kontrol) menggantikan `<img>` kalau `media_type`
-  banner yang aktif adalah `'video'`.
-- `api/upload-signature.js` sekarang menerima `resourceType` di body
-  request (`'image'` atau `'video'`) untuk menentukan endpoint
-  Cloudinary yang ditandatangani.
-
-## 3c. Upgrade terbaru: Halaman Utama & Halaman Belanja jadi TERPISAH + palet warna baru
-
-### Sekarang 2 halaman beneran, bukan cuma 2 section
-- **`index.html`** = Halaman Utama (profil resmi Yayasan Aqilah Hidayah):
-  section Beranda (pengenalan singkat), Tentang (visi/misi/komitmen +
-  deskripsi), Testimoni (kutipan pembeli/mitra toko), dan CTA strip.
-  Tidak ada produk/kategori/keranjang di halaman ini sama sekali.
-- **`belanja.html`** = Halaman Belanja (marketplace-nya): pita banner
-  promo, banner gambar/video, kategori, grid produk, "Kenapa belanja di
-  EX-SCHOOL", dan modal Beli Sekarang. Ini yang dulu jadi bagian bawah
-  `index.html`, sekarang dipindah total ke file sendiri.
-- Tombol "Belanja Sekarang" di halaman utama mengarah ke `belanja.html`;
-  tombol "← Halaman Utama" di header `belanja.html` mengarah balik ke
-  `index.html`. Link "Riwayat Pesanan" di `pesanan.html` sekarang balik
-  ke `belanja.html` juga (bukan `index.html`), lebih sesuai alur belanja.
-- JS dipecah jadi 3 file: **`common.js`** (util bersama: fetch, tombol
-  Masuk/Profil, media sosial di footer — dipakai KEDUA halaman),
-  **`landing.js`** (khusus `index.html`: statistik produk/kategori),
-  dan **`script.js`** (khusus `belanja.html`: semua logic marketplace,
-  tidak berubah selain util yang dipindah ke `common.js`). Urutan
-  `<script>` di tiap halaman: `icons.js` → `common.js` → (`landing.js`
-  atau `script.js`).
-- Teks profil/visi/misi/testimoni di `index.html` masih placeholder —
-  edit langsung di file itu sesuai data asli yayasan.
-
-### Palet warna diganti total
-- Sebelumnya: navy + emas. Sekarang: **biru laut (warna utama), biru,
-  biru muda, hitam, dan putih** — tanpa emas sama sekali.
-- Diatur lewat CSS variables di `style.css` (`:root`): `--green` (biru
-  laut, warna dominan), `--blue` & `--blue-deep` (biru), `--blue-light`
-  (biru muda, dipakai buat aksen & background lembut kayak section
-  Testimoni), `--ink` (hitam, dipakai buat semua border/shadow brutalist
-  gantiin navy lama), `--accent`/`--accent-deep` (dulu namanya
-  `--gold`/`--gold-deep`, sekarang isinya biru muda/biru — dipakai di
-  badge & teks aksen di atas background gelap).
-- Karena ini CSS variables terpusat, perubahan ini otomatis kepakai di
-  SEMUA halaman (`index.html`, `belanja.html`, `akun.html`,
-  `pesanan.html`, `admin.html`, `cs.html`) — tidak perlu edit satu-satu.
-- Query string `style.css?v=3` dinaikkan di semua halaman biar browser
-  gak nyangkut di CSS lama yang ke-cache.
-
 ## 4. File baru yang ditambahkan
 
 ```
@@ -266,10 +193,6 @@ SETUP_UPGRADE.sql               → migrasi database (jalankan sekali)
 ADD_ORDERS_CHAT.sql             → migrasi tabel orders + order_messages
 ADD_ORDERS_LAST_MESSAGE.sql     → view orders_with_last_message (buat CS Panel)
 ADD_ROLE_CS.sql                 → migrasi role cs di tabel profiles
-ADD_HERO_BANNER_MEDIA_TYPE.sql  → migrasi media_type di hero_banners (video)
-belanja.html                    → halaman belanja (terpisah dari index.html)
-common.js                       → util bersama index.html & belanja.html
-landing.js                      → JS khusus halaman utama (index.html)
 api/orders.js                   → API pesanan + chat (publik & admin)
 pesanan.html, pesanan.js        → ruang chat pesanan untuk pembeli
 cs.html, cs.js                  → CS Panel — balas chat pembeli sampai selesai

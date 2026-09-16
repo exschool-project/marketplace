@@ -1,9 +1,27 @@
-// ---------------------------------------------------------------------
-// Logic khusus HALAMAN BELANJA (belanja.html): banner promo, banner
-// gambar/video, kategori, produk, pencarian, dan modal Beli Sekarang.
-// Butuh common.js (API_BASE, fetchJSON, escapeHtml, dll) sudah dimuat
-// duluan di halaman.
-// ---------------------------------------------------------------------
+const API_BASE = '/api';
+
+// Sesi login (kalau ada) — dipakai buat nandain pesanan checkout punya
+// akun siapa (opsional, checkout tanpa login tetap jalan normal). Diisi
+// oleh initNavAccountButton() pas halaman dimuat.
+let currentSession = null;
+
+// ---------- Util ----------
+function rupiah(value) {
+  return 'Rp' + Math.round(Number(value) / 1000) + 'rb';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = String(str ?? '');
+  return div.innerHTML;
+}
+
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || 'Terjadi kesalahan saat memuat data.');
+  return body;
+}
 
 // ---------- Banner ----------
 async function loadBanner() {
@@ -25,14 +43,10 @@ async function loadBanner() {
   }
 }
 
-// ---------- Banner Gambar/Video (upload, diatur owner) ----------
-// Media banner bisa berupa GAMBAR (image_url + media_type 'image', default
-// buat data lama) ATAU VIDEO (media_type 'video') — cuma satu yang
-// ditampilkan sekaligus, sisanya disembunyikan lewat class .hidden.
+// ---------- Banner Gambar (upload, diatur owner) ----------
 async function loadHeroBannerImage() {
   const wrap = document.getElementById('hero-banner-wrap');
   const img = document.getElementById('hero-banner-img');
-  const video = document.getElementById('hero-banner-video');
   const titleEl = document.getElementById('hero-banner-title');
   const subtitleEl = document.getElementById('hero-banner-subtitle');
   if (!wrap || !img) return;
@@ -44,23 +58,8 @@ async function loadHeroBannerImage() {
       return;
     }
     const banner = data[0]; // yang paling atas urutannya
-    const isVideo = banner.media_type === 'video';
-
-    if (isVideo && video) {
-      video.src = banner.image_url;
-      video.load();
-      video.classList.remove('hidden');
-      img.classList.add('hidden');
-    } else {
-      img.src = banner.image_url;
-      img.alt = banner.title || 'Banner';
-      img.classList.remove('hidden');
-      if (video) {
-        video.classList.add('hidden');
-        video.removeAttribute('src');
-      }
-    }
-
+    img.src = banner.image_url;
+    img.alt = banner.title || 'Banner';
     if (titleEl) titleEl.textContent = banner.title || '';
     if (subtitleEl) subtitleEl.textContent = banner.subtitle || '';
     if (banner.link_url) {
@@ -112,9 +111,20 @@ function initSearch() {
   const input = document.getElementById('search-input');
   if (!form || !input) return;
 
+  const hasCatalog = !!document.getElementById('product-grid');
+
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    currentSearch = input.value.trim();
+    const q = input.value.trim();
+
+    if (!hasCatalog) {
+      // Halaman ini (mis. beranda) gak punya grid produk -> arahkan ke
+      // halaman Belanja sambil bawa kata kuncinya.
+      window.location.href = `belanja.html${q ? `?q=${encodeURIComponent(q)}` : ''}`;
+      return;
+    }
+
+    currentSearch = q;
     // Pencarian nyari lintas kategori — reset chip ke "Semua" biar hasilnya
     // tidak kelihatan kosong padahal produknya ada di kategori lain.
     if (currentSearch) {
@@ -125,6 +135,16 @@ function initSearch() {
     loadProducts();
     document.getElementById('produk')?.scrollIntoView({ behavior: 'smooth' });
   });
+
+  // Datang dari halaman lain bawa ?q=... (mis. search di beranda diarahkan
+  // ke sini) -> langsung isi kotak cari & jalanin pencariannya.
+  if (hasCatalog) {
+    const initialQuery = new URLSearchParams(window.location.search).get('q');
+    if (initialQuery) {
+      input.value = initialQuery;
+      currentSearch = initialQuery;
+    }
+  }
 }
 
 // ---------- Produk ----------
@@ -172,6 +192,9 @@ async function loadProducts(categorySlug = currentCategory) {
   const grid = document.getElementById('product-grid');
   if (!grid) return;
 
+  const countEl = document.getElementById('shop-result-count');
+  if (countEl) countEl.textContent = '';
+
   renderProductSkeletons(grid);
 
   try {
@@ -190,10 +213,16 @@ async function loadProducts(categorySlug = currentCategory) {
       grid.innerHTML = currentSearch
         ? `<p class="grid-msg">Tidak ada produk yang cocok dengan "${escapeHtml(currentSearch)}".</p>`
         : `<p class="grid-msg">Belum ada produk di kategori ini.</p>`;
+      if (countEl) countEl.textContent = currentSearch ? `0 hasil untuk "${currentSearch}"` : '';
       return;
     }
 
     grid.innerHTML = filtered.map(productCardHTML).join('');
+    if (countEl) {
+      countEl.textContent = currentSearch
+        ? `${filtered.length} hasil untuk "${currentSearch}"`
+        : `${filtered.length} produk`;
+    }
   } catch (err) {
     grid.innerHTML = `<p class="grid-msg">Gagal memuat produk: ${escapeHtml(err.message)}</p>`;
   }
@@ -232,6 +261,25 @@ function renderHeroPicks(products) {
       </div>
     </div>
   `).join('');
+}
+
+// ---------- Media Sosial (diatur owner lewat admin panel) ----------
+async function loadSocialLinks() {
+  const wrap = document.getElementById('social-links');
+  if (!wrap) return;
+
+  try {
+    const { data } = await fetchJSON(`${API_BASE}/social-links`);
+    if (!data || data.length === 0) {
+      wrap.innerHTML = '';
+      return;
+    }
+    wrap.innerHTML = data
+      .map((s) => `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(s.platform)}</a>`)
+      .join('');
+  } catch (err) {
+    wrap.innerHTML = '';
+  }
 }
 
 // ---------- Beli Sekarang (modal) ----------
@@ -337,6 +385,30 @@ function initOrderModal() {
       submitBtn.textContent = 'Buat Pesanan';
     }
   });
+}
+
+// ---------- Nav: tombol Masuk -> Profil kalau udah login ----------
+async function initNavAccountButton() {
+  const btn = document.getElementById('nav-account-btn');
+  if (!window.supabase) return;
+
+  try {
+    const config = await fetchJSON(`${API_BASE}/config`);
+    const supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (data.session) {
+      currentSession = data.session;
+      if (btn) {
+        btn.innerHTML = `${ICONS.user} Profil`;
+        btn.setAttribute('aria-label', 'Profil akun saya');
+      }
+    }
+  } catch (err) {
+    // Gagal cek sesi (mis. offline) -> biarkan tombol default "Masuk",
+    // klik ke akun.html tetap kerja normal (dia cek sesi ulang di sana).
+    // currentSession tetap null -> checkout jalan seperti biasa (guest).
+  }
 }
 
 // ---------- Init ----------
