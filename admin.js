@@ -543,6 +543,72 @@ document.getElementById('social-list')?.addEventListener('click', async (e) => {
   }
 });
 
+// ---------- Testimoni (admin & owner) ----------
+async function loadTestimonialsAdmin() {
+  const { data } = await authedFetch(`${API_BASE}/testimonials`);
+  const list = document.getElementById('testimonial-list');
+
+  list.innerHTML = data.map((t) => `
+    <div class="admin-row" data-id="${t.id}">
+      <span class="admin-row-text">
+        ${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)} — ${escapeHtml(t.author_name)}${t.author_role ? ` · ${escapeHtml(t.author_role)}` : ''}
+        <span class="admin-row-sub">${escapeHtml(t.quote)}</span>
+      </span>
+      <span class="admin-row-tag">${t.is_active ? 'Aktif' : 'Nonaktif'}</span>
+      <button class="mini-btn toggle-testimonial" type="button">${t.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
+      <button class="mini-btn danger delete-testimonial" type="button">Hapus</button>
+    </div>
+  `).join('') || '<p class="empty-msg">Belum ada testimoni. Section testimoni di beranda masih disembunyikan sampai ada yang ditambahkan di sini.</p>';
+}
+
+async function handleTestimonialSubmit(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('testimonial-name');
+  const roleInput = document.getElementById('testimonial-role');
+  const ratingInput = document.getElementById('testimonial-rating');
+  const quoteInput = document.getElementById('testimonial-quote');
+
+  const author_name = nameInput.value.trim();
+  const quote = quoteInput.value.trim();
+  if (!author_name || !quote) return;
+
+  await authedFetch(`${API_BASE}/testimonials`, {
+    method: 'POST',
+    body: JSON.stringify({
+      author_name,
+      author_role: roleInput.value.trim() || null,
+      quote,
+      rating: Number(ratingInput.value),
+    }),
+  });
+  nameInput.value = '';
+  roleInput.value = '';
+  quoteInput.value = '';
+  ratingInput.value = '5';
+  await loadTestimonialsAdmin();
+}
+
+document.getElementById('testimonial-list')?.addEventListener('click', async (e) => {
+  const row = e.target.closest('.admin-row');
+  if (!row) return;
+  const id = row.dataset.id;
+
+  if (e.target.classList.contains('delete-testimonial')) {
+    if (!confirm('Hapus testimoni ini?')) return;
+    await authedFetch(`${API_BASE}/testimonials?id=${id}`, { method: 'DELETE' });
+    await loadTestimonialsAdmin();
+  }
+
+  if (e.target.classList.contains('toggle-testimonial')) {
+    const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
+    await authedFetch(`${API_BASE}/testimonials?id=${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ is_active: !isActive }),
+    });
+    await loadTestimonialsAdmin();
+  }
+});
+
 // ---------- Banner Gambar (khusus owner) ----------
 let pendingHeroBannerUrl = null;
 
@@ -916,7 +982,7 @@ document.getElementById('oc-form')?.addEventListener('submit', async (e) => {
 // ---------- Load semua data dashboard ----------
 async function loadAllData() {
   await loadCategoriesAdmin(); // duluan, karena dropdown produk butuh ini
-  await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin(), loadSocialAdmin(), loadHeroBannerAdmin(), loadOrdersAdmin()]);
+  await Promise.all([loadBannerAdmin(), loadProductsAdmin(), loadTeamAdmin(), loadSocialAdmin(), loadHeroBannerAdmin(), loadOrdersAdmin(), loadTestimonialsAdmin()]);
 }
 
 // Versi "aman" dari loadAllData(): kalau gagal (mis. cold-start function
@@ -969,6 +1035,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('category-form').addEventListener('submit', handleCategorySubmit);
   document.getElementById('product-form').addEventListener('submit', handleProductSubmit);
   document.getElementById('social-form').addEventListener('submit', handleSocialSubmit);
+  document.getElementById('testimonial-form').addEventListener('submit', handleTestimonialSubmit);
   document.getElementById('hero-banner-form').addEventListener('submit', handleHeroBannerSubmit);
   initProductImageInput();
   initHeroBannerImageInput();

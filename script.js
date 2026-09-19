@@ -228,17 +228,40 @@ async function loadProducts(categorySlug = currentCategory) {
   }
 }
 
-// ---------- Produk Populer (pilihan owner, dipasang di hero-visual) ----------
+// ---------- Produk Populer (pilihan owner) ----------
+// Dipakai buat DUA tempat sekaligus (satu fetch, dua render): kartu
+// melayang dekoratif di hero (#hero-visual-cards) DAN grid produk nyata
+// yang bisa diklik "Beli Sekarang" di section "Produk Unggulan"
+// (#featured-grid) — kalau elemennya nggak ada di halaman ini, dilewatin.
 async function loadFeaturedProducts() {
   const cardsWrap = document.getElementById('hero-visual-cards');
-  if (!cardsWrap) return;
+  const gridWrap = document.getElementById('featured-grid');
+  if (!cardsWrap && !gridWrap) return;
 
   try {
     const { data } = await fetchJSON(`${API_BASE}/products?featured=true`);
-    renderHeroPicks((data || []).slice(0, 3));
+    const products = data || [];
+    if (cardsWrap) renderHeroPicks(products.slice(0, 3));
+    if (gridWrap) renderFeaturedGrid(products.slice(0, 8));
   } catch (err) {
-    cardsWrap.innerHTML = '';
+    if (cardsWrap) cardsWrap.innerHTML = '';
+    if (gridWrap) document.getElementById('featured-section')?.classList.add('hidden');
   }
+}
+
+function renderFeaturedGrid(products) {
+  const gridWrap = document.getElementById('featured-grid');
+  if (!gridWrap) return;
+  const section = document.getElementById('featured-section');
+
+  if (!products || products.length === 0) {
+    // Belum ada produk yang ditandai "populer" di Admin Panel -> section
+    // ini disembunyikan seluruhnya, bukan ditampilkan kosong.
+    section?.classList.add('hidden');
+    return;
+  }
+  section?.classList.remove('hidden');
+  gridWrap.innerHTML = products.map(productCardHTML).join('');
 }
 
 // ---------- Hero visual (produk unggulan) ----------
@@ -261,6 +284,45 @@ function renderHeroPicks(products) {
       </div>
     </div>
   `).join('');
+}
+
+// ---------- Testimoni (beranda) ----------
+// Diisi dari database lewat Admin Panel — SENGAJA nggak ada konten
+// contoh/demo. Kalau belum ada testimoni aktif, section-nya disembunyikan
+// seluruhnya (bukan ditampilkan kosong).
+async function loadTestimonials() {
+  const wrap = document.getElementById('testi-grid');
+  const section = document.getElementById('testimonials-section');
+  if (!wrap || !section) return;
+
+  try {
+    const { data } = await fetchJSON(`${API_BASE}/testimonials`);
+    const items = data || [];
+    if (items.length === 0) {
+      section.classList.add('hidden');
+      return;
+    }
+    section.classList.remove('hidden');
+    wrap.innerHTML = items.map(testimonialCardHTML).join('');
+  } catch (err) {
+    section.classList.add('hidden');
+  }
+}
+
+function testimonialCardHTML(item) {
+  const rating = Math.max(1, Math.min(5, Number(item.rating) || 5));
+  const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+  const initial = (item.author_name || '?').trim().charAt(0).toUpperCase();
+  return `
+    <div class="testi-card">
+      <div class="testi-stars">${stars}</div>
+      <p class="testi-quote">"${escapeHtml(item.quote)}"</p>
+      <div class="testi-author">
+        <div class="testi-avatar">${escapeHtml(initial)}</div>
+        <div><strong>${escapeHtml(item.author_name)}</strong>${item.author_role ? `<span>${escapeHtml(item.author_role)}</span>` : ''}</div>
+      </div>
+    </div>
+  `;
 }
 
 // ---------- Media Sosial (diatur owner lewat admin panel) ----------
@@ -388,6 +450,23 @@ function initOrderModal() {
 }
 
 // ---------- Nav: tombol Masuk -> Profil kalau udah login ----------
+// Status login (buat teks tombol nav yang gabung sama bahasa aktif — lihat
+// updateNavAccountButtonText()). Terpisah dari currentSession di atas biar
+// jelas: currentSession dipakai checkout, ini cuma buat teks tombol.
+let isLoggedIn = false;
+
+function updateNavAccountButtonText() {
+  const btn = document.getElementById('nav-account-btn');
+  if (!btn || typeof t !== 'function') return;
+  if (isLoggedIn) {
+    btn.innerHTML = `${ICONS.user} ${t('nav.profile')}`;
+    btn.setAttribute('aria-label', t('nav.profile'));
+  } else {
+    btn.textContent = t('nav.login');
+  }
+}
+document.addEventListener('exschool:langchange', updateNavAccountButtonText);
+
 async function initNavAccountButton() {
   const btn = document.getElementById('nav-account-btn');
   if (!window.supabase) return;
@@ -399,10 +478,8 @@ async function initNavAccountButton() {
 
     if (data.session) {
       currentSession = data.session;
-      if (btn) {
-        btn.innerHTML = `${ICONS.user} Profil`;
-        btn.setAttribute('aria-label', 'Profil akun saya');
-      }
+      isLoggedIn = true;
+      updateNavAccountButtonText();
     }
   } catch (err) {
     // Gagal cek sesi (mis. offline) -> biarkan tombol default "Masuk",
@@ -422,5 +499,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadCategories();
   await loadProducts();
   await loadFeaturedProducts();
+  await loadTestimonials();
   await loadSocialLinks();
 });

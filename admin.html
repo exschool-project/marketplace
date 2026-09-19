@@ -165,6 +165,29 @@
         <div id="product-list" class="admin-list"></div>
       </section>
 
+      <!-- TESTIMONI -->
+      <section class="admin-panel brutal">
+        <h2>Testimoni</h2>
+        <p class="panel-sub">Ulasan pembeli yang tampil di beranda. Section testimoni di beranda otomatis disembunyikan selama belum ada testimoni aktif di sini — jadi jangan diisi contoh/demo.</p>
+        <form id="testimonial-form" class="form-grid">
+          <label class="field"><span>Nama pembeli</span><input type="text" id="testimonial-name" required placeholder="Nama pembeli"></label>
+          <label class="field"><span>Peran / kota (opsional)</span><input type="text" id="testimonial-role" placeholder="Jakarta, atau nama produk yang dibeli"></label>
+          <label class="field">
+            <span>Rating</span>
+            <select id="testimonial-rating">
+              <option value="5">★★★★★ (5)</option>
+              <option value="4">★★★★ (4)</option>
+              <option value="3">★★★ (3)</option>
+              <option value="2">★★ (2)</option>
+              <option value="1">★ (1)</option>
+            </select>
+          </label>
+          <label class="field" style="grid-column:1 / -1;"><span>Isi testimoni</span><input type="text" id="testimonial-quote" required placeholder="Tulis ulasan pembeli di sini..."></label>
+          <button type="submit" class="btn btn-green brutal-sm" style="align-self:end;">Tambah</button>
+        </form>
+        <div id="testimonial-list" class="admin-list"></div>
+      </section>
+
       <!-- BANNER GAMBAR: hanya dirender & diisi kalau role === owner -->
       <section id="hero-banner-panel" class="admin-panel brutal owner-only hidden">
         <h2>Banner Gambar <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>

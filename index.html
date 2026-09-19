@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EX-SCHOOL — Marketplace Global</title>
+<title>EX-SCHOOL — Digital Marketplace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=2">
@@ -20,13 +20,17 @@
     <div class="nav-wrap">
       <div class="logo">EX-SCHOOL</div>
       <form class="search" role="search" id="search-form">
-        <input type="text" id="search-input" placeholder="Cari produk, toko, atau kategori...">
-        <button type="submit" aria-label="Cari">CARI</button>
+        <input type="text" id="search-input" data-i18n-placeholder="nav.search_placeholder" placeholder="Cari produk atau jasa digital...">
+        <button type="submit" aria-label="Cari" data-i18n="nav.search_btn">CARI</button>
       </form>
       <div class="nav-actions">
-        <a class="btn btn-green hover-lift-sm brutal-sm" href="belanja.html">Belanja</a>
-        <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html" id="nav-account-btn">Masuk</a>
-        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg> Riwayat</a>
+        <div class="lang-switch" id="lang-switch" role="group" aria-label="Bahasa / Language">
+          <button type="button" data-lang="id">ID</button>
+          <button type="button" data-lang="en">EN</button>
+        </div>
+        <a class="btn btn-green hover-lift-sm brutal-sm" href="belanja.html" data-i18n="nav.shop">Belanja</a>
+        <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html" id="nav-account-btn" data-i18n="nav.login">Masuk</a>
+        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg> <span data-i18n="nav.history">Riwayat</span></a>
       </div>
     </div>
   </header>
@@ -52,12 +56,12 @@
 
         <div class="hero-overlay-content">
           <div class="hero-copy">
-            <span class="eyebrow">◆ Beranda </span>
-            <h1>Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
+            <span class="eyebrow" data-i18n="hero.eyebrow">◆ Beranda</span>
+            <h1 data-i18n-html="hero.title">Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
             <p class="hero-org">Yayasan Aqilah Hidayah</p>
-            <p class="lead">Marketplace buat kamu yang cari barang bagus, harga jujur, dan pengiriman cepat — dari toko-toko lokal terpercaya di seluruh Indonesia.</p>
+            <p class="lead" data-i18n="hero.lead">Marketplace jasa &amp; produk digital pilihan — desain, website, dan karya digital lainnya dari kreator terpercaya, dikerjakan cepat dan hasilnya sesuai brief.</p>
             <div class="hero-ctas">
-              <a href="belanja.html" class="btn btn-green hover-lift brutal">Mulai Belanja</a>
+              <a href="belanja.html" class="btn btn-green hover-lift brutal" data-i18n="hero.cta">Mulai Belanja</a>
             </div>
           </div>
         </div>
@@ -75,10 +79,10 @@
     <!-- STATS STRIP: angka kepercayaan singkat, langsung di bawah hero -->
     <section class="stats-strip">
       <div class="stats-strip-inner">
-        <div class="stat-item"><strong>50+</strong><span>Toko lokal</span></div>
-        <div class="stat-item"><strong>500+</strong><span>Produk aktif</span></div>
-        <div class="stat-item"><strong>34</strong><span>Provinsi terjangkau</span></div>
-        <div class="stat-item"><strong>4.9<span class="stat-star">★</span></strong><span>Rating rata-rata</span></div>
+        <div class="stat-item"><strong>50+</strong><span data-i18n="stats.item1_label">Kreator terpercaya</span></div>
+        <div class="stat-item"><strong>500+</strong><span data-i18n="stats.item2_label">Produk digital</span></div>
+        <div class="stat-item"><strong>24/7</strong><span data-i18n="stats.item3_label">Chat langsung</span></div>
+        <div class="stat-item"><strong>4.9<span class="stat-star">★</span></strong><span data-i18n="stats.item4_label">Rating rata-rata</span></div>
       </div>
     </section>
 
@@ -86,35 +90,50 @@
     <section class="intro">
       <div class="section intro-grid">
         <div class="intro-copy">
-          <span class="eyebrow">◆ Tentang Kami</span>
-          <h2>Marketplace yang berpihak ke toko lokal</h2>
-          <p>EX-SCHOOL dibangun oleh Yayasan Aqilah Hidayah jadi rumah digital buat toko-toko kecil &amp; menengah di sekitar kita — bukan cuma tempat jualan, tapi ruang buat mereka tumbuh bareng pembeli yang percaya sama kualitas lokal.</p>
-          <p>Setiap transaksi langsung ke penjual, tanpa potongan berlapis dan tanpa proses ribet — pesan, chat langsung sama admin/penjual, dan pantau statusnya sampai selesai di satu tempat.</p>
+          <span class="eyebrow" data-i18n="intro.eyebrow">◆ Tentang Kami</span>
+          <h2 data-i18n="intro.title">Marketplace jasa &amp; produk digital tepercaya</h2>
+          <p data-i18n="intro.p1">EX-SCHOOL dibangun oleh Yayasan Aqilah Hidayah jadi tempat cari jasa &amp; produk digital berkualitas — dari desain logo, pembuatan website, sampai karya digital lainnya, langsung dari kreator terpercaya.</p>
+          <p data-i18n="intro.p2">Setiap transaksi langsung ke kreator, tanpa potongan berlapis dan tanpa proses ribet — pesan, chat langsung sama admin/kreator, dan pantau statusnya sampai selesai di satu tempat.</p>
         </div>
         <div class="intro-points">
           <div class="intro-point">
             <span class="intro-point-num">01</span>
             <div>
-              <h4>Kurasi ketat</h4>
-              <p>Setiap toko &amp; produk diverifikasi dulu sebelum tayang, jadi kualitasnya terjaga.</p>
+              <h4 data-i18n="intro.point1_title">Kurasi ketat</h4>
+              <p data-i18n="intro.point1_desc">Setiap kreator &amp; jasa yang tayang sudah diverifikasi dulu, jadi kualitasnya terjaga.</p>
             </div>
           </div>
           <div class="intro-point">
             <span class="intro-point-num">02</span>
             <div>
-              <h4>Chat langsung</h4>
-              <p>Nggak perlu pindah aplikasi — tanya, nego, sampai lacak pesanan lewat chat di sini.</p>
+              <h4 data-i18n="intro.point2_title">Chat langsung</h4>
+              <p data-i18n="intro.point2_desc">Nggak perlu pindah aplikasi — tanya, revisi, sampai lacak pesanan lewat chat di sini.</p>
             </div>
           </div>
           <div class="intro-point">
             <span class="intro-point-num">03</span>
             <div>
-              <h4>Transparan</h4>
-              <p>Harga jujur, status pesanan jelas, dan riwayat pesanan tersimpan rapi di akun kamu.</p>
+              <h4 data-i18n="intro.point3_title">Transparan</h4>
+              <p data-i18n="intro.point3_desc">Harga jujur, status pesanan jelas, dan riwayat pesanan tersimpan rapi di akun kamu.</p>
             </div>
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- PRODUK UNGGULAN: produk NYATA (bukan dekorasi), diisi dari
+         /api/products?featured=true. Section ini otomatis sembunyi kalau
+         belum ada produk yang ditandai "populer" di Admin Panel. -->
+    <section class="section featured-section hidden" id="featured-section">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow" data-i18n="featured.eyebrow">◆ Produk Unggulan</span>
+          <h2 data-i18n="featured.title">Produk paling laris</h2>
+          <p data-i18n="featured.sub">Pilihan produk digital dengan permintaan tertinggi.</p>
+        </div>
+        <a href="belanja.html" class="mini-btn" data-i18n="featured.cta">Lihat Semua Produk →</a>
+      </div>
+      <div class="grid" id="featured-grid"></div>
     </section>
 
     <!-- WHY US -->
@@ -122,66 +141,42 @@
       <div class="section">
         <div class="section-head">
           <div>
-            <h2>Kenapa belanja di EX-SCHOOL</h2>
-            <p>Bukan cuma marketplace, ini rumah buat toko-toko lokal.</p>
+            <h2 data-i18n="why.title">Kenapa pakai EX-SCHOOL</h2>
+            <p data-i18n="why.sub">Bukan cuma marketplace, ini rumah buat kreator digital lokal.</p>
           </div>
         </div>
         <div class="why-grid">
           <div class="why-card">
-            <span class="num">01 / Ongkir</span>
-            <h3>Gratis ongkir tiap hari</h3>
-            <p>Minimal belanja 50rb, ongkir ditanggung buat semua kota di Indonesia.</p>
+            <span class="num" data-i18n="why.card1_num">01 / Kecepatan</span>
+            <h3 data-i18n="why.card1_title">Pengerjaan cepat</h3>
+            <p data-i18n="why.card1_desc">Sebagian besar pesanan jasa digital selesai dalam hitungan hari, bukan minggu.</p>
           </div>
           <div class="why-card">
-            <span class="num">02 / Jaminan</span>
-            <h3>Uang kembali 100%</h3>
-            <p>Barang gak sesuai? Ajukan komplain dan dana otomatis balik ke kamu.</p>
+            <span class="num" data-i18n="why.card2_num">02 / Jaminan</span>
+            <h3 data-i18n="why.card2_title">Uang kembali 100%</h3>
+            <p data-i18n="why.card2_desc">Hasil nggak sesuai brief? Ajukan komplain dan dana otomatis balik ke kamu.</p>
           </div>
           <div class="why-card">
-            <span class="num">03 / Lokal</span>
-            <h3>Dukung toko sekitar</h3>
-            <p>Setiap transaksi langsung ke penjual lokal, tanpa perantara ribet.</p>
+            <span class="num" data-i18n="why.card3_num">03 / Kreator</span>
+            <h3 data-i18n="why.card3_title">Kreator terverifikasi</h3>
+            <p data-i18n="why.card3_desc">Setiap kreator &amp; jasa yang tayang sudah lewat proses verifikasi kami.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- TESTIMONI -->
-    <section class="testimonials">
+    <!-- TESTIMONI: diisi dari /api/testimonials (dikelola Admin Panel).
+         Section ini otomatis sembunyi kalau belum ada testimoni AKTIF —
+         sengaja TANPA konten contoh/demo. -->
+    <section class="testimonials hidden" id="testimonials-section">
       <div class="section">
         <div class="section-head">
           <div>
-            <h2>Kata mereka yang udah belanja</h2>
-            <p>Testimoni asli dari pembeli EX-SCHOOL.</p>
+            <h2 data-i18n="testi.title">Kata mereka yang udah pakai jasa kami</h2>
+            <p data-i18n="testi.sub">Testimoni asli dari pembeli EX-SCHOOL.</p>
           </div>
         </div>
-        <div class="testi-grid">
-          <div class="testi-card">
-            <div class="testi-stars">★★★★★</div>
-            <p class="testi-quote">"Pesan jasa desain logo di sini, prosesnya cepat &amp; admin-nya responsif banget di chat. Hasilnya juga sesuai brief."</p>
-            <div class="testi-author">
-              <div class="testi-avatar">R</div>
-              <div><strong>Rina A.</strong><span>Jakarta</span></div>
-            </div>
-          </div>
-          <div class="testi-card">
-            <div class="testi-stars">★★★★★</div>
-            <p class="testi-quote">"Suka konsepnya yang dukung toko lokal. Harganya jujur, nggak ada biaya siluman pas checkout."</p>
-            <div class="testi-author">
-              <div class="testi-avatar">D</div>
-              <div><strong>Dimas P.</strong><span>Bandung</span></div>
-            </div>
-          </div>
-          <div class="testi-card">
-            <div class="testi-stars">★★★★★</div>
-            <p class="testi-quote">"Riwayat pesanan gampang dicek, tinggal login aja langsung kelihatan semua. Enak buat yang sering pesan berulang."</p>
-            <div class="testi-author">
-              <div class="testi-avatar">S</div>
-              <div><strong>Sari W.</strong><span>Surabaya</span></div>
-            </div>
-          </div>
-        </div>
-        <p class="testi-note">Testimoni di atas contoh tampilan — ganti dengan ulasan asli dari pembeli kamu.</p>
+        <div class="testi-grid" id="testi-grid"></div>
       </div>
     </section>
 
@@ -189,10 +184,10 @@
     <section class="cta-strip">
       <div class="cta-strip-inner">
         <div>
-          <h2>Siap belanja?</h2>
-          <p>Ratusan produk dari toko-toko lokal terpercaya nunggu buat kamu jelajahi.</p>
+          <h2 data-i18n="cta.title">Siap belanja?</h2>
+          <p data-i18n="cta.sub">Ratusan jasa &amp; produk digital dari kreator terpercaya nunggu buat kamu jelajahi.</p>
         </div>
-        <a href="belanja.html" class="btn btn-green hover-lift brutal">Lihat Semua Produk →</a>
+        <a href="belanja.html" class="btn btn-green hover-lift brutal" data-i18n="cta.btn">Lihat Semua Produk →</a>
       </div>
     </section>
   </main>
@@ -202,38 +197,81 @@
     <div class="foot-wrap">
       <div>
         <div class="logo" style="display:inline-block; margin-bottom:12px;">EX-SCHOOL</div>
-        <p class="foot-desc">Marketplace lokal buat kamu belanja apa aja, dari toko kepercayaan sendiri.</p>
+        <p class="foot-desc" data-i18n="footer.desc">Marketplace jasa &amp; produk digital dari kreator-kreator terpercaya.</p>
         <div id="social-links" class="social-links"></div>
       </div>
       <div>
-        <h4>Belanja</h4>
+        <h4 data-i18n="footer.shop_heading">Belanja</h4>
         <ul>
-          <li><a href="belanja.html#kategori">Kategori</a></li>
-          <li><a href="belanja.html">Semua Produk</a></li>
+          <li><a href="belanja.html#kategori" data-i18n="footer.category">Kategori</a></li>
+          <li><a href="belanja.html" data-i18n="footer.all_products">Semua Produk</a></li>
         </ul>
       </div>
       <div>
-        <h4>Bantuan</h4>
+        <h4 data-i18n="footer.help_heading">Bantuan</h4>
         <ul>
-          <li><a href="#">Pusat Bantuan</a></li>
-          <li><a href="pesanan.html">Riwayat Pesanan</a></li>
+          <li><a href="#" data-i18n="footer.help_center">Pusat Bantuan</a></li>
+          <li><a href="pesanan.html" data-i18n="footer.order_history">Riwayat Pesanan</a></li>
         </ul>
       </div>
       <div>
-        <h4>Perusahaan</h4>
+        <h4 data-i18n="footer.company_heading">Perusahaan</h4>
         <ul>
-          <li><a href="#">Tentang Kami</a></li>
+          <li><a href="#" data-i18n="footer.about">Tentang Kami</a></li>
         </ul>
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© 2026 EX-SCHOOL — Yayasan Aqilah Hidayah. Semua hak dilindungi.</span>
-      <span>Dibuat exschool-project</span>
+      <span data-i18n="footer.copyright">© 2026 EX-SCHOOL — Yayasan Aqilah Hidayah. Semua hak dilindungi.</span>
+      <span data-i18n="footer.credit">Dibuat exschool-project</span>
     </div>
   </footer>
 
+  <!-- MODAL BELI SEKARANG: diisi & dikontrol dari script.js (dipakai
+       tombol "Beli Sekarang" di section Produk Unggulan) -->
+  <div id="order-modal" class="order-modal-overlay hidden">
+    <div class="order-modal brutal">
+      <button type="button" id="order-modal-close" class="order-modal-close" aria-label="Tutup"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+
+      <!-- STEP 1: form data pembeli -->
+      <div id="order-step-form">
+        <span class="eyebrow">◆ Beli Sekarang</span>
+        <h2 id="order-product-name">Nama produk</h2>
+        <p class="order-product-price" id="order-product-price"></p>
+
+        <form id="order-form">
+          <label class="field">
+            <span>Nama kamu</span>
+            <input type="text" id="order-buyer-name" required autocomplete="name" placeholder="Nama lengkap">
+          </label>
+          <label class="field">
+            <span>Nomor WhatsApp</span>
+            <input type="tel" id="order-buyer-phone" required autocomplete="tel" placeholder="08xxxxxxxxxx">
+          </label>
+          <label class="field">
+            <span>Catatan (opsional)</span>
+            <input type="text" id="order-buyer-note" placeholder="Detail brief, dll">
+          </label>
+          <p id="order-form-error" class="order-form-error hidden"></p>
+          <button type="submit" class="btn btn-green brutal-sm hover-lift-sm" style="width:100%;">Buat Pesanan</button>
+        </form>
+      </div>
+
+      <!-- STEP 2: sukses, kasih kode pesanan + tombol ke ruang chat -->
+      <div id="order-step-success" class="hidden">
+        <span class="eyebrow">◆ Pesanan Dibuat</span>
+        <h2><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg> Pesanan kamu berhasil dibuat</h2>
+        <p class="order-code-label">Kode pesanan kamu:</p>
+        <p class="order-code-value mono" id="order-success-code"></p>
+        <p class="order-success-note">Simpan kode ini. Chat langsung dengan admin buat lanjutin pesanan di ruang chat.</p>
+        <a id="order-success-chat-link" class="btn btn-green brutal-sm hover-lift-sm" style="width:100%; display:block; text-align:center; box-sizing:border-box;" href="#">Buka Ruang Chat →</a>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="icons.js"></script>
+  <script src="i18n.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

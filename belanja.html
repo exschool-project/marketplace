@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Belanja — EX-SCHOOL</title>
-<meta name="description" content="Jelajahi semua produk dari toko-toko lokal terpercaya di EX-SCHOOL.">
+<meta name="description" content="Jelajahi semua produk & jasa digital dari kreator terpercaya di EX-SCHOOL.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=2">
@@ -18,12 +18,16 @@
     <div class="nav-wrap">
       <a href="index.html" class="logo" style="text-decoration:none;">EX-SCHOOL</a>
       <form class="search" role="search" id="search-form">
-        <input type="text" id="search-input" placeholder="Cari produk, toko, atau kategori...">
-        <button type="submit" aria-label="Cari">CARI</button>
+        <input type="text" id="search-input" data-i18n-placeholder="nav.search_placeholder" placeholder="Cari produk atau jasa digital...">
+        <button type="submit" aria-label="Cari" data-i18n="nav.search_btn">CARI</button>
       </form>
       <div class="nav-actions">
-        <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html" id="nav-account-btn">Masuk</a>
-        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg> Riwayat</a>
+        <div class="lang-switch" id="lang-switch" role="group" aria-label="Bahasa / Language">
+          <button type="button" data-lang="id">ID</button>
+          <button type="button" data-lang="en">EN</button>
+        </div>
+        <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html" id="nav-account-btn" data-i18n="nav.login">Masuk</a>
+        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg> <span data-i18n="nav.history">Riwayat</span></a>
       </div>
     </div>
   </header>
@@ -33,9 +37,9 @@
          area tenang & rapi, khas halaman katalog di situs premium. -->
     <div class="shop-head">
       <div class="shop-head-inner">
-        <p class="shop-breadcrumb"><a href="index.html">Beranda</a> <span>/</span> Belanja</p>
-        <h1>Belanja</h1>
-        <p class="shop-head-sub">Semua produk dari toko-toko lokal terpercaya — kualitas terjamin, harga jujur.</p>
+        <p class="shop-breadcrumb"><a href="index.html" data-i18n="shop.breadcrumb_home">Beranda</a> <span>/</span> <span data-i18n="shop.breadcrumb_current">Belanja</span></p>
+        <h1 data-i18n="shop.title">Belanja</h1>
+        <p class="shop-head-sub" data-i18n="shop.sub">Semua jasa &amp; produk digital dari kreator terpercaya — kualitas terjamin, harga jujur.</p>
       </div>
     </div>
 
@@ -55,33 +59,33 @@
     <div class="foot-wrap">
       <div>
         <div class="logo" style="display:inline-block; margin-bottom:12px;">EX-SCHOOL</div>
-        <p class="foot-desc">Marketplace lokal buat kamu belanja apa aja, dari toko kepercayaan sendiri.</p>
+        <p class="foot-desc" data-i18n="footer.desc">Marketplace jasa &amp; produk digital dari kreator-kreator terpercaya.</p>
         <div id="social-links" class="social-links"></div>
       </div>
       <div>
-        <h4>Belanja</h4>
+        <h4 data-i18n="footer.shop_heading">Belanja</h4>
         <ul>
-          <li><a href="#kategori">Kategori</a></li>
-          <li><a href="#produk">Produk</a></li>
+          <li><a href="#kategori" data-i18n="footer.category">Kategori</a></li>
+          <li><a href="#produk" data-i18n="footer.all_products">Semua Produk</a></li>
         </ul>
       </div>
       <div>
-        <h4>Bantuan</h4>
+        <h4 data-i18n="footer.help_heading">Bantuan</h4>
         <ul>
-          <li><a href="#">Pusat Bantuan</a></li>
-          <li><a href="pesanan.html">Riwayat Pesanan</a></li>
+          <li><a href="#" data-i18n="footer.help_center">Pusat Bantuan</a></li>
+          <li><a href="pesanan.html" data-i18n="footer.order_history">Riwayat Pesanan</a></li>
         </ul>
       </div>
       <div>
-        <h4>Perusahaan</h4>
+        <h4 data-i18n="footer.company_heading">Perusahaan</h4>
         <ul>
-          <li><a href="index.html">Tentang Kami</a></li>
+          <li><a href="index.html" data-i18n="footer.about">Tentang Kami</a></li>
         </ul>
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© 2026 EX-SCHOOL — Yayasan Aqilah Hidayah. Semua hak dilindungi.</span>
-      <span>Dibuat exschool-project</span>
+      <span data-i18n="footer.copyright">© 2026 EX-SCHOOL — Yayasan Aqilah Hidayah. Semua hak dilindungi.</span>
+      <span data-i18n="footer.credit">Dibuat exschool-project</span>
     </div>
   </footer>
 
@@ -107,7 +111,7 @@
           </label>
           <label class="field">
             <span>Catatan (opsional)</span>
-            <input type="text" id="order-buyer-note" placeholder="Ukuran, warna, dll">
+            <input type="text" id="order-buyer-note" placeholder="Detail brief, dll">
           </label>
           <p id="order-form-error" class="order-form-error hidden"></p>
           <button type="submit" class="btn btn-green brutal-sm hover-lift-sm" style="width:100%;">Buat Pesanan</button>
@@ -128,6 +132,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="icons.js"></script>
+  <script src="i18n.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
