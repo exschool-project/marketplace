@@ -605,6 +605,99 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
   animation-delay:.2s;
 }
 
+/* ---------- STATS STRIP (beranda, langsung di bawah hero) ---------- */
+.stats-strip{ background:var(--gold); border-bottom:3px solid var(--ink); }
+.stats-strip-inner{
+  max-width:1180px;
+  margin:0 auto;
+  padding:20px 24px;
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:16px;
+  text-align:center;
+}
+.stat-item strong{
+  display:block;
+  font-family:'Space Grotesk', sans-serif;
+  font-size:clamp(1.3rem, 3vw, 1.8rem);
+  font-weight:700;
+  color:var(--ink);
+}
+.stat-item .stat-star{ font-size:.8em; }
+.stat-item span{
+  display:block;
+  font-size:.74rem;
+  color:var(--green-deep);
+  margin-top:2px;
+  font-weight:600;
+}
+@media (max-width:640px){
+  .stats-strip-inner{ grid-template-columns:repeat(2, 1fr); gap:18px 12px; }
+}
+
+/* ---------- TENTANG KAMI (beranda, penjelasan awal platform) ---------- */
+.intro-grid{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:48px;
+  align-items:start;
+}
+.intro-copy h2{ font-size:clamp(1.6rem, 3vw, 2.1rem); margin:10px 0 16px; }
+.intro-copy p{ color:#2B587A; font-size:.95rem; line-height:1.7; margin:0 0 14px; }
+.intro-points{ display:flex; flex-direction:column; gap:20px; }
+.intro-point{ display:flex; gap:16px; align-items:flex-start; }
+.intro-point-num{
+  flex-shrink:0;
+  font-family:'JetBrains Mono', monospace;
+  font-weight:700;
+  font-size:.82rem;
+  color:var(--blue-deep);
+  border:2.5px solid var(--ink);
+  width:38px; height:38px;
+  border-radius:999px;
+  display:flex; align-items:center; justify-content:center;
+}
+.intro-point h4{ font-size:.98rem; margin:0 0 4px; }
+.intro-point p{ margin:0; font-size:.85rem; color:#3E6B85; line-height:1.55; }
+@media (max-width:820px){
+  .intro-grid{ grid-template-columns:1fr; gap:28px; }
+}
+
+/* ---------- TESTIMONI (beranda) ---------- */
+.testimonials{ background:#F3F9FC; }
+.testi-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; }
+.testi-card{
+  background:var(--card);
+  border:2.5px solid var(--ink);
+  box-shadow:5px 5px 0 var(--ink);
+  padding:22px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.testi-stars{ color:var(--gold-deep); font-size:.95rem; letter-spacing:2px; }
+.testi-quote{ margin:0; font-size:.9rem; line-height:1.6; color:var(--ink); flex:1; }
+.testi-author{ display:flex; align-items:center; gap:10px; }
+.testi-avatar{
+  width:36px; height:36px;
+  border-radius:999px;
+  background:var(--blue);
+  color:#fff;
+  flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk', sans-serif;
+  font-weight:700;
+}
+.testi-author strong{ display:block; font-size:.84rem; }
+.testi-author span{ display:block; font-size:.74rem; color:#3E6B85; }
+.testi-note{ margin:24px 0 0; font-size:.74rem; color:#7C97A9; text-align:center; }
+@media (max-width:820px){
+  .testi-grid{ grid-template-columns:1fr 1fr; }
+}
+@media (max-width:560px){
+  .testi-grid{ grid-template-columns:1fr; }
+}
+
 /* ---------- WHY US ---------- */
 .why{ background:var(--ink); color:var(--paper); }
 .why .section-head h2, .why .section-head p{ color:var(--paper); }
