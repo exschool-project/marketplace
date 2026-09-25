@@ -236,9 +236,13 @@ async function handleBannerSubmit(e) {
   const input = document.getElementById('banner-input');
   const message = input.value.trim();
   if (!message) return;
-  await authedFetch(`${API_BASE}/banner`, { method: 'POST', body: JSON.stringify({ message }) });
-  input.value = '';
-  await loadBannerAdmin();
+  try {
+    await authedFetch(`${API_BASE}/banner`, { method: 'POST', body: JSON.stringify({ message }) });
+    input.value = '';
+    await loadBannerAdmin();
+  } catch (err) {
+    alert(`Gagal menambah pesan banner: ${err.message}`);
+  }
 }
 
 document.getElementById('banner-list')?.addEventListener('click', async (e) => {
@@ -246,19 +250,23 @@ document.getElementById('banner-list')?.addEventListener('click', async (e) => {
   if (!row) return;
   const id = row.dataset.id;
 
-  if (e.target.classList.contains('delete-banner')) {
-    if (!confirm('Hapus pesan banner ini?')) return;
-    await authedFetch(`${API_BASE}/banner?id=${id}`, { method: 'DELETE' });
-    await loadBannerAdmin();
-  }
+  try {
+    if (e.target.classList.contains('delete-banner')) {
+      if (!confirm('Hapus pesan banner ini?')) return;
+      await authedFetch(`${API_BASE}/banner?id=${id}`, { method: 'DELETE' });
+      await loadBannerAdmin();
+    }
 
-  if (e.target.classList.contains('toggle-banner')) {
-    const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-    await authedFetch(`${API_BASE}/banner?id=${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ is_active: !isActive }),
-    });
-    await loadBannerAdmin();
+    if (e.target.classList.contains('toggle-banner')) {
+      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
+      await authedFetch(`${API_BASE}/banner?id=${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ is_active: !isActive }),
+      });
+      await loadBannerAdmin();
+    }
+  } catch (err) {
+    alert(`Gagal memperbarui banner: ${err.message}`);
   }
 });
 
@@ -289,12 +297,16 @@ async function handleCategorySubmit(e) {
   const input = document.getElementById('category-input');
   const name = input.value.trim();
   if (!name) return;
-  await authedFetch(`${API_BASE}/categories`, {
-    method: 'POST',
-    body: JSON.stringify({ name, slug: slugify(name) }),
-  });
-  input.value = '';
-  await loadCategoriesAdmin();
+  try {
+    await authedFetch(`${API_BASE}/categories`, {
+      method: 'POST',
+      body: JSON.stringify({ name, slug: slugify(name) }),
+    });
+    input.value = '';
+    await loadCategoriesAdmin();
+  } catch (err) {
+    alert(`Gagal menambah kategori: ${err.message}`);
+  }
 }
 
 document.getElementById('category-list')?.addEventListener('click', async (e) => {
@@ -302,8 +314,12 @@ document.getElementById('category-list')?.addEventListener('click', async (e) =>
   if (!row) return;
   if (e.target.classList.contains('delete-category')) {
     if (!confirm('Hapus kategori ini? Produk terkait tidak ikut terhapus.')) return;
-    await authedFetch(`${API_BASE}/categories?id=${row.dataset.id}`, { method: 'DELETE' });
-    await loadCategoriesAdmin();
+    try {
+      await authedFetch(`${API_BASE}/categories?id=${row.dataset.id}`, { method: 'DELETE' });
+      await loadCategoriesAdmin();
+    } catch (err) {
+      alert(`Gagal menghapus kategori: ${err.message}`);
+    }
   }
 });
 
@@ -405,11 +421,15 @@ async function handleProductSubmit(e) {
     is_featured: form.querySelector('#product-featured').checked,
   };
 
-  await authedFetch(`${API_BASE}/products`, { method: 'POST', body: JSON.stringify(payload) });
-  form.reset();
-  pendingImageUrl = null;
-  document.getElementById('product-image-preview').classList.add('hidden');
-  await loadProductsAdmin();
+  try {
+    await authedFetch(`${API_BASE}/products`, { method: 'POST', body: JSON.stringify(payload) });
+    form.reset();
+    pendingImageUrl = null;
+    document.getElementById('product-image-preview').classList.add('hidden');
+    await loadProductsAdmin();
+  } catch (err) {
+    alert(`Gagal menambah produk: ${err.message}`);
+  }
 }
 
 document.getElementById('product-list')?.addEventListener('click', async (e) => {
@@ -417,28 +437,32 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
   if (!row) return;
   const id = row.dataset.id;
 
-  if (e.target.classList.contains('delete-product')) {
-    if (!confirm('Hapus produk ini?')) return;
-    await authedFetch(`${API_BASE}/products?id=${id}`, { method: 'DELETE' });
-    await loadProductsAdmin();
-  }
+  try {
+    if (e.target.classList.contains('delete-product')) {
+      if (!confirm('Hapus produk ini?')) return;
+      await authedFetch(`${API_BASE}/products?id=${id}`, { method: 'DELETE' });
+      await loadProductsAdmin();
+    }
 
-  if (e.target.classList.contains('toggle-product')) {
-    const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-    await authedFetch(`${API_BASE}/products?id=${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ is_active: !isActive }),
-    });
-    await loadProductsAdmin();
-  }
+    if (e.target.classList.contains('toggle-product')) {
+      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
+      await authedFetch(`${API_BASE}/products?id=${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ is_active: !isActive }),
+      });
+      await loadProductsAdmin();
+    }
 
-  if (e.target.classList.contains('toggle-featured')) {
-    const isFeatured = e.target.textContent.trim() === 'Batal Populer';
-    await authedFetch(`${API_BASE}/products?id=${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ is_featured: !isFeatured }),
-    });
-    await loadProductsAdmin();
+    if (e.target.classList.contains('toggle-featured')) {
+      const isFeatured = e.target.textContent.trim() === 'Batal Populer';
+      await authedFetch(`${API_BASE}/products?id=${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ is_featured: !isFeatured }),
+      });
+      await loadProductsAdmin();
+    }
+  } catch (err) {
+    alert(`Gagal memperbarui produk: ${err.message}`);
   }
 });
 
@@ -513,13 +537,17 @@ async function handleSocialSubmit(e) {
   const url = urlInput.value.trim();
   if (!platform || !url) return;
 
-  await authedFetch(`${API_BASE}/social-links`, {
-    method: 'POST',
-    body: JSON.stringify({ platform, url }),
-  });
-  platformInput.value = '';
-  urlInput.value = '';
-  await loadSocialAdmin();
+  try {
+    await authedFetch(`${API_BASE}/social-links`, {
+      method: 'POST',
+      body: JSON.stringify({ platform, url }),
+    });
+    platformInput.value = '';
+    urlInput.value = '';
+    await loadSocialAdmin();
+  } catch (err) {
+    alert(`Gagal menambah link media sosial: ${err.message}`);
+  }
 }
 
 document.getElementById('social-list')?.addEventListener('click', async (e) => {
@@ -527,19 +555,23 @@ document.getElementById('social-list')?.addEventListener('click', async (e) => {
   if (!row) return;
   const id = row.dataset.id;
 
-  if (e.target.classList.contains('delete-social')) {
-    if (!confirm('Hapus link media sosial ini?')) return;
-    await authedFetch(`${API_BASE}/social-links?id=${id}`, { method: 'DELETE' });
-    await loadSocialAdmin();
-  }
+  try {
+    if (e.target.classList.contains('delete-social')) {
+      if (!confirm('Hapus link media sosial ini?')) return;
+      await authedFetch(`${API_BASE}/social-links?id=${id}`, { method: 'DELETE' });
+      await loadSocialAdmin();
+    }
 
-  if (e.target.classList.contains('toggle-social')) {
-    const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-    await authedFetch(`${API_BASE}/social-links?id=${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ is_active: !isActive }),
-    });
-    await loadSocialAdmin();
+    if (e.target.classList.contains('toggle-social')) {
+      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
+      await authedFetch(`${API_BASE}/social-links?id=${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ is_active: !isActive }),
+      });
+      await loadSocialAdmin();
+    }
+  } catch (err) {
+    alert(`Gagal memperbarui link media sosial: ${err.message}`);
   }
 });
 
@@ -572,20 +604,24 @@ async function handleTestimonialSubmit(e) {
   const quote = quoteInput.value.trim();
   if (!author_name || !quote) return;
 
-  await authedFetch(`${API_BASE}/testimonials`, {
-    method: 'POST',
-    body: JSON.stringify({
-      author_name,
-      author_role: roleInput.value.trim() || null,
-      quote,
-      rating: Number(ratingInput.value),
-    }),
-  });
-  nameInput.value = '';
-  roleInput.value = '';
-  quoteInput.value = '';
-  ratingInput.value = '5';
-  await loadTestimonialsAdmin();
+  try {
+    await authedFetch(`${API_BASE}/testimonials`, {
+      method: 'POST',
+      body: JSON.stringify({
+        author_name,
+        author_role: roleInput.value.trim() || null,
+        quote,
+        rating: Number(ratingInput.value),
+      }),
+    });
+    nameInput.value = '';
+    roleInput.value = '';
+    quoteInput.value = '';
+    ratingInput.value = '5';
+    await loadTestimonialsAdmin();
+  } catch (err) {
+    alert(`Gagal menambah testimoni: ${err.message}`);
+  }
 }
 
 document.getElementById('testimonial-list')?.addEventListener('click', async (e) => {
@@ -593,19 +629,23 @@ document.getElementById('testimonial-list')?.addEventListener('click', async (e)
   if (!row) return;
   const id = row.dataset.id;
 
-  if (e.target.classList.contains('delete-testimonial')) {
-    if (!confirm('Hapus testimoni ini?')) return;
-    await authedFetch(`${API_BASE}/testimonials?id=${id}`, { method: 'DELETE' });
-    await loadTestimonialsAdmin();
-  }
+  try {
+    if (e.target.classList.contains('delete-testimonial')) {
+      if (!confirm('Hapus testimoni ini?')) return;
+      await authedFetch(`${API_BASE}/testimonials?id=${id}`, { method: 'DELETE' });
+      await loadTestimonialsAdmin();
+    }
 
-  if (e.target.classList.contains('toggle-testimonial')) {
-    const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-    await authedFetch(`${API_BASE}/testimonials?id=${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ is_active: !isActive }),
-    });
-    await loadTestimonialsAdmin();
+    if (e.target.classList.contains('toggle-testimonial')) {
+      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
+      await authedFetch(`${API_BASE}/testimonials?id=${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ is_active: !isActive }),
+      });
+      await loadTestimonialsAdmin();
+    }
+  } catch (err) {
+    alert(`Gagal memperbarui testimoni: ${err.message}`);
   }
 });
 
@@ -670,20 +710,25 @@ async function handleHeroBannerSubmit(e) {
   const linkInput = document.getElementById('hero-banner-link');
   const titleInput = document.getElementById('hero-banner-title');
   const subtitleInput = document.getElementById('hero-banner-subtitle');
-  await authedFetch(`${API_BASE}/hero-banners`, {
-    method: 'POST',
-    body: JSON.stringify({
-      image_url: pendingHeroBannerUrl,
-      link_url: linkInput.value.trim() || null,
-      title: titleInput.value.trim() || null,
-      subtitle: subtitleInput.value.trim() || null,
-    }),
-  });
 
-  document.getElementById('hero-banner-form').reset();
-  pendingHeroBannerUrl = null;
-  document.getElementById('hero-banner-preview').classList.add('hidden');
-  await loadHeroBannerAdmin();
+  try {
+    await authedFetch(`${API_BASE}/hero-banners`, {
+      method: 'POST',
+      body: JSON.stringify({
+        image_url: pendingHeroBannerUrl,
+        link_url: linkInput.value.trim() || null,
+        title: titleInput.value.trim() || null,
+        subtitle: subtitleInput.value.trim() || null,
+      }),
+    });
+
+    document.getElementById('hero-banner-form').reset();
+    pendingHeroBannerUrl = null;
+    document.getElementById('hero-banner-preview').classList.add('hidden');
+    await loadHeroBannerAdmin();
+  } catch (err) {
+    alert(`Gagal menambah banner gambar: ${err.message}`);
+  }
 }
 
 document.getElementById('hero-banner-list')?.addEventListener('click', async (e) => {
@@ -691,19 +736,23 @@ document.getElementById('hero-banner-list')?.addEventListener('click', async (e)
   if (!row) return;
   const id = row.dataset.id;
 
-  if (e.target.classList.contains('delete-hero-banner')) {
-    if (!confirm('Hapus banner gambar ini?')) return;
-    await authedFetch(`${API_BASE}/hero-banners?id=${id}`, { method: 'DELETE' });
-    await loadHeroBannerAdmin();
-  }
+  try {
+    if (e.target.classList.contains('delete-hero-banner')) {
+      if (!confirm('Hapus banner gambar ini?')) return;
+      await authedFetch(`${API_BASE}/hero-banners?id=${id}`, { method: 'DELETE' });
+      await loadHeroBannerAdmin();
+    }
 
-  if (e.target.classList.contains('toggle-hero-banner')) {
-    const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-    await authedFetch(`${API_BASE}/hero-banners?id=${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ is_active: !isActive }),
-    });
-    await loadHeroBannerAdmin();
+    if (e.target.classList.contains('toggle-hero-banner')) {
+      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
+      await authedFetch(`${API_BASE}/hero-banners?id=${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ is_active: !isActive }),
+      });
+      await loadHeroBannerAdmin();
+    }
+  } catch (err) {
+    alert(`Gagal memperbarui banner gambar: ${err.message}`);
   }
 });
 
