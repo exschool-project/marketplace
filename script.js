@@ -229,23 +229,19 @@ async function loadProducts(categorySlug = currentCategory) {
 }
 
 // ---------- Produk Populer (pilihan owner) ----------
-// Dipakai buat DUA tempat sekaligus (satu fetch, dua render): kartu
-// melayang dekoratif di hero (#hero-visual-cards) DAN grid produk nyata
-// yang bisa diklik "Beli Sekarang" di section "Produk Unggulan"
-// (#featured-grid) — kalau elemennya nggak ada di halaman ini, dilewatin.
+// Dulu juga dipakai buat kartu melayang dekoratif di hero — sekarang
+// SENGAJA cuma satu tempat: grid produk nyata yang bisa diklik "Beli
+// Sekarang" di section "Produk Unggulan" (#featured-grid). Kalau
+// elemennya nggak ada di halaman ini (mis. belanja.html), dilewatin.
 async function loadFeaturedProducts() {
-  const cardsWrap = document.getElementById('hero-visual-cards');
   const gridWrap = document.getElementById('featured-grid');
-  if (!cardsWrap && !gridWrap) return;
+  if (!gridWrap) return;
 
   try {
     const { data } = await fetchJSON(`${API_BASE}/products?featured=true`);
-    const products = data || [];
-    if (cardsWrap) renderHeroPicks(products.slice(0, 3));
-    if (gridWrap) renderFeaturedGrid(products.slice(0, 8));
+    renderFeaturedGrid((data || []).slice(0, 8));
   } catch (err) {
-    if (cardsWrap) cardsWrap.innerHTML = '';
-    if (gridWrap) document.getElementById('featured-section')?.classList.add('hidden');
+    document.getElementById('featured-section')?.classList.add('hidden');
   }
 }
 
@@ -262,28 +258,6 @@ function renderFeaturedGrid(products) {
   }
   section?.classList.remove('hidden');
   gridWrap.innerHTML = products.map(productCardHTML).join('');
-}
-
-// ---------- Hero visual (produk unggulan) ----------
-function renderHeroPicks(products) {
-  const cardsWrap = document.getElementById('hero-visual-cards');
-  if (!cardsWrap) return;
-
-  if (!products || products.length === 0) {
-    cardsWrap.innerHTML = '';
-    return;
-  }
-
-  const classes = ['c1', 'c2', 'c3'];
-  cardsWrap.innerHTML = products.map((p, i) => `
-    <div class="float-card ${classes[i] || ''}">
-      <div class="tag-hole"></div>
-      <div class="ttl">${escapeHtml(p.name)}</div>
-      <div class="prc">
-        ${p.old_price ? `<del>${rupiah(p.old_price)}</del>` : ''}${rupiah(p.price)}
-      </div>
-    </div>
-  `).join('');
 }
 
 // ---------- Testimoni (beranda) ----------

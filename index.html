@@ -15,22 +15,19 @@
     <div class="banner-track" id="banner-track"></div>
   </div>
 
-  <!-- NAV -->
+  <!-- NAV BERANDA: sengaja dibikin minimal (cuma logo + bahasa + tombol
+       Belanja). Kotak cari, tombol Masuk/Profil, dan Riwayat Pesanan
+       cuma relevan pas lagi belanja beneran — semuanya ada di
+       belanja.html, BUKAN di sini. -->
   <header class="site">
     <div class="nav-wrap">
       <div class="logo">EX-SCHOOL</div>
-      <form class="search" role="search" id="search-form">
-        <input type="text" id="search-input" data-i18n-placeholder="nav.search_placeholder" placeholder="Cari produk atau jasa digital...">
-        <button type="submit" aria-label="Cari" data-i18n="nav.search_btn">CARI</button>
-      </form>
       <div class="nav-actions">
         <div class="lang-switch" id="lang-switch" role="group" aria-label="Bahasa / Language">
           <button type="button" data-lang="id">ID</button>
           <button type="button" data-lang="en">EN</button>
         </div>
         <a class="btn btn-green hover-lift-sm brutal-sm" href="belanja.html" data-i18n="nav.shop">Belanja</a>
-        <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html" id="nav-account-btn" data-i18n="nav.login">Masuk</a>
-        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg> <span data-i18n="nav.history">Riwayat</span></a>
       </div>
     </div>
   </header>
@@ -64,10 +61,6 @@
               <a href="belanja.html" class="btn btn-green hover-lift brutal" data-i18n="hero.cta">Mulai Belanja</a>
             </div>
           </div>
-        </div>
-
-        <div id="hero-visual-cards" class="hero-visual-cards">
-          <!-- Diisi dari /api/products?featured=true (produk populer pilihan owner) -->
         </div>
       </div>
     </section>

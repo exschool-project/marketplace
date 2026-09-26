@@ -87,24 +87,6 @@ body{
 }
 .hero-banner-title:empty, .hero-banner-subtitle:empty{ display:none; }
 
-/* wadah kartu harga (float-card) supaya tetap bisa diklik di atas gambar */
-/* Bersusun rapi di pojok kanan-bawah hero, bukan bertebaran miring
-   seperti sebelumnya — kesannya jadi informatif, bukan dekoratif. */
-.hero-visual-cards{
-  position:absolute;
-  right:clamp(16px, 3vw, 40px);
-  bottom:clamp(16px, 3vw, 40px);
-  z-index:3;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  pointer-events:none;
-}
-.hero-visual-cards .float-card{ pointer-events:auto; }
-@media (max-width:820px){
-  .hero-visual-cards{ display:none; } /* di HP, hero udah padat sama teks — sembunyikan biar rapi */
-}
-
 /* ---------- OVERLAY teks welcome + tombol, MENIMPA gambar hero ----------
    .hero-visual (position:relative) jadi wadah utama; layer ini
    position:absolute + inset:0 supaya teks selalu nempel di atas gambar,
@@ -444,28 +426,6 @@ button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
      kebaca walau banner gambar belum diupload owner di admin */
   background:linear-gradient(120deg, var(--blue), var(--green));
 }
-/* Kartu info produk populer di hero — dulu bertumpuk miring gaya
-   sticker/zine (rotate + shadow keras), sekarang rapi bersusun vertikal
-   di satu sisi, flat & senada dengan kartu formal lainnya di situs. */
-.float-card{
-  position:relative;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-md);
-  padding:14px 16px;
-  width:220px;
-}
-.float-card .tag-hole{ display:none; }
-.float-card .ttl{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:.95rem; margin-bottom:6px; }
-.float-card .prc{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.05rem; }
-.float-card .prc del{ opacity:.5; font-weight:500; margin-right:6px; font-size:.85rem; }
-@media (max-width:640px){
-  .float-card{ width:180px; padding:12px 14px; }
-  .float-card .ttl{ font-size:.88rem; }
-  .float-card .prc{ font-size:.95rem; }
-}
-
 /* ---------- CATEGORY CHIPS ---------- */
 .cats{
   max-width:1180px;
