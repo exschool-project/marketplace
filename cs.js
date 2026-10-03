@@ -196,6 +196,13 @@ function showDashboard(profile) {
   // Role "cs" murni gak punya akses ke admin.html — sembunyikan link-nya
   // biar gak nyasar ke halaman yang bakal nolak dia masuk.
   document.getElementById('admin-panel-link')?.classList.toggle('hidden', normalizedRole === 'cs');
+
+  // Shimmer placeholder di daftar pesanan SEBELUM data aslinya kejawab —
+  // biar begitu dashboard kebuka langsung kelihatan "lagi dimuat".
+  const listEl = document.getElementById('cs-order-list');
+  if (listEl && !listEl.children.length) {
+    listEl.innerHTML = Array.from({ length: 4 }, () => '<div class="row-skeleton" style="margin-bottom:10px;"></div>').join('');
+  }
 }
 
 // ---------- Init Supabase ----------

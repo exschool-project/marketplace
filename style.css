@@ -323,6 +323,128 @@ header.site{
 }
 button .icon-inline, a.btn .icon-inline{ vertical-align:-0.14em; }
 
+/* ---------------------------------------------------------------------
+   ANIMASI
+   - .reveal / .reveal-stagger : elemen fade+geser naik pas kelihatan di
+     layar (di-trigger via IntersectionObserver di script.js). Dipasang
+     di section-section beranda.
+   - skeleton-pulse (dipakai ulang) : shimmer buat semua placeholder
+     loading (chip kategori, baris admin/CS, dll) SEBELUM data aslinya
+     muncul.
+   - header.site.is-scrolled : nav dikasih shadow tipis begitu halaman
+     di-scroll.
+   - card-in / chip-in : animasi masuk buat kartu/chip yang disuntik JS
+     (produk, testimoni, kategori) — pakai CSS "animation" (bukan
+     transition) biar otomatis jalan tiap kali kontennya baru dirender,
+     termasuk pas ganti kategori / refresh, bukan cuma sekali di awal.
+--------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference){
+  .reveal{
+    opacity:0;
+    transform:translateY(22px);
+    transition: opacity .7s cubic-bezier(.22,.61,.36,1), transform .7s cubic-bezier(.22,.61,.36,1);
+  }
+  .reveal.in-view{ opacity:1; transform:translateY(0); }
+
+  .reveal-stagger > *{
+    opacity:0;
+    transform:translateY(18px);
+    transition: opacity .6s cubic-bezier(.22,.61,.36,1), transform .6s cubic-bezier(.22,.61,.36,1);
+  }
+  .reveal-stagger.in-view > *{ opacity:1; transform:translateY(0); }
+  .reveal-stagger.in-view > *:nth-child(1){ transition-delay:.05s; }
+  .reveal-stagger.in-view > *:nth-child(2){ transition-delay:.15s; }
+  .reveal-stagger.in-view > *:nth-child(3){ transition-delay:.25s; }
+  .reveal-stagger.in-view > *:nth-child(4){ transition-delay:.35s; }
+
+  .hero-copy{ animation: hero-copy-in .8s cubic-bezier(.22,.61,.36,1) both; }
+  @keyframes hero-copy-in{
+    from{ opacity:0; transform:translateY(16px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  @keyframes card-in{
+    from{ opacity:0; transform:translateY(14px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .pcard, .testi-card, .admin-row, .cs-order-row{
+    animation: card-in .45s cubic-bezier(.22,.61,.36,1) both;
+  }
+  .grid > *:nth-child(1), .testi-grid > *:nth-child(1){ animation-delay:.02s; }
+  .grid > *:nth-child(2), .testi-grid > *:nth-child(2){ animation-delay:.06s; }
+  .grid > *:nth-child(3), .testi-grid > *:nth-child(3){ animation-delay:.1s; }
+  .grid > *:nth-child(4){ animation-delay:.14s; }
+  .grid > *:nth-child(5){ animation-delay:.18s; }
+  .grid > *:nth-child(6){ animation-delay:.22s; }
+  .grid > *:nth-child(7){ animation-delay:.26s; }
+  .grid > *:nth-child(8){ animation-delay:.3s; }
+
+  @keyframes chip-in{
+    from{ opacity:0; transform:translateY(8px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .chip{ animation: chip-in .35s ease both; }
+}
+@media (prefers-reduced-motion: reduce){
+  .reveal, .reveal-stagger > *{ opacity:1; transform:none; }
+}
+
+header.site{ transition: box-shadow .25s ease; }
+header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
+
+/* Shimmer chip kategori (placeholder sebelum /api/categories kejawab) */
+.chip-skeleton{
+  display:inline-block;
+  height:34px; width:84px;
+  border-radius:999px;
+  background:#E7EEF3;
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+/* Shimmer kartu testimoni */
+.testi-card-skeleton{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  padding:22px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.testi-card-skeleton .sk-line{
+  height:10px; border-radius:4px;
+  background:#E7EEF3;
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+}
+.testi-card-skeleton .sk-line.sk-q1{ width:100%; }
+.testi-card-skeleton .sk-line.sk-q2{ width:92%; }
+.testi-card-skeleton .sk-line.sk-q3{ width:70%; }
+.testi-card-skeleton .sk-author{ display:flex; align-items:center; gap:10px; margin-top:4px; }
+.testi-card-skeleton .sk-avatar{
+  width:36px; height:36px; border-radius:999px; flex-shrink:0;
+  background:#E7EEF3;
+  animation:skeleton-pulse 1.4s ease-in-out infinite;
+}
+.testi-card-skeleton .sk-name{ width:90px; height:9px; }
+
+/* Shimmer baris list generik (dipakai Admin/CS Panel) */
+.row-skeleton{
+  height:52px;
+  border:1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, #EEF3F7 25%, #F7FAFB 37%, #EEF3F7 63%);
+  background-size:400% 100%;
+  animation: row-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes row-shimmer{
+  0%{ background-position:100% 50%; }
+  100%{ background-position:0 50%; }
+}
+@media (prefers-reduced-motion: reduce){
+  .chip-skeleton, .testi-card-skeleton .sk-line, .testi-card-skeleton .sk-avatar, .row-skeleton{ animation:none; }
+}
+
 /* ---------- Responsive: NAV (logo + cari + tombol aksi) ----------
    Sebelumnya nav cuma satu baris rapat (logo+search+tombol) tanpa
    wrap sama sekali, jadi di HP semuanya keremes jadi satu baris sempit.

@@ -83,6 +83,10 @@ async function loadCategories() {
   const nav = document.getElementById('category-nav');
   if (!nav) return;
 
+  // Placeholder shimmer dulu selama nunggu /api/categories kejawab, biar
+  // nggak ada jeda kosong sebelum chip kategori muncul.
+  nav.innerHTML = Array.from({ length: 4 }, () => '<span class="chip-skeleton"></span>').join('');
+
   try {
     const { data } = await fetchJSON(`${API_BASE}/categories`);
     const chips = [`<span class="chip active" data-cat="semua">Semua</span>`]
@@ -462,12 +466,92 @@ async function initNavAccountButton() {
   }
 }
 
+// ---------- Animasi: scroll-reveal, shadow nav, count-up angka ----------
+// Semua "no-op" dengan aman kalau elemennya nggak ada di halaman ini
+// (mis. belanja.html nggak punya .reveal/.stat-item sama sekali).
+function initScrollReveal() {
+  const targets = document.querySelectorAll('.reveal, .reveal-stagger');
+  if (!targets.length) return;
+
+  if (!('IntersectionObserver' in window)) {
+    // Browser lama tanpa dukungan IO -> langsung tampilkan semua, jangan
+    // sampai kontennya ketutup opacity:0 selamanya.
+    targets.forEach((el) => el.classList.add('in-view'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  targets.forEach((el) => observer.observe(el));
+}
+
+function initNavScrollShadow() {
+  const header = document.querySelector('header.site');
+  if (!header) return;
+  const update = () => header.classList.toggle('is-scrolled', window.scrollY > 8);
+  update();
+  window.addEventListener('scroll', update, { passive: true });
+}
+
+function initStatsCountUp() {
+  const items = document.querySelectorAll('[data-count-to]');
+  if (!items.length) return;
+
+  const animateCount = (el) => {
+    const target = Number(el.dataset.countTo);
+    const decimals = Number(el.dataset.decimals || 0);
+    const suffix = el.dataset.suffix || '';
+    const duration = 1100;
+    const start = performance.now();
+
+    // Pastikan node teks pertama ada (elemen ini punya child <span> ★).
+    if (!el.childNodes.length || el.childNodes[0].nodeType !== Node.TEXT_NODE) {
+      el.insertBefore(document.createTextNode(''), el.firstChild);
+    }
+
+    function tick(now) {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const value = target * eased;
+      const text = decimals > 0 ? value.toFixed(decimals) : Math.round(value).toString();
+      el.childNodes[0].nodeValue = text + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  };
+
+  if (!('IntersectionObserver' in window)) {
+    items.forEach(animateCount);
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        animateCount(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  items.forEach((el) => observer.observe(el));
+}
+
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', async () => {
   initCategoryFilter();
   initSearch();
   initOrderModal();
   initNavAccountButton();
+  initScrollReveal();
+  initNavScrollShadow();
+  initStatsCountUp();
   await loadHeroBannerImage();
   await loadBanner();
   await loadCategories();

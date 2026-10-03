@@ -106,6 +106,24 @@ function showDashboard(profile) {
 
   const heroBannerPanel = document.getElementById('hero-banner-panel');
   heroBannerPanel.classList.toggle('hidden', normalizedRole !== 'owner');
+
+  seedListSkeletons();
+}
+
+// Taruh shimmer placeholder di semua daftar SEBELUM data aslinya kejawab
+// dari server — biar begitu dashboard kebuka langsung kelihatan "lagi
+// dimuat", bukan kosong melompong nunggu beberapa saat.
+function seedListSkeletons() {
+  const listIds = [
+    'order-list', 'banner-list', 'category-list', 'product-list',
+    'testimonial-list', 'hero-banner-list', 'social-list', 'team-list',
+  ];
+  listIds.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && !el.children.length) {
+      el.innerHTML = Array.from({ length: 3 }, () => '<div class="row-skeleton"></div>').join('');
+    }
+  });
 }
 
 // ---------- Init Supabase (hanya dipakai untuk proses login) ----------

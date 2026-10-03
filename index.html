@@ -71,17 +71,17 @@
 
     <!-- STATS STRIP: angka kepercayaan singkat, langsung di bawah hero -->
     <section class="stats-strip">
-      <div class="stats-strip-inner">
-        <div class="stat-item"><strong>50+</strong><span data-i18n="stats.item1_label">Kreator terpercaya</span></div>
-        <div class="stat-item"><strong>500+</strong><span data-i18n="stats.item2_label">Produk digital</span></div>
+      <div class="stats-strip-inner reveal-stagger">
+        <div class="stat-item"><strong data-count-to="50" data-suffix="+">0+</strong><span data-i18n="stats.item1_label">Kreator terpercaya</span></div>
+        <div class="stat-item"><strong data-count-to="500" data-suffix="+">0+</strong><span data-i18n="stats.item2_label">Produk digital</span></div>
         <div class="stat-item"><strong>24/7</strong><span data-i18n="stats.item3_label">Chat langsung</span></div>
-        <div class="stat-item"><strong>4.9<span class="stat-star">★</span></strong><span data-i18n="stats.item4_label">Rating rata-rata</span></div>
+        <div class="stat-item"><strong data-count-to="4.9" data-decimals="1">0.0<span class="stat-star">★</span></strong><span data-i18n="stats.item4_label">Rating rata-rata</span></div>
       </div>
     </section>
 
     <!-- TENTANG KAMI: penjelasan awal platform -->
     <section class="intro">
-      <div class="section intro-grid">
+      <div class="section intro-grid reveal">
         <div class="intro-copy">
           <span class="eyebrow" data-i18n="intro.eyebrow">◆ Tentang Kami</span>
           <h2 data-i18n="intro.title">Marketplace jasa &amp; produk digital tepercaya</h2>
@@ -117,7 +117,7 @@
     <!-- PRODUK UNGGULAN: produk NYATA (bukan dekorasi), diisi dari
          /api/products?featured=true. Section ini otomatis sembunyi kalau
          belum ada produk yang ditandai "populer" di Admin Panel. -->
-    <section class="section featured-section hidden" id="featured-section">
+    <section class="section featured-section hidden reveal" id="featured-section">
       <div class="section-head">
         <div>
           <span class="eyebrow" data-i18n="featured.eyebrow">◆ Produk Unggulan</span>
@@ -138,7 +138,7 @@
             <p data-i18n="why.sub">Bukan cuma marketplace, ini rumah buat kreator digital lokal.</p>
           </div>
         </div>
-        <div class="why-grid">
+        <div class="why-grid reveal-stagger">
           <div class="why-card">
             <span class="num" data-i18n="why.card1_num">01 / Kecepatan</span>
             <h3 data-i18n="why.card1_title">Pengerjaan cepat</h3>
@@ -175,7 +175,7 @@
 
     <!-- CTA STRIP -->
     <section class="cta-strip">
-      <div class="cta-strip-inner">
+      <div class="cta-strip-inner reveal">
         <div>
           <h2 data-i18n="cta.title">Siap belanja?</h2>
           <p data-i18n="cta.sub">Ratusan jasa &amp; produk digital dari kreator terpercaya nunggu buat kamu jelajahi.</p>
