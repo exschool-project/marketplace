@@ -98,16 +98,61 @@ function showDashboard(profile) {
   badge.textContent = normalizedRole.toUpperCase();
   badge.className = `role-badge role-${normalizedRole}`;
 
-  const teamPanel = document.getElementById('team-panel');
-  teamPanel.classList.toggle('hidden', normalizedRole !== 'owner');
-
-  const socialPanel = document.getElementById('social-panel');
-  socialPanel.classList.toggle('hidden', normalizedRole !== 'owner');
-
-  const heroBannerPanel = document.getElementById('hero-banner-panel');
-  heroBannerPanel.classList.toggle('hidden', normalizedRole !== 'owner');
+  // Semua elemen "khusus owner" — baik panelnya sendiri MAUPUN link-nya
+  // di sidebar (.admin-nav-link + grup labelnya) — ditandain class
+  // "owner-only" yang sama, jadi cukup satu toggle buat keduanya
+  // sekaligus. Ini yang bikin tampilan "wajib sesuai role": role selain
+  // owner nggak akan pernah lihat menu ATAU link menuju ke situ sama
+  // sekali, bukan cuma kontennya aja yang disembunyikan.
+  const isOwner = normalizedRole === 'owner';
+  document.querySelectorAll('.owner-only').forEach((el) => {
+    el.classList.toggle('hidden', !isOwner);
+  });
 
   seedListSkeletons();
+  initSidebarScrollSpy();
+}
+
+// Highlight otomatis link sidebar yang lagi aktif sesuai section yang
+// kelihatan di layar (scroll-spy) — dipanggil sekali aja walau
+// showDashboard() bisa kepanggil 2x (cache optimistic + verifikasi ulang).
+let sidebarScrollSpyReady = false;
+function initSidebarScrollSpy() {
+  if (sidebarScrollSpyReady) return;
+  sidebarScrollSpyReady = true;
+
+  const links = document.querySelectorAll('.admin-nav-link');
+  if (!links.length || !('IntersectionObserver' in window)) return;
+
+  const sections = Array.from(links)
+    .map((link) => document.querySelector(link.getAttribute('href')))
+    .filter(Boolean);
+  if (!sections.length) return;
+
+  const setActive = (id) => {
+    links.forEach((link) => link.classList.toggle('active', link.getAttribute('href') === `#${id}`));
+  };
+
+  // State intersect per section disimpan sendiri (bukan cuma ngandelin
+  // array "entries" di tiap callback, yang isinya cuma section yang BARU
+  // berubah statusnya) — lalu pilih yang posisinya paling atas di layar,
+  // biar highlight-nya selalu konsisten walau beberapa section tumpang
+  // tindih kelihatan bareng pas di-scroll cepat.
+  const intersecting = new Map();
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => intersecting.set(entry.target.id, entry));
+
+    let topMost = null;
+    intersecting.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      if (!topMost || entry.boundingClientRect.top < topMost.boundingClientRect.top) {
+        topMost = entry;
+      }
+    });
+    if (topMost) setActive(topMost.target.id);
+  }, { rootMargin: '-84px 0px -70% 0px', threshold: 0 });
+
+  sections.forEach((el) => observer.observe(el));
 }
 
 // Taruh shimmer placeholder di semua daftar SEBELUM data aslinya kejawab

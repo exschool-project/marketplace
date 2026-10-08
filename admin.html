@@ -68,12 +68,60 @@
       </div>
     </header>
 
-    <main class="admin-main">
+    <div class="admin-layout">
+      <!-- SIDEBAR: navigasi antar panel + pemisah jelas fitur khusus Owner.
+           Item "Khusus Owner" disembunyikan otomatis buat role admin biasa
+           (lihat showDashboard() di admin.js — sama persis logikanya kayak
+           panel-nya sendiri). -->
+      <nav class="admin-sidebar" aria-label="Navigasi panel admin">
+        <a href="#overview" class="admin-nav-link">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Ringkasan
+        </a>
+        <a href="#orders-panel" class="admin-nav-link">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/></svg>
+          Pesanan &amp; Chat
+        </a>
+
+        <p class="admin-nav-group-label">Konten</p>
+        <a href="#banner-panel" class="admin-nav-link">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="4"/><path d="M5 10v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/></svg>
+          Banner Berjalan
+        </a>
+        <a href="#categories-panel" class="admin-nav-link">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/></svg>
+          Kategori
+        </a>
+        <a href="#products-panel" class="admin-nav-link">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg>
+          Produk
+        </a>
+        <a href="#testimonials-panel" class="admin-nav-link">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
+          Testimoni
+        </a>
+
+        <p id="nav-owner-group-label" class="admin-nav-group-label owner-only hidden">Khusus Owner</p>
+        <a href="#hero-banner-panel" id="nav-hero-banner-link" class="admin-nav-link owner-only hidden">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="1"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5L6 20"/></svg>
+          Banner Gambar
+        </a>
+        <a href="#social-panel" id="nav-social-link" class="admin-nav-link owner-only hidden">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6"/></svg>
+          Media Sosial
+        </a>
+        <a href="#team-panel" id="nav-team-link" class="admin-nav-link owner-only hidden">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="18" cy="8" r="2.4"/><path d="M15.5 14.3c2.6.4 4.5 2.6 4.5 5.7"/></svg>
+          Manajemen Tim
+        </a>
+      </nav>
+
+      <main class="admin-content">
 
       <p id="dashboard-load-error" class="dashboard-load-error hidden"></p>
 
       <!-- STATS -->
-      <section class="stat-row">
+      <section class="stat-row" id="overview">
         <div class="stat-card brutal-sm">
           <span class="stat-num" id="stat-products">–</span>
           <span class="stat-label">Produk</span>
@@ -93,7 +141,7 @@
       </section>
 
       <!-- PESANAN -->
-      <section class="admin-panel brutal">
+      <section class="admin-panel brutal" id="orders-panel">
         <h2>Pesanan &amp; Chat</h2>
         <p class="panel-sub">Pesanan masuk dari tombol "Beli Sekarang" di beranda. Ubah status di sini, atau buka <a href="cs.html" style="text-decoration:underline; font-weight:700;">CS Panel</a> buat balas chat sampai selesai dalam tampilan yang lebih lega.</p>
         <div class="inline-form">
@@ -110,7 +158,7 @@
       </section>
 
       <!-- BANNER -->
-      <section class="admin-panel brutal">
+      <section class="admin-panel brutal" id="banner-panel">
         <h2>Banner Berjalan</h2>
         <p class="panel-sub">Teks yang tampil di pita banner paling atas halaman utama.</p>
         <form id="banner-form" class="inline-form">
@@ -121,7 +169,7 @@
       </section>
 
       <!-- KATEGORI -->
-      <section class="admin-panel brutal">
+      <section class="admin-panel brutal" id="categories-panel">
         <h2>Kategori</h2>
         <p class="panel-sub">Kategori dipakai sebagai filter chip di halaman utama.</p>
         <form id="category-form" class="inline-form">
@@ -132,7 +180,7 @@
       </section>
 
       <!-- PRODUK -->
-      <section class="admin-panel brutal">
+      <section class="admin-panel brutal" id="products-panel">
         <h2>Produk</h2>
         <p class="panel-sub">Produk yang tampil di grid halaman utama.</p>
         <form id="product-form" class="product-form">
@@ -166,7 +214,7 @@
       </section>
 
       <!-- TESTIMONI -->
-      <section class="admin-panel brutal">
+      <section class="admin-panel brutal" id="testimonials-panel">
         <h2>Testimoni</h2>
         <p class="panel-sub">Ulasan pembeli yang tampil di beranda. Section testimoni di beranda otomatis disembunyikan selama belum ada testimoni aktif di sini — jadi jangan diisi contoh/demo.</p>
         <form id="testimonial-form" class="form-grid">
@@ -189,7 +237,7 @@
       </section>
 
       <!-- BANNER GAMBAR: hanya dirender & diisi kalau role === owner -->
-      <section id="hero-banner-panel" class="admin-panel brutal owner-only hidden">
+      <section id="hero-banner-panel" class="admin-panel brutal owner-only owner-section hidden">
         <h2>Banner Gambar <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
         <p class="panel-sub">Gambar yang tampil di paling atas halaman utama, di bawah pita banner teks. Judul &amp; sub-judul akan ditimpa otomatis di atas gambar (bukan diedit manual di file gambarnya) dan menyesuaikan ukuran layar HP/tablet/desktop.</p>
         <form id="hero-banner-form">
@@ -219,7 +267,7 @@
       </section>
 
       <!-- MEDIA SOSIAL: hanya dirender & diisi kalau role === owner -->
-      <section id="social-panel" class="admin-panel brutal owner-only hidden">
+      <section id="social-panel" class="admin-panel brutal owner-only owner-section hidden">
         <h2>Media Sosial <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
         <p class="panel-sub">Link ini tampil di footer beranda. Contoh nama platform: Instagram, WhatsApp, TikTok.</p>
         <form id="social-form" class="form-grid">
@@ -231,7 +279,7 @@
       </section>
 
       <!-- MANAJEMEN TIM: hanya dirender & diisi kalau role === owner -->
-      <section id="team-panel" class="admin-panel brutal owner-only hidden">
+      <section id="team-panel" class="admin-panel brutal owner-only owner-section hidden">
         <h2>Manajemen Tim <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
         <p class="panel-sub">Atur siapa yang jadi admin, owner, atau member biasa.</p>
         <div id="team-list" class="admin-list"></div>
@@ -239,7 +287,8 @@
 
       <p class="admin-copyright mono">© 2026 EX-SCHOOL — Yayasan Aqilah Hidayah</p>
 
-    </main>
+      </main>
+    </div>
   </section>
 
   <!-- MODAL CHAT PESANAN (admin balas pembeli) -->
