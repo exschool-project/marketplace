@@ -971,8 +971,6 @@ async function handleHeroBannerSubmit(e) {
   }
 
   const linkInput = document.getElementById('hero-banner-link');
-  const titleInput = document.getElementById('hero-banner-title');
-  const subtitleInput = document.getElementById('hero-banner-subtitle');
 
   try {
     await authedFetch(`${API_BASE}/hero-banners`, {
@@ -980,8 +978,6 @@ async function handleHeroBannerSubmit(e) {
       body: JSON.stringify({
         image_url: pendingHeroBannerUrl,
         link_url: linkInput.value.trim() || null,
-        title: titleInput.value.trim() || null,
-        subtitle: subtitleInput.value.trim() || null,
       }),
     });
 

@@ -6,7 +6,7 @@
 <title>EX-SCHOOL — Digital Marketplace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -42,26 +42,15 @@
     <section class="hero" id="beranda">
       <div class="hero-visual" id="hero-visual">
         <div id="hero-banner-wrap" class="hero-banner-wrap hidden">
-          <img id="hero-banner-img" class="hero-banner-img" alt="Banner" loading="lazy">
+          <img id="hero-banner-img" class="hero-banner-img" alt="Banner">
           <video id="hero-banner-video" class="hero-banner-img hidden" muted loop playsinline preload="metadata" aria-hidden="true"></video>
-          <div class="hero-banner-overlay">
-            <div class="hero-banner-text">
-              <h2 id="hero-banner-title" class="hero-banner-title"></h2>
-              <p id="hero-banner-subtitle" class="hero-banner-subtitle"></p>
-            </div>
-          </div>
         </div>
+      </div>
 
-        <div class="hero-overlay-content">
-          <div class="hero-copy">
-            <span class="eyebrow" data-i18n="hero.eyebrow">◆ Beranda</span>
-            <!-- Teks sambutan sengaja tidak ditampilkan; h1 disimpan tersembunyi (visually-hidden) untuk SEO & pembaca layar. -->
-            <h1 class="visually-hidden" data-i18n-html="hero.title">Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
-            <div class="hero-ctas">
-              <a href="belanja.html" class="btn btn-green hover-lift brutal" data-i18n="hero.cta">Mulai Belanja</a>
-            </div>
-          </div>
-        </div>
+      <!-- Banner murni (tanpa teks/elemen menimpa). Tombol dipindah ke bawah banner. -->
+      <div class="hero-cta-bar">
+        <h1 class="visually-hidden" data-i18n-html="hero.title">Selamat Datang di <span class="hl">EX-SCHOOL</span></h1>
+        <a href="belanja.html" class="btn btn-green hover-lift brutal" data-i18n="hero.cta">Mulai Belanja</a>
       </div>
     </section>
 
