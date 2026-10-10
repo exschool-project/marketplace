@@ -388,12 +388,35 @@ document.getElementById('category-list')?.addEventListener('click', async (e) =>
 
 // ---------- Upload gambar (Cloudinary, signed upload) — dipakai bersama
 // oleh form produk dan form banner gambar ----------
+const MAX_VIDEO_SECONDS = 60;
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // batas upload Cloudinary paket gratis
+
+// Baca durasi video di browser sebelum diunggah (banner video maks 1 menit).
+function getVideoDuration(file) {
+  return new Promise((resolve, reject) => {
+    const v = document.createElement('video');
+    const src = URL.createObjectURL(file);
+    v.preload = 'metadata';
+    v.onloadedmetadata = () => { URL.revokeObjectURL(src); resolve(v.duration); };
+    v.onerror = () => { URL.revokeObjectURL(src); reject(new Error('Video tidak bisa dibaca. Pakai format MP4/WebM.')); };
+    v.src = src;
+  });
+}
+
 async function uploadImageToCloudinary(file, folder, statusEl) {
-  if (statusEl) statusEl.textContent = 'Mengunggah ke Cloudinary...';
+  const isVideo = file.type.startsWith('video/');
+  if (isVideo) {
+    if (file.size > MAX_VIDEO_BYTES) throw new Error('Ukuran video maksimal 100 MB.');
+    const secs = await getVideoDuration(file);
+    if (!Number.isFinite(secs) || secs > MAX_VIDEO_SECONDS + 0.5) {
+      throw new Error(`Durasi video maksimal ${MAX_VIDEO_SECONDS} detik (video ini ${Math.round(secs)} detik).`);
+    }
+  }
+  if (statusEl) statusEl.textContent = isVideo ? 'Mengunggah video ke Cloudinary (bisa agak lama)...' : 'Mengunggah ke Cloudinary...';
 
   const ticket = await authedFetch(`${API_BASE}/upload-signature`, {
     method: 'POST',
-    body: JSON.stringify({ folder }),
+    body: JSON.stringify({ folder, resource_type: isVideo ? 'video' : 'image' }),
   });
 
   const form = new FormData();
@@ -409,6 +432,8 @@ async function uploadImageToCloudinary(file, folder, statusEl) {
 
   return body.secure_url;
 }
+
+const isVideoUrl = (u) => /\/video\/upload\//.test(String(u || '')) || /\.(mp4|webm|mov)(\?|$)/i.test(String(u || ''));
 
 function initProductImageInput() {
   const input = document.getElementById('product-image');
@@ -898,7 +923,12 @@ function initHeroBannerImageInput() {
     }
 
     previewWrap.classList.remove('hidden');
-    previewImg.src = URL.createObjectURL(file);
+    const previewVideo = document.getElementById('hero-banner-preview-video');
+    const fileIsVideo = file.type.startsWith('video/');
+    previewImg.classList.toggle('hidden', fileIsVideo);
+    previewVideo.classList.toggle('hidden', !fileIsVideo);
+    if (fileIsVideo) previewVideo.src = URL.createObjectURL(file);
+    else previewImg.src = URL.createObjectURL(file);
 
     try {
       pendingHeroBannerUrl = await uploadImageToCloudinary(file, 'ex-school/hero-banners', statusEl);
@@ -918,9 +948,11 @@ async function loadHeroBannerAdmin() {
 
   list.innerHTML = data.map((b) => `
     <div class="admin-row" data-id="${b.id}">
-      <img class="admin-row-thumb" src="${escapeHtml(b.image_url)}" alt="">
+      ${isVideoUrl(b.image_url)
+        ? `<video class="admin-row-thumb" src="${escapeHtml(b.image_url)}" muted preload="metadata"></video>`
+        : `<img class="admin-row-thumb" src="${escapeHtml(b.image_url)}" alt="">`}
       <span class="admin-row-text">
-        ${b.title ? escapeHtml(b.title) : '<span class="admin-row-sub">Tanpa judul</span>'}
+        ${isVideoUrl(b.image_url) ? '<span class="role-badge role-owner">VIDEO</span> ' : ''}${b.title ? escapeHtml(b.title) : '<span class="admin-row-sub">Tanpa judul</span>'}
         ${b.link_url ? `· ${escapeHtml(b.link_url)}` : ''}
       </span>
       <span class="admin-row-tag">${b.is_active ? 'Aktif' : 'Nonaktif'}</span>
@@ -934,7 +966,7 @@ async function handleHeroBannerSubmit(e) {
   e.preventDefault();
 
   if (!pendingHeroBannerUrl) {
-    alert('Tunggu gambar selesai diunggah dulu (atau pilih gambar).');
+    alert('Tunggu file selesai diunggah dulu (atau pilih gambar/video).');
     return;
   }
 

@@ -58,7 +58,22 @@ async function loadHeroBannerImage() {
       return;
     }
     const banner = data[0]; // yang paling atas urutannya
-    img.src = banner.image_url;
+    const video = document.getElementById('hero-banner-video');
+    const isVideo = /\/video\/upload\//.test(banner.image_url) || /\.(mp4|webm|mov)(\?|$)/i.test(banner.image_url);
+    if (isVideo && video) {
+      // Banner video: otomatis main tanpa suara, berulang. Poster = frame
+      // pertama (transformasi Cloudinary) biar tidak kosong selagi memuat.
+      img.classList.add('hidden');
+      video.classList.remove('hidden');
+      video.poster = banner.image_url.replace('/video/upload/', '/video/upload/so_0/').replace(/\.(mp4|webm|mov)(\?.*)?$/i, '.jpg');
+      video.src = banner.image_url;
+      video.muted = true;
+      video.play().catch(() => { /* autoplay diblokir (mis. mode hemat daya) -> tampil poster saja */ });
+    } else {
+      video?.classList.add('hidden');
+      img.classList.remove('hidden');
+      img.src = banner.image_url;
+    }
     img.alt = banner.title || 'Banner';
     if (titleEl) titleEl.textContent = banner.title || '';
     if (subtitleEl) subtitleEl.textContent = banner.subtitle || '';

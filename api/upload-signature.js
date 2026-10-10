@@ -26,6 +26,9 @@ module.exports = withErrorHandling(async (req, res) => {
   const rawFolder = (req.body && req.body.folder) || 'ex-school/products';
   const folder = String(rawFolder).replace(/[^a-zA-Z0-9/_-]/g, '').slice(0, 100) || 'ex-school/products';
 
+  // 'video' dipakai untuk banner video; selain itu selalu gambar.
+  const resourceType = req.body && req.body.resource_type === 'video' ? 'video' : 'image';
+
   const timestamp = Math.round(Date.now() / 1000);
   const signature = buildSignature({ timestamp, folder }, config.apiSecret);
 
@@ -35,6 +38,6 @@ module.exports = withErrorHandling(async (req, res) => {
     apiKey: config.apiKey,
     cloudName: config.cloudName,
     folder,
-    uploadUrl: `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${config.cloudName}/${resourceType}/upload`,
   });
 });

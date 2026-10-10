@@ -240,3 +240,8 @@ File baru/berubah: `produk.html`, `produk.js`, `ADD_PRODUCT_DETAIL.sql`,
 `style.css`, `script.js` (kartu jadi tautan), `api/products.js` (field detail
 + validasi), `api/testimonials.js` (`product_id`, `image_url`, filter
 `?product_id=`), `admin.html/js/css` (editor detail & form testimoni).
+
+### Banner Gambar / Video
+Banner beranda sekarang bisa **foto atau video** (MP4/WebM, **maks. 60 detik**,
+maks. 100 MB). Video main otomatis, tanpa suara, berulang. Batas durasi
+dicek di browser admin sebelum upload. Tidak perlu SQL tambahan.
