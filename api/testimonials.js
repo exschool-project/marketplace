@@ -7,6 +7,8 @@ const { withErrorHandling } = require('./_lib/http');
 // (dipakai section testimoni di beranda), tapi POST/PUT/DELETE khusus
 // admin/owner. Kalau tabel belum ada (migrasi ADD_TESTIMONIALS.sql belum
 // dijalankan), GET tetap balikin data kosong daripada bikin beranda error.
+const cleanImageUrl = (v) => (typeof v === 'string' && /^https?:\/\//i.test(v.trim()) ? v.trim() : null);
+
 module.exports = withErrorHandling(async (req, res) => {
   const supabase = getSupabaseAdmin();
   const { id } = req.query;
@@ -20,6 +22,10 @@ module.exports = withErrorHandling(async (req, res) => {
       .select('*')
       .order('sort_order', { ascending: true });
 
+    // ?product_id=xxx -> cuma testimoni yang dikaitkan ke produk itu
+    // (dipakai halaman produk.html).
+    if (req.query.product_id) query = query.eq('product_id', req.query.product_id);
+
     // Publik cuma lihat yang aktif; admin/owner (di panel admin) lihat semua.
     if (!isStaff) query = query.eq('is_active', true);
 
@@ -27,7 +33,8 @@ module.exports = withErrorHandling(async (req, res) => {
     if (error) {
       // 42P01 = undefined_table -> migrasi belum dijalankan. Jangan bikin
       // beranda error, anggap aja belum ada testimoni sama sekali.
-      if (error.code === '42P01') {
+      // 42703 = kolom product_id belum ada (ADD_PRODUCT_DETAIL.sql belum jalan).
+      if (error.code === '42P01' || error.code === '42703') {
         res.status(200).json({ data: [], migration_pending: true });
         return;
       }
@@ -42,7 +49,7 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await requireAdmin(req, res);
     if (!ctx) return;
 
-    const { author_name, author_role, quote, rating = 5, is_active = true, sort_order = 0 } = req.body || {};
+    const { author_name, author_role, quote, rating = 5, is_active = true, sort_order = 0, product_id, image_url } = req.body || {};
 
     if (!author_name || !String(author_name).trim() || !quote || !String(quote).trim()) {
       res.status(400).json({ error: 'Nama & isi testimoni wajib diisi.' });
@@ -63,6 +70,8 @@ module.exports = withErrorHandling(async (req, res) => {
         rating: ratingNum,
         is_active,
         sort_order,
+        product_id: product_id || null,
+        image_url: cleanImageUrl(image_url),
       })
       .select()
       .single();
@@ -83,8 +92,10 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await requireAdmin(req, res);
     if (!ctx) return;
 
-    const { author_name, author_role, quote, rating, is_active, sort_order } = req.body || {};
+    const { author_name, author_role, quote, rating, is_active, sort_order, product_id, image_url } = req.body || {};
     const updates = {};
+    if (product_id !== undefined) updates.product_id = product_id || null;
+    if (image_url !== undefined) updates.image_url = cleanImageUrl(image_url);
     if (author_name !== undefined) updates.author_name = String(author_name).trim();
     if (author_role !== undefined) updates.author_role = author_role && String(author_role).trim() ? String(author_role).trim() : null;
     if (quote !== undefined) updates.quote = String(quote).trim();

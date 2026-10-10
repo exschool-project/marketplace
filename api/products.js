@@ -5,7 +5,40 @@ const { withErrorHandling } = require('./_lib/http');
 const EDITABLE_FIELDS = [
   'name', 'shop_name', 'price', 'old_price',
   'icon', 'image_url', 'category_id', 'badge', 'is_active', 'sort_order', 'is_featured',
+  'description', 'features', 'gallery', 'showcase', 'faq', 'delivery_time',
 ];
+
+// ---------- Sanitasi field detail produk ----------
+// Isi detail dikirim dari admin panel, tapi tetap divalidasi di server:
+// URL harus http(s), teks dipotong, jumlah item dibatasi.
+const isHttpUrl = (v) => typeof v === 'string' && /^https?:\/\//i.test(v.trim());
+const clip = (v, n) => String(v ?? '').trim().slice(0, n);
+
+function cleanDetailField(key, value) {
+  if (value === null || value === undefined) {
+    return key === 'description' || key === 'delivery_time' ? null : [];
+  }
+  switch (key) {
+    case 'description': return clip(value, 5000) || null;
+    case 'delivery_time': return clip(value, 80) || null;
+    case 'features':
+      return (Array.isArray(value) ? value : []).map((x) => clip(x, 160)).filter(Boolean).slice(0, 20);
+    case 'gallery':
+      return (Array.isArray(value) ? value : []).filter(isHttpUrl).map((u) => u.trim()).slice(0, 8);
+    case 'showcase':
+      return (Array.isArray(value) ? value : [])
+        .filter((x) => x && isHttpUrl(x.url))
+        .map((x) => ({ url: x.url.trim(), caption: clip(x.caption, 160) }))
+        .slice(0, 12);
+    case 'faq':
+      return (Array.isArray(value) ? value : [])
+        .map((x) => ({ q: clip(x && x.q, 200), a: clip(x && x.a, 800) }))
+        .filter((x) => x.q && x.a)
+        .slice(0, 12);
+    default: return value;
+  }
+}
+const DETAIL_FIELDS = ['description', 'features', 'gallery', 'showcase', 'faq', 'delivery_time'];
 
 // Satu file menangani /api/products (list & create) DAN /api/products?id=xxx
 // (ambil satu, update, hapus) — digabung supaya jumlah Vercel Functions
@@ -131,7 +164,8 @@ module.exports = withErrorHandling(async (req, res) => {
     const body = req.body || {};
     const updates = {};
     EDITABLE_FIELDS.forEach((key) => {
-      if (body[key] !== undefined) updates[key] = body[key];
+      if (body[key] === undefined) return;
+      updates[key] = DETAIL_FIELDS.includes(key) ? cleanDetailField(key, body[key]) : body[key];
     });
 
     const { data, error } = await supabase

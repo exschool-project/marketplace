@@ -438,8 +438,12 @@ function initProductImageInput() {
 }
 
 // ---------- Produk ----------
+let productsCache = [];
+
 async function loadProductsAdmin() {
   const { data } = await authedFetch(`${API_BASE}/products`);
+  productsCache = data;
+  fillTestimonialProductSelect();
   const list = document.getElementById('product-list');
   list.innerHTML = data.map((p) => `
     <div class="admin-row" data-id="${p.id}">
@@ -447,6 +451,7 @@ async function loadProductsAdmin() {
       <span class="admin-row-text">${p.image_url ? '' : (p.icon ? escapeHtml(p.icon) + ' ' : ICONS.box + ' ')}${escapeHtml(p.name)} — Rp${Number(p.price).toLocaleString('id-ID')}</span>
       <span class="admin-row-tag">${p.is_active ? 'Aktif' : 'Nonaktif'}</span>
       ${p.is_featured ? '<span class="role-badge role-owner">POPULER</span>' : ''}
+      <button class="mini-btn edit-detail" type="button">Edit Detail</button>
       <button class="mini-btn toggle-featured">${p.is_featured ? 'Batal Populer' : 'Jadikan Populer'}</button>
       <button class="mini-btn toggle-product" type="button">${p.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
       <button class="mini-btn danger delete-product" type="button">Hapus</button>
@@ -499,6 +504,11 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
   const row = e.target.closest('.admin-row');
   if (!row) return;
   const id = row.dataset.id;
+
+  if (e.target.classList.contains('edit-detail')) {
+    openDetailEditor(id);
+    return;
+  }
 
   try {
     if (e.target.classList.contains('delete-product')) {
@@ -638,7 +648,160 @@ document.getElementById('social-list')?.addEventListener('click', async (e) => {
   }
 });
 
+
+// ---------- Editor detail produk (deskripsi, fitur, galeri, contoh, FAQ) ----------
+let detailState = null; // { id, gallery: [url], showcase: [{url, caption}] }
+
+function renderDetailMedia() {
+  document.getElementById('pde-gallery').innerHTML = detailState.gallery.map((u, i) => `
+    <div class="pde-thumb"><img src="${escapeHtml(u)}" alt=""><button type="button" class="pde-remove" data-kind="gallery" data-index="${i}" aria-label="Hapus">✕</button></div>
+  `).join('');
+  document.getElementById('pde-showcase').innerHTML = detailState.showcase.map((s, i) => `
+    <div class="pde-showcase-row">
+      <img src="${escapeHtml(s.url)}" alt="">
+      <input type="text" class="pde-caption" data-index="${i}" value="${escapeHtml(s.caption || '')}" maxlength="160" placeholder="Keterangan gambar (opsional)">
+      <button type="button" class="pde-remove" data-kind="showcase" data-index="${i}" aria-label="Hapus">✕</button>
+    </div>
+  `).join('');
+}
+
+function openDetailEditor(id) {
+  const p = productsCache.find((x) => x.id === id);
+  if (!p) return;
+  detailState = {
+    id,
+    gallery: Array.isArray(p.gallery) ? [...p.gallery] : [],
+    showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, caption: s.caption || '' })) : [],
+  };
+  document.getElementById('pde-title').textContent = p.name;
+  document.getElementById('pde-description').value = p.description || '';
+  document.getElementById('pde-delivery').value = p.delivery_time || '';
+  document.getElementById('pde-features').value = (Array.isArray(p.features) ? p.features : []).join('\n');
+  document.getElementById('pde-faq').value = (Array.isArray(p.faq) ? p.faq : []).map((f) => `${f.q} | ${f.a}`).join('\n');
+  document.getElementById('pde-status').textContent = '';
+  document.getElementById('pde-preview').href = `produk.html?id=${encodeURIComponent(id)}`;
+  document.getElementById('pde-gallery-input').value = '';
+  document.getElementById('pde-showcase-input').value = '';
+  renderDetailMedia();
+  const form = document.getElementById('product-detail-form');
+  form.classList.remove('hidden');
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeDetailEditor() {
+  document.getElementById('product-detail-form')?.classList.add('hidden');
+  detailState = null;
+}
+
+async function uploadMany(inputEl, target) {
+  const files = [...(inputEl.files || [])];
+  const statusEl = document.getElementById('pde-status');
+  if (!files.length || !detailState) return;
+  let done = 0;
+  for (const file of files) {
+    try {
+      statusEl.textContent = `Mengunggah ${done + 1}/${files.length}...`;
+      const url = await uploadImageToCloudinary(file, 'ex-school/products', null);
+      if (!detailState) return; // editor ditutup selama upload
+      if (target === 'gallery') detailState.gallery.push(url);
+      else detailState.showcase.push({ url, caption: '' });
+      done += 1;
+      renderDetailMedia();
+    } catch (err) {
+      statusEl.textContent = `Gagal mengunggah ${file.name}: ${err.message}`;
+      inputEl.value = '';
+      return;
+    }
+  }
+  statusEl.textContent = `${done} gambar berhasil diunggah. Jangan lupa klik "Simpan Detail".`;
+  inputEl.value = '';
+}
+
+function initDetailEditor() {
+  const form = document.getElementById('product-detail-form');
+  if (!form) return;
+
+  document.getElementById('pde-gallery-input').addEventListener('change', (e) => uploadMany(e.target, 'gallery'));
+  document.getElementById('pde-showcase-input').addEventListener('change', (e) => uploadMany(e.target, 'showcase'));
+  document.getElementById('pde-cancel').addEventListener('click', closeDetailEditor);
+
+  form.addEventListener('click', (e) => {
+    const btn = e.target.closest('.pde-remove');
+    if (!btn || !detailState) return;
+    detailState[btn.dataset.kind].splice(Number(btn.dataset.index), 1);
+    renderDetailMedia();
+  });
+  form.addEventListener('input', (e) => {
+    if (e.target.classList.contains('pde-caption') && detailState) {
+      detailState.showcase[Number(e.target.dataset.index)].caption = e.target.value;
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!detailState) return;
+    const statusEl = document.getElementById('pde-status');
+    const saveBtn = document.getElementById('pde-save');
+
+    const lines = (id) => document.getElementById(id).value.split('\n').map((l) => l.trim()).filter(Boolean);
+    const faq = lines('pde-faq').map((l) => {
+      const i = l.indexOf('|');
+      return i === -1 ? null : { q: l.slice(0, i).trim(), a: l.slice(i + 1).trim() };
+    }).filter((f) => f && f.q && f.a);
+
+    const payload = {
+      description: document.getElementById('pde-description').value.trim() || null,
+      delivery_time: document.getElementById('pde-delivery').value.trim() || null,
+      features: lines('pde-features'),
+      gallery: detailState.gallery,
+      showcase: detailState.showcase,
+      faq,
+    };
+
+    saveBtn.disabled = true;
+    statusEl.textContent = 'Menyimpan...';
+    try {
+      await authedFetch(`${API_BASE}/products?id=${detailState.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      statusEl.textContent = 'Tersimpan ✓';
+      await loadProductsAdmin();
+    } catch (err) {
+      statusEl.textContent = /column|schema/i.test(err.message)
+        ? 'Gagal: kolom detail belum ada di database. Jalankan ADD_PRODUCT_DETAIL.sql di Supabase dulu.'
+        : `Gagal menyimpan: ${err.message}`;
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+}
+
 // ---------- Testimoni (admin & owner) ----------
+let pendingTestimonialImage = null;
+
+function fillTestimonialProductSelect() {
+  const sel = document.getElementById('testimonial-product');
+  if (!sel) return;
+  const keep = sel.value;
+  sel.innerHTML = '<option value="">Umum (semua produk)</option>' +
+    productsCache.map((p) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+  sel.value = keep;
+}
+
+function initTestimonialImageInput() {
+  const input = document.getElementById('testimonial-image');
+  const statusEl = document.getElementById('testimonial-image-status');
+  input?.addEventListener('change', async () => {
+    pendingTestimonialImage = null;
+    const file = input.files?.[0];
+    if (!file) { statusEl.textContent = ''; return; }
+    try {
+      pendingTestimonialImage = await uploadImageToCloudinary(file, 'ex-school/testimonials', statusEl);
+      statusEl.textContent = 'Foto berhasil diunggah';
+    } catch (err) {
+      statusEl.textContent = `Gagal: ${err.message}`;
+    }
+  });
+}
+
 async function loadTestimonialsAdmin() {
   const { data } = await authedFetch(`${API_BASE}/testimonials`);
   const list = document.getElementById('testimonial-list');
@@ -646,7 +809,7 @@ async function loadTestimonialsAdmin() {
   list.innerHTML = data.map((t) => `
     <div class="admin-row" data-id="${t.id}">
       <span class="admin-row-text">
-        ${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)} — ${escapeHtml(t.author_name)}${t.author_role ? ` · ${escapeHtml(t.author_role)}` : ''}
+        ${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)} — ${escapeHtml(t.author_name)}${t.author_role ? ` · ${escapeHtml(t.author_role)}` : ''}${t.product_id ? ` · <em>${escapeHtml((productsCache.find((p) => p.id === t.product_id) || {}).name || 'produk')}</em>` : ''}${t.image_url ? ' · foto' : ''}
         <span class="admin-row-sub">${escapeHtml(t.quote)}</span>
       </span>
       <span class="admin-row-tag">${t.is_active ? 'Aktif' : 'Nonaktif'}</span>
@@ -675,8 +838,13 @@ async function handleTestimonialSubmit(e) {
         author_role: roleInput.value.trim() || null,
         quote,
         rating: Number(ratingInput.value),
+        product_id: document.getElementById('testimonial-product').value || null,
+        image_url: pendingTestimonialImage,
       }),
     });
+    pendingTestimonialImage = null;
+    document.getElementById('testimonial-image').value = '';
+    document.getElementById('testimonial-image-status').textContent = '';
     nameInput.value = '';
     roleInput.value = '';
     quoteInput.value = '';
@@ -1150,6 +1318,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('testimonial-form').addEventListener('submit', handleTestimonialSubmit);
   document.getElementById('hero-banner-form').addEventListener('submit', handleHeroBannerSubmit);
   initProductImageInput();
+  initDetailEditor();
+  initTestimonialImageInput();
   initHeroBannerImageInput();
   initNotifyButton();
 

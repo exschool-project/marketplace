@@ -157,10 +157,10 @@ function productCardHTML(p) {
     <div class="pcard">
       <div class="hole"></div>
       ${p.badge ? `<span class="badge">${escapeHtml(p.badge)}</span>` : ''}
-      <div class="thumb">${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy">` : (p.icon ? escapeHtml(p.icon) : ICONS.box)}</div>
+      <a class="thumb" href="produk.html?id=${encodeURIComponent(p.id)}" aria-label="${escapeHtml(p.name)}">${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy">` : (p.icon ? escapeHtml(p.icon) : ICONS.box)}</a>
       <div class="body">
         <div class="shop">${escapeHtml(p.shop_name)}</div>
-        <div class="name">${escapeHtml(p.name)}</div>
+        <a class="name" href="produk.html?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a>
         <div class="price-row">
           <span class="price">${rupiah(p.price)}</span>
           ${p.old_price ? `<span class="old">${rupiah(p.old_price)}</span>` : ''}

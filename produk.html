@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Belanja — EX-SCHOOL</title>
-<meta name="description" content="Jelajahi semua produk & jasa digital dari kreator terpercaya di EX-SCHOOL.">
+<title>Detail Produk — EX-SCHOOL</title>
+<meta name="description" content="Detail produk di EX-SCHOOL.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=3">
@@ -33,28 +33,25 @@
   </header>
 
   <main>
-    <!-- SHOP HEAD: breadcrumb + judul halaman, pengganti hero/banner —
-         area tenang & rapi, khas halaman katalog di situs premium. -->
-    <div class="shop-head">
-      <div class="shop-head-inner">
-        <p class="shop-breadcrumb"><a href="index.html" data-i18n="shop.breadcrumb_home">Beranda</a> <span>/</span> <span data-i18n="shop.breadcrumb_current">Belanja</span></p>
-        <h1 data-i18n="shop.title">Belanja</h1>
-        <p class="shop-head-sub" data-i18n="shop.sub">Semua jasa &amp; produk digital dari kreator terpercaya — kualitas terjamin, harga jujur.</p>
-      </div>
+    <div class="pd-crumb-bar">
+      <p class="pd-crumb"><a href="index.html" data-i18n="shop.breadcrumb_home">Beranda</a> <span>/</span> <a href="belanja.html" data-i18n="nav.shop">Belanja</a> <span>/</span> <span id="pd-crumb-name">…</span></p>
     </div>
 
-    <!-- CATEGORY CHIPS: diisi dari /api/categories -->
-    <div id="kategori"></div>
-    <nav class="cats" id="category-nav" aria-label="Kategori produk"></nav>
-
-    <!-- PRODUCT GRID: diisi dari /api/products -->
-    <section class="section shop-section" id="produk">
-      <p class="shop-result-count" id="shop-result-count"></p>
-      <div class="grid" id="product-grid"></div>
-    </section>
+    <div id="pd-root" aria-live="polite">
+      <!-- skeleton selagi memuat -->
+      <div class="pd-top pd-skeleton">
+        <div class="pd-gallery"><div class="pd-main-img sk-block"></div></div>
+        <div class="pd-info">
+          <div class="sk-line" style="width:30%"></div>
+          <div class="sk-line" style="width:80%;height:26px"></div>
+          <div class="sk-line" style="width:40%;height:22px"></div>
+          <div class="sk-line" style="width:100%;height:46px;margin-top:18px"></div>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <!-- FOOTER -->
+    <!-- FOOTER -->
   <footer>
     <div class="foot-wrap">
       <div>
@@ -65,8 +62,8 @@
       <div>
         <h4 data-i18n="footer.shop_heading">Belanja</h4>
         <ul>
-          <li><a href="#kategori" data-i18n="footer.category">Kategori</a></li>
-          <li><a href="#produk" data-i18n="footer.all_products">Semua Produk</a></li>
+          <li><a href="belanja.html#kategori" data-i18n="footer.category">Kategori</a></li>
+          <li><a href="belanja.html" data-i18n="footer.all_products">Semua Produk</a></li>
         </ul>
       </div>
       <div>
@@ -134,5 +131,6 @@
   <script src="icons.js"></script>
   <script src="i18n.js"></script>
   <script src="script.js"></script>
+  <script src="produk.js"></script>
 </body>
 </html>

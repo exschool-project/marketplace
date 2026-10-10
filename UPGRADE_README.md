@@ -213,3 +213,30 @@ api/admin/users/[id].js         → (owner) ubah role akun
    melihat panel Manajemen Tim (hanya owner yang bisa)
 4. Semua pengecekan role dilakukan di server (`_lib/auth.js`), bukan cuma
    disembunyikan di sisi tampilan — jadi aman dari akses langsung ke API
+
+
+---
+
+## 6. Halaman Detail Produk (produk.html) — BARU
+
+Klik gambar/nama produk di kartu mana pun (beranda, belanja, produk terkait)
+membuka `produk.html?id=...` berisi: galeri foto + zoom (lightbox), harga &
+diskon, estimasi pengerjaan, deskripsi lengkap, daftar "Yang Kamu Dapatkan",
+**Contoh & Dokumentasi** (gambar + keterangan), cara pemesanan, **testimoni**
+(ringkasan rating + foto bukti), FAQ, produk terkait, dan tombol Beli
+Sekarang (di HP menempel di bawah layar). Bagian yang kosong otomatis tidak
+tampil — tidak ada konten demo.
+
+**Langkah wajib:**
+1. Supabase → SQL Editor → jalankan `ADD_PRODUCT_DETAIL.sql` (sekali, aman diulang).
+2. Deploy ulang.
+3. Admin Panel → Produk → tombol **Edit Detail** di tiap produk: isi deskripsi,
+   poin fitur, upload foto galeri & contoh/dokumentasi (via Cloudinary), FAQ.
+4. Admin Panel → Testimoni: sekarang ada pilihan **Untuk produk** dan **Foto
+   bukti**. Testimoni yang dikaitkan ke produk muncul di halaman produk itu;
+   kalau produk belum punya, ditampilkan testimoni umum (diberi label jelas).
+
+File baru/berubah: `produk.html`, `produk.js`, `ADD_PRODUCT_DETAIL.sql`,
+`style.css`, `script.js` (kartu jadi tautan), `api/products.js` (field detail
++ validasi), `api/testimonials.js` (`product_id`, `image_url`, filter
+`?product_id=`), `admin.html/js/css` (editor detail & form testimoni).

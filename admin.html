@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=2">
-<link rel="stylesheet" href="admin.css?v=2">
+<link rel="stylesheet" href="admin.css?v=3">
 <style>
   /* Anti-kedip: sama seperti cs.html, tapi butuh role admin/owner. */
   html.staff-cached-session #login-view{ display:none !important; }
@@ -211,6 +211,46 @@
           <button type="submit" class="btn btn-green brutal-sm">Tambah Produk</button>
         </form>
         <div id="product-list" class="admin-list"></div>
+
+        <!-- EDITOR DETAIL PRODUK: tampil saat klik "Edit Detail" di salah satu produk.
+             Isinya muncul di halaman produk.html (deskripsi, fitur, galeri, contoh, FAQ). -->
+        <form id="product-detail-form" class="detail-editor hidden">
+          <h3>Detail halaman produk: <span id="pde-title"></span></h3>
+          <p class="panel-sub">Semua bagian opsional — bagian yang dikosongkan otomatis tidak tampil di halaman produk.</p>
+
+          <label class="field"><span>Deskripsi lengkap</span>
+            <textarea id="pde-description" rows="7" maxlength="5000" placeholder="Jelaskan produk/jasa ini. Pisahkan paragraf dengan baris kosong."></textarea>
+          </label>
+          <label class="field"><span>Estimasi pengerjaan (opsional)</span>
+            <input type="text" id="pde-delivery" maxlength="80" placeholder="Contoh: 2–3 hari kerja">
+          </label>
+          <label class="field"><span>Yang didapatkan pembeli (satu poin per baris)</span>
+            <textarea id="pde-features" rows="5" placeholder="Revisi 2x&#10;File sumber (PSD/AI)&#10;Garansi sesuai brief"></textarea>
+          </label>
+
+          <div class="field">
+            <span>Galeri foto produk (foto utama di atas otomatis jadi gambar pertama)</span>
+            <input type="file" id="pde-gallery-input" accept="image/*" multiple>
+            <div id="pde-gallery" class="pde-thumbs"></div>
+          </div>
+
+          <div class="field">
+            <span>Contoh &amp; dokumentasi (hasil kerja, screenshot, bukti) — beri keterangan tiap gambar</span>
+            <input type="file" id="pde-showcase-input" accept="image/*" multiple>
+            <div id="pde-showcase" class="pde-showcase"></div>
+          </div>
+
+          <label class="field"><span>FAQ (satu per baris, format: Pertanyaan | Jawaban)</span>
+            <textarea id="pde-faq" rows="5" placeholder="Berapa kali bisa revisi? | Maksimal 2x revisi minor."></textarea>
+          </label>
+
+          <p id="pde-status" class="mono pde-status"></p>
+          <div class="pde-actions">
+            <button type="submit" class="btn btn-green brutal-sm" id="pde-save">Simpan Detail</button>
+            <button type="button" class="btn brutal-sm" id="pde-cancel">Tutup</button>
+            <a id="pde-preview" class="btn brutal-sm" href="#" target="_blank" rel="noopener">Lihat Halaman ↗</a>
+          </div>
+        </form>
       </section>
 
       <!-- TESTIMONI -->
@@ -229,6 +269,15 @@
               <option value="2">★★ (2)</option>
               <option value="1">★ (1)</option>
             </select>
+          </label>
+          <label class="field">
+            <span>Untuk produk (opsional)</span>
+            <select id="testimonial-product"><option value="">Umum (semua produk)</option></select>
+          </label>
+          <label class="field">
+            <span>Foto bukti / hasil (opsional)</span>
+            <input type="file" id="testimonial-image" accept="image/*">
+            <span id="testimonial-image-status" class="mono" style="font-weight:400;font-size:.75rem;"></span>
           </label>
           <label class="field" style="grid-column:1 / -1;"><span>Isi testimoni</span><input type="text" id="testimonial-quote" required placeholder="Tulis ulasan pembeli di sini..."></label>
           <button type="submit" class="btn btn-green brutal-sm" style="align-self:end;">Tambah</button>
