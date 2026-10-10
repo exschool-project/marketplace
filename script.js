@@ -47,24 +47,38 @@ async function loadBanner() {
 async function loadHeroBannerImage() {
   const wrap = document.getElementById('hero-banner-wrap');
   const img = document.getElementById('hero-banner-img');
-  const titleEl = document.getElementById('hero-banner-title');
-  const subtitleEl = document.getElementById('hero-banner-subtitle');
+  const skeleton = document.getElementById('hero-skeleton');
   if (!wrap || !img) return;
+
+  const hideAll = () => { skeleton?.classList.add('hidden'); wrap.classList.add('hidden'); };
+
+  // Munculkan banner dengan animasi (fade + zoom-out halus) SETELAH media
+  // benar-benar siap, supaya tidak "tiba-tiba" muncul / bergeser.
+  let revealed = false;
+  const reveal = () => {
+    if (revealed) return;
+    revealed = true;
+    skeleton?.classList.add('hidden');
+    wrap.classList.remove('hidden');
+    // dua frame: pastikan state awal (opacity 0) sempat dirender dulu
+    requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('is-in')));
+  };
 
   try {
     const { data } = await fetchJSON(`${API_BASE}/hero-banners`);
-    if (!data || data.length === 0) {
-      wrap.classList.add('hidden');
-      return;
-    }
+    if (!data || data.length === 0) { hideAll(); return; }
+
     const banner = data[0]; // yang paling atas urutannya
     const video = document.getElementById('hero-banner-video');
     const isVideo = /\/video\/upload\//.test(banner.image_url) || /\.(mp4|webm|mov)(\?|$)/i.test(banner.image_url);
+
     if (isVideo && video) {
       // Banner video: otomatis main tanpa suara, berulang. Poster = frame
       // pertama (transformasi Cloudinary) biar tidak kosong selagi memuat.
       img.classList.add('hidden');
       video.classList.remove('hidden');
+      video.addEventListener('loadeddata', reveal, { once: true });
+      video.addEventListener('error', reveal, { once: true });
       video.poster = banner.image_url.replace('/video/upload/', '/video/upload/so_0/').replace(/\.(mp4|webm|mov)(\?.*)?$/i, '.jpg');
       video.src = banner.image_url;
       video.muted = true;
@@ -72,11 +86,13 @@ async function loadHeroBannerImage() {
     } else {
       video?.classList.add('hidden');
       img.classList.remove('hidden');
+      img.addEventListener('load', reveal, { once: true });
+      img.addEventListener('error', hideAll, { once: true });
       img.src = banner.image_url;
+      if (img.complete && img.naturalWidth) reveal(); // sudah ada di cache
     }
     img.alt = banner.title || 'Banner';
-    if (titleEl) titleEl.textContent = banner.title || '';
-    if (subtitleEl) subtitleEl.textContent = banner.subtitle || '';
+
     if (banner.link_url) {
       wrap.style.cursor = 'pointer';
       wrap.onclick = () => window.open(banner.link_url, '_blank', 'noopener,noreferrer');
@@ -84,9 +100,11 @@ async function loadHeroBannerImage() {
       wrap.style.cursor = 'default';
       wrap.onclick = null;
     }
-    wrap.classList.remove('hidden');
+
+    // Jaga-jaga koneksi sangat lambat: jangan biarkan skeleton selamanya.
+    setTimeout(reveal, 8000);
   } catch (err) {
-    wrap.classList.add('hidden');
+    hideAll();
   }
 }
 
