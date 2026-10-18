@@ -684,7 +684,7 @@ function renderDetailMedia() {
   document.getElementById('pde-showcase').innerHTML = detailState.showcase.map((s, i) => `
     <div class="pde-showcase-row">
       <img src="${escapeHtml(s.url)}" alt="">
-      <input type="text" class="pde-caption" data-index="${i}" value="${escapeHtml(s.caption || '')}" maxlength="160" placeholder="Keterangan gambar (opsional)">
+      <input type="text" class="pde-caption" data-index="${i}" value="${escapeHtml(s.caption || '')}" maxlength="25000" placeholder="Keterangan gambar (opsional)">
       <button type="button" class="pde-remove" data-kind="showcase" data-index="${i}" aria-label="Hapus">✕</button>
     </div>
   `).join('');

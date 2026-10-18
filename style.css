@@ -1375,3 +1375,22 @@ footer{
   .hero-banner-wrap .hero-banner-img{ transform:none; }
   .hero-skeleton{ animation:none; }
 }
+
+/* =====================================================================
+   SEMUA GAMBAR TAMPIL UTUH (tidak dipotong): lebar penuh, tinggi
+   mengikuti rasio asli gambar. Kartu produk memakai kotak tetap dengan
+   object-fit:contain supaya grid tetap rapi tanpa memotong gambar.
+   ===================================================================== */
+.pd-main-img{ display:block; aspect-ratio:auto; min-height:180px; }
+.pd-main-fallback{ display:flex; aspect-ratio:4 / 3; }
+.pd-main-img img{ width:100%; height:auto; max-height:none; object-fit:contain; }
+.pd-thumb img{ object-fit:contain; background:#fff; }
+.pd-showcase-btn{ aspect-ratio:auto; }
+.pd-showcase-btn img{ height:auto; object-fit:contain; }
+.testi-photo{ aspect-ratio:auto; }
+.testi-photo img{ height:auto; object-fit:contain; }
+.pcard .thumb{ height:auto; aspect-ratio:4 / 3; }
+.pcard .thumb img{ object-fit:contain; background:#fff; }
+.admin-row-thumb, .pde-thumb img, .pde-showcase-row img{ object-fit:contain; background:#fff; }
+.pd-lightbox img{ max-width:100vw; max-height:calc(100vh - 110px); }
+.pd-lightbox{ padding:48px 12px; }

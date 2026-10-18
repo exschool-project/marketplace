@@ -12,29 +12,31 @@ const EDITABLE_FIELDS = [
 // Isi detail dikirim dari admin panel, tapi tetap divalidasi di server:
 // URL harus http(s), teks dipotong, jumlah item dibatasi.
 const isHttpUrl = (v) => typeof v === 'string' && /^https?:\/\//i.test(v.trim());
-const clip = (v, n) => String(v ?? '').trim().slice(0, n);
+// Batas teks: 25.000 karakter untuk SEMUA kolom teks (deskripsi, fitur, FAQ, keterangan, dll).
+const MAX_TEXT = 25000;
+const clip = (v, n = MAX_TEXT) => String(v ?? '').trim().slice(0, n);
 
 function cleanDetailField(key, value) {
   if (value === null || value === undefined) {
     return key === 'description' || key === 'delivery_time' ? null : [];
   }
   switch (key) {
-    case 'description': return clip(value, 5000) || null;
-    case 'delivery_time': return clip(value, 80) || null;
+    case 'description': return clip(value) || null;
+    case 'delivery_time': return clip(value) || null;
     case 'features':
-      return (Array.isArray(value) ? value : []).map((x) => clip(x, 160)).filter(Boolean).slice(0, 20);
+      return (Array.isArray(value) ? value : []).map((x) => clip(x)).filter(Boolean).slice(0, 100);
     case 'gallery':
-      return (Array.isArray(value) ? value : []).filter(isHttpUrl).map((u) => u.trim()).slice(0, 8);
+      return (Array.isArray(value) ? value : []).filter(isHttpUrl).map((u) => u.trim()).slice(0, 30);
     case 'showcase':
       return (Array.isArray(value) ? value : [])
         .filter((x) => x && isHttpUrl(x.url))
-        .map((x) => ({ url: x.url.trim(), caption: clip(x.caption, 160) }))
-        .slice(0, 12);
+        .map((x) => ({ url: x.url.trim(), caption: clip(x.caption) }))
+        .slice(0, 50);
     case 'faq':
       return (Array.isArray(value) ? value : [])
-        .map((x) => ({ q: clip(x && x.q, 200), a: clip(x && x.a, 800) }))
+        .map((x) => ({ q: clip(x && x.q), a: clip(x && x.a) }))
         .filter((x) => x.q && x.a)
-        .slice(0, 12);
+        .slice(0, 50);
     default: return value;
   }
 }
