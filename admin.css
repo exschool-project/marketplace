@@ -713,3 +713,45 @@
 .pde-status{ min-height:1.2em; font-size:.8rem; margin:4px 0 10px; }
 .pde-actions{ display:flex; flex-wrap:wrap; gap:10px; }
 .pde-actions .btn{ text-decoration:none; }
+
+.pde-wordcount{ font-style:normal; font-weight:400; font-size:.75rem; color:#3E6B85; margin-left:8px; }
+
+.pde-showcase-row{ align-items:flex-start; }
+.pde-showcase-row img{ width:96px; height:96px; }
+.pde-showcase-fields{ flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
+.pde-showcase-fields input, .pde-showcase-fields textarea{
+  width:100%; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px;
+  font-family:'Inter', sans-serif; font-size:.88rem; background:var(--paper);
+}
+@media (max-width:560px){ .pde-showcase-row{ flex-wrap:wrap; } .pde-showcase-row img{ width:100%; height:auto; max-height:180px; } .pde-showcase-fields{ flex-basis:100%; } }
+
+/* =====================================================================
+   PANEL ADMIN: satu halaman per menu
+   ===================================================================== */
+.admin-page.page-off{ display:none !important; }
+.admin-content{ gap:0; }
+@media (prefers-reduced-motion: no-preference){
+  .admin-page:not(.page-off){ animation:admin-page-in .28s ease both; }
+  @keyframes admin-page-in{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+}
+.page-head{ margin-bottom:20px; }
+.page-head h2{ font-family:'Space Grotesk', sans-serif; font-size:1.6rem; margin:0 0 6px; }
+.page-head .panel-sub{ margin:0; max-width:70ch; }
+.admin-nav-group-label.first{ margin-top:0; }
+.admin-nav-link{ position:relative; }
+.admin-nav-link .unread-badge{ margin-left:auto; }
+a.stat-card{ text-decoration:none; color:inherit; transition:transform .15s ease, box-shadow .15s ease; }
+a.stat-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
+.quick-title{ font-family:'Space Grotesk', sans-serif; font-size:1rem; margin:28px 0 12px; }
+.quick-links{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:14px; }
+.quick-card{
+  display:flex; flex-direction:column; gap:4px; padding:16px 18px; background:var(--card);
+  text-decoration:none; color:var(--ink); transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.quick-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:var(--border-strong); }
+.quick-card strong{ font-family:'Space Grotesk', sans-serif; font-size:.95rem; }
+.quick-card span{ font-size:.82rem; color:#3E6B85; line-height:1.45; }
+@media (max-width:900px){
+  /* di HP: menu jadi satu baris geser; link yang aktif tetap terlihat */
+  .admin-nav-link.active{ box-shadow:var(--shadow-sm); }
+}

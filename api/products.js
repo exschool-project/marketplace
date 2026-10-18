@@ -12,29 +12,47 @@ const EDITABLE_FIELDS = [
 // Isi detail dikirim dari admin panel, tapi tetap divalidasi di server:
 // URL harus http(s), teks dipotong, jumlah item dibatasi.
 const isHttpUrl = (v) => typeof v === 'string' && /^https?:\/\//i.test(v.trim());
-// Batas teks: 25.000 karakter untuk SEMUA kolom teks (deskripsi, fitur, FAQ, keterangan, dll).
-const MAX_TEXT = 25000;
-const clip = (v, n = MAX_TEXT) => String(v ?? '').trim().slice(0, n);
+// Batas teks dihitung dalam KATA (bukan karakter): maksimal MAX_WORDS kata untuk
+// tiap kolom teks (deskripsi, tiap poin fitur, tiap FAQ, keterangan gambar, dll).
+// Ubah angka ini kalau mau batas lain (mis. 2000). Melebihi batas -> ditolak
+// dengan pesan jelas, TIDAK dipotong diam-diam.
+const MAX_WORDS = 25000;
+const MAX_CHARS_SAFETY = 500000; // pengaman teknis saja, bukan batas yang dilihat pengguna
+const wordCount = (v) => (String(v ?? '').trim().match(/\S+/g) || []).length;
+const clip = (v, label = 'Teks') => {
+  const t = String(v ?? '').trim();
+  if (wordCount(t) > MAX_WORDS) {
+    const err = new Error(`${label} terlalu panjang: ${wordCount(t).toLocaleString('id-ID')} kata (maksimal ${MAX_WORDS.toLocaleString('id-ID')} kata).`);
+    err.status = 400;
+    throw err;
+  }
+  return t.slice(0, MAX_CHARS_SAFETY);
+};
 
 function cleanDetailField(key, value) {
   if (value === null || value === undefined) {
     return key === 'description' || key === 'delivery_time' ? null : [];
   }
   switch (key) {
-    case 'description': return clip(value) || null;
-    case 'delivery_time': return clip(value) || null;
+    case 'description': return clip(value, 'Deskripsi') || null;
+    case 'delivery_time': return clip(value, 'Estimasi pengerjaan') || null;
     case 'features':
-      return (Array.isArray(value) ? value : []).map((x) => clip(x)).filter(Boolean).slice(0, 100);
+      return (Array.isArray(value) ? value : []).map((x) => clip(x, 'Poin fitur')).filter(Boolean).slice(0, 100);
     case 'gallery':
       return (Array.isArray(value) ? value : []).filter(isHttpUrl).map((u) => u.trim()).slice(0, 30);
     case 'showcase':
       return (Array.isArray(value) ? value : [])
         .filter((x) => x && isHttpUrl(x.url))
-        .map((x) => ({ url: x.url.trim(), caption: clip(x.caption) }))
+        .map((x) => ({
+          url: x.url.trim(),
+          title: clip(x.title, 'Judul gambar'),
+          // 'caption' = nama lama; dipakai sebagai deskripsi kalau belum ada
+          description: clip(x.description ?? x.caption, 'Deskripsi gambar'),
+        }))
         .slice(0, 50);
     case 'faq':
       return (Array.isArray(value) ? value : [])
-        .map((x) => ({ q: clip(x && x.q), a: clip(x && x.a) }))
+        .map((x) => ({ q: clip(x && x.q, 'Pertanyaan FAQ'), a: clip(x && x.a, 'Jawaban FAQ') }))
         .filter((x) => x.q && x.a)
         .slice(0, 50);
     default: return value;
@@ -165,10 +183,15 @@ module.exports = withErrorHandling(async (req, res) => {
 
     const body = req.body || {};
     const updates = {};
-    EDITABLE_FIELDS.forEach((key) => {
-      if (body[key] === undefined) return;
-      updates[key] = DETAIL_FIELDS.includes(key) ? cleanDetailField(key, body[key]) : body[key];
-    });
+    try {
+      EDITABLE_FIELDS.forEach((key) => {
+        if (body[key] === undefined) return;
+        updates[key] = DETAIL_FIELDS.includes(key) ? cleanDetailField(key, body[key]) : body[key];
+      });
+    } catch (e) {
+      res.status(e.status || 400).json({ error: e.message });
+      return;
+    }
 
     const { data, error } = await supabase
       .from('products')

@@ -42,6 +42,7 @@ const PD_TEXT = {
     related: 'Produk Lainnya',
     close: 'Tutup', prev: 'Sebelumnya', next: 'Berikutnya', zoom: 'Perbesar gambar',
     photo: 'Foto',
+    detail: 'Lihat detail',
   },
   en: {
     notFound: 'This product was not found or is no longer available.',
@@ -72,6 +73,7 @@ const PD_TEXT = {
     related: 'More Products',
     close: 'Close', prev: 'Previous', next: 'Next', zoom: 'Enlarge image',
     photo: 'Photo',
+    detail: 'View details',
   },
 };
 const pt = (k) => {
@@ -97,6 +99,11 @@ function paragraphsHTML(text) {
     .join('');
 }
 
+// Bentuk lama {url, caption} tetap didukung: caption dianggap deskripsi.
+function normShowcase(s) {
+  return { url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '' };
+}
+
 function galleryImages(p) {
   const list = [];
   if (p.image_url) list.push(p.image_url);
@@ -118,7 +125,7 @@ function renderProduct() {
 
   const images = galleryImages(p);
   const features = pdArr(p.features);
-  const showcase = pdArr(p.showcase);
+  const showcase = pdArr(p.showcase).map(normShowcase);
   const faq = pdArr(p.faq);
   const hasDesc = !!(p.description && p.description.trim());
   const ownReviews = !pdReviewsAreGeneral ? pdReviews : [];
@@ -186,8 +193,12 @@ function renderProduct() {
         <p class="pd-sub">${escapeHtml(pt('showcaseSub'))}</p>
         <div class="pd-showcase-grid">${showcase.map((s, i) => `
           <figure class="pd-showcase-item" data-index="${i}">
-            <button type="button" class="pd-showcase-btn" aria-label="${escapeHtml(pt('zoom'))}"><img src="${escapeHtml(s.url)}" alt="${escapeHtml(s.caption || p.name)}" loading="lazy"></button>
-            ${s.caption ? `<figcaption>${escapeHtml(s.caption)}</figcaption>` : ''}
+            <button type="button" class="pd-showcase-btn" aria-label="${escapeHtml(pt('zoom'))}"><img src="${escapeHtml(s.url)}" alt="${escapeHtml(s.title || p.name)}" loading="lazy"></button>
+            ${(s.title || s.description) ? `<figcaption>
+              ${s.title ? `<h3 class="pd-showcase-title">${escapeHtml(s.title)}</h3>` : ''}
+              ${s.description ? `<p class="pd-showcase-desc">${escapeHtml(s.description).replace(/\n/g, '<br>')}</p>` : ''}
+              <button type="button" class="pd-showcase-more">${escapeHtml(pt('detail'))}</button>
+            </figcaption>` : ''}
           </figure>`).join('')}</div>
       </section>` : ''}
 
@@ -273,15 +284,17 @@ function bindGallery(images) {
     mainImg.src = images[current];
     thumbs.querySelectorAll('.pd-thumb').forEach((b) => b.classList.toggle('active', b === btn));
   });
-  mainBtn?.addEventListener('click', () => openLightbox(images.map((u) => ({ url: u, caption: '' })), current));
+  mainBtn?.addEventListener('click', () => openLightbox(images.map((u) => ({ url: u, title: '', description: '' })), current));
 }
 
 function bindShowcase(showcase) {
   document.querySelectorAll('.pd-showcase-item').forEach((fig) => {
-    fig.querySelector('.pd-showcase-btn')?.addEventListener('click', () => openLightbox(showcase, Number(fig.dataset.index)));
+    const open = () => openLightbox(showcase, Number(fig.dataset.index));
+    fig.querySelector('.pd-showcase-btn')?.addEventListener('click', open);
+    fig.querySelector('.pd-showcase-more')?.addEventListener('click', open);
   });
   document.querySelectorAll('.testi-photo').forEach((btn) => {
-    btn.addEventListener('click', () => openLightbox([{ url: btn.dataset.photo, caption: '' }], 0));
+    btn.addEventListener('click', () => openLightbox([{ url: btn.dataset.photo, title: '', description: '' }], 0));
   });
 }
 
@@ -317,7 +330,7 @@ function ensureLightbox() {
   el.innerHTML = `
     <button type="button" class="pd-lb-close" aria-label="${escapeHtml(pt('close'))}">${ICONS.close}</button>
     <button type="button" class="pd-lb-nav pd-lb-prev" aria-label="${escapeHtml(pt('prev'))}">‹</button>
-    <figure><img alt=""><figcaption></figcaption></figure>
+    <figure><img alt=""><figcaption><strong class="pd-lb-title"></strong><span class="pd-lb-desc"></span><small class="pd-lb-count"></small></figcaption></figure>
     <button type="button" class="pd-lb-nav pd-lb-next" aria-label="${escapeHtml(pt('next'))}">›</button>`;
   document.body.appendChild(el);
   el.addEventListener('click', (e) => {
@@ -333,7 +346,11 @@ function paintLightbox() {
   const item = lbList[lbIndex];
   if (!item) return;
   el.querySelector('img').src = item.url;
-  el.querySelector('figcaption').textContent = item.caption || '';
+  el.querySelector('img').alt = item.title || '';
+  el.querySelector('.pd-lb-title').textContent = item.title || '';
+  el.querySelector('.pd-lb-desc').textContent = item.description || '';
+  el.querySelector('.pd-lb-count').textContent = lbList.length > 1 ? `${lbIndex + 1} / ${lbList.length}` : '';
+  el.querySelector('figcaption').classList.toggle('empty', !item.title && !item.description && lbList.length < 2);
   const multi = lbList.length > 1;
   el.querySelector('.pd-lb-prev').classList.toggle('hidden', !multi);
   el.querySelector('.pd-lb-next').classList.toggle('hidden', !multi);

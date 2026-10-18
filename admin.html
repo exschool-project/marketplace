@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=2">
-<link rel="stylesheet" href="admin.css?v=3">
+<link rel="stylesheet" href="admin.css?v=6">
 <style>
   /* Anti-kedip: sama seperti cs.html, tapi butuh role admin/owner. */
   html.staff-cached-session #login-view{ display:none !important; }
@@ -74,6 +74,7 @@
            (lihat showDashboard() di admin.js — sama persis logikanya kayak
            panel-nya sendiri). -->
       <nav class="admin-sidebar" aria-label="Navigasi panel admin">
+        <p class="admin-nav-group-label first">Utama</p>
         <a href="#overview" class="admin-nav-link">
           <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           Ringkasan
@@ -83,7 +84,7 @@
           Pesanan &amp; Chat
         </a>
 
-        <p class="admin-nav-group-label">Konten</p>
+        <p class="admin-nav-group-label">Konten Toko</p>
         <a href="#banner-panel" class="admin-nav-link">
           <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="4"/><path d="M5 10v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/></svg>
           Banner Berjalan
@@ -104,7 +105,7 @@
         <p id="nav-owner-group-label" class="admin-nav-group-label owner-only hidden">Khusus Owner</p>
         <a href="#hero-banner-panel" id="nav-hero-banner-link" class="admin-nav-link owner-only hidden">
           <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="1"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5L6 20"/></svg>
-          Banner Gambar
+          Banner Gambar / Video
         </a>
         <a href="#social-panel" id="nav-social-link" class="admin-nav-link owner-only hidden">
           <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6"/></svg>
@@ -120,28 +121,46 @@
 
       <p id="dashboard-load-error" class="dashboard-load-error hidden"></p>
 
-      <!-- STATS -->
-      <section class="stat-row" id="overview">
-        <div class="stat-card brutal-sm">
-          <span class="stat-num" id="stat-products">–</span>
-          <span class="stat-label">Produk</span>
+      <!-- RINGKASAN (halaman awal; isinya menyesuaikan role) -->
+      <section class="admin-page" id="overview">
+        <div class="page-head">
+          <h2 id="overview-title">Ringkasan</h2>
+          <p class="panel-sub" id="overview-role-desc"></p>
         </div>
-        <div class="stat-card brutal-sm">
-          <span class="stat-num" id="stat-categories">–</span>
-          <span class="stat-label">Kategori</span>
+
+        <div class="stat-row">
+          <a class="stat-card brutal-sm" href="#products-panel">
+            <span class="stat-num" id="stat-products">–</span>
+            <span class="stat-label">Produk</span>
+          </a>
+          <a class="stat-card brutal-sm" href="#categories-panel">
+            <span class="stat-num" id="stat-categories">–</span>
+            <span class="stat-label">Kategori</span>
+          </a>
+          <a class="stat-card brutal-sm" href="#banner-panel">
+            <span class="stat-num" id="stat-banners">–</span>
+            <span class="stat-label">Banner aktif</span>
+          </a>
+          <a class="stat-card brutal-sm" href="#orders-panel">
+            <span class="stat-num" id="stat-orders-new">–</span>
+            <span class="stat-label">Pesanan baru</span>
+          </a>
         </div>
-        <div class="stat-card brutal-sm">
-          <span class="stat-num" id="stat-banners">–</span>
-          <span class="stat-label">Banner aktif</span>
-        </div>
-        <div class="stat-card brutal-sm">
-          <span class="stat-num" id="stat-orders-new">–</span>
-          <span class="stat-label">Pesanan baru</span>
+
+        <h3 class="quick-title">Pintasan</h3>
+        <div class="quick-links">
+          <a class="quick-card brutal-sm" href="#orders-panel"><strong>Pesanan &amp; Chat</strong><span>Balas pembeli &amp; ubah status pesanan</span></a>
+          <a class="quick-card brutal-sm" href="#products-panel"><strong>Produk</strong><span>Tambah produk &amp; isi halaman detailnya</span></a>
+          <a class="quick-card brutal-sm" href="#testimonials-panel"><strong>Testimoni</strong><span>Ulasan pembeli per produk</span></a>
+          <a class="quick-card brutal-sm" href="#categories-panel"><strong>Kategori</strong><span>Filter kategori di halaman belanja</span></a>
+          <a class="quick-card brutal-sm owner-only hidden" href="#hero-banner-panel"><strong>Banner Gambar / Video</strong><span>Banner utama beranda</span></a>
+          <a class="quick-card brutal-sm owner-only hidden" href="#social-panel"><strong>Media Sosial</strong><span>Link di footer beranda</span></a>
+          <a class="quick-card brutal-sm owner-only hidden" href="#team-panel"><strong>Manajemen Tim</strong><span>Atur role admin, CS &amp; owner</span></a>
         </div>
       </section>
 
       <!-- PESANAN -->
-      <section class="admin-panel brutal" id="orders-panel">
+      <section class="admin-panel admin-page brutal" id="orders-panel">
         <h2>Pesanan &amp; Chat</h2>
         <p class="panel-sub">Pesanan masuk dari tombol "Beli Sekarang" di beranda. Ubah status di sini, atau buka <a href="cs.html" style="text-decoration:underline; font-weight:700;">CS Panel</a> buat balas chat sampai selesai dalam tampilan yang lebih lega.</p>
         <div class="inline-form">
@@ -158,7 +177,7 @@
       </section>
 
       <!-- BANNER -->
-      <section class="admin-panel brutal" id="banner-panel">
+      <section class="admin-panel admin-page brutal" id="banner-panel">
         <h2>Banner Berjalan</h2>
         <p class="panel-sub">Teks yang tampil di pita banner paling atas halaman utama.</p>
         <form id="banner-form" class="inline-form">
@@ -169,7 +188,7 @@
       </section>
 
       <!-- KATEGORI -->
-      <section class="admin-panel brutal" id="categories-panel">
+      <section class="admin-panel admin-page brutal" id="categories-panel">
         <h2>Kategori</h2>
         <p class="panel-sub">Kategori dipakai sebagai filter chip di halaman utama.</p>
         <form id="category-form" class="inline-form">
@@ -180,7 +199,7 @@
       </section>
 
       <!-- PRODUK -->
-      <section class="admin-panel brutal" id="products-panel">
+      <section class="admin-panel admin-page brutal" id="products-panel">
         <h2>Produk</h2>
         <p class="panel-sub">Produk yang tampil di grid halaman utama.</p>
         <form id="product-form" class="product-form">
@@ -218,11 +237,11 @@
           <h3>Detail halaman produk: <span id="pde-title"></span></h3>
           <p class="panel-sub">Semua bagian opsional — bagian yang dikosongkan otomatis tidak tampil di halaman produk.</p>
 
-          <label class="field"><span>Deskripsi lengkap</span>
-            <textarea id="pde-description" rows="7" maxlength="25000" placeholder="Jelaskan produk/jasa ini. Pisahkan paragraf dengan baris kosong."></textarea>
+          <label class="field"><span>Deskripsi lengkap <em id="pde-wordcount" class="pde-wordcount"></em></span>
+            <textarea id="pde-description" rows="7" placeholder="Jelaskan produk/jasa ini. Pisahkan paragraf dengan baris kosong."></textarea>
           </label>
           <label class="field"><span>Estimasi pengerjaan (opsional)</span>
-            <input type="text" id="pde-delivery" maxlength="25000" placeholder="Contoh: 2–3 hari kerja">
+            <input type="text" id="pde-delivery" placeholder="Contoh: 2–3 hari kerja">
           </label>
           <label class="field"><span>Yang didapatkan pembeli (satu poin per baris)</span>
             <textarea id="pde-features" rows="5" placeholder="Revisi 2x&#10;File sumber (PSD/AI)&#10;Garansi sesuai brief"></textarea>
@@ -235,7 +254,7 @@
           </div>
 
           <div class="field">
-            <span>Contoh &amp; dokumentasi (hasil kerja, screenshot, bukti) — beri keterangan tiap gambar</span>
+            <span>Contoh &amp; dokumentasi (hasil kerja, screenshot, bukti) — isi judul &amp; deskripsi tiap gambar (tampil di bawah gambar dan di jendela detail saat gambar diklik)</span>
             <input type="file" id="pde-showcase-input" accept="image/*" multiple>
             <div id="pde-showcase" class="pde-showcase"></div>
           </div>
@@ -254,7 +273,7 @@
       </section>
 
       <!-- TESTIMONI -->
-      <section class="admin-panel brutal" id="testimonials-panel">
+      <section class="admin-panel admin-page brutal" id="testimonials-panel">
         <h2>Testimoni</h2>
         <p class="panel-sub">Ulasan pembeli yang tampil di beranda. Section testimoni di beranda otomatis disembunyikan selama belum ada testimoni aktif di sini — jadi jangan diisi contoh/demo.</p>
         <form id="testimonial-form" class="form-grid">
@@ -286,7 +305,7 @@
       </section>
 
       <!-- BANNER GAMBAR: hanya dirender & diisi kalau role === owner -->
-      <section id="hero-banner-panel" class="admin-panel brutal owner-only owner-section hidden">
+      <section id="hero-banner-panel" class="admin-panel admin-page brutal owner-only owner-section hidden">
         <h2>Banner Gambar / Video <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
         <p class="panel-sub">Gambar yang tampil di paling atas halaman utama, di bawah pita banner teks. Banner tampil polos (tanpa teks menimpa) dan otomatis menyesuaikan ukuran layar; rasio gambar/video asli dipertahankan.</p>
         <form id="hero-banner-form">
@@ -309,7 +328,7 @@
       </section>
 
       <!-- MEDIA SOSIAL: hanya dirender & diisi kalau role === owner -->
-      <section id="social-panel" class="admin-panel brutal owner-only owner-section hidden">
+      <section id="social-panel" class="admin-panel admin-page brutal owner-only owner-section hidden">
         <h2>Media Sosial <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
         <p class="panel-sub">Link ini tampil di footer beranda. Contoh nama platform: Instagram, WhatsApp, TikTok.</p>
         <form id="social-form" class="form-grid">
@@ -321,7 +340,7 @@
       </section>
 
       <!-- MANAJEMEN TIM: hanya dirender & diisi kalau role === owner -->
-      <section id="team-panel" class="admin-panel brutal owner-only owner-section hidden">
+      <section id="team-panel" class="admin-panel admin-page brutal owner-only owner-section hidden">
         <h2>Manajemen Tim <span class="role-badge role-owner" style="margin-left:8px;">OWNER ONLY</span></h2>
         <p class="panel-sub">Atur siapa yang jadi admin, owner, atau member biasa.</p>
         <div id="team-list" class="admin-list"></div>

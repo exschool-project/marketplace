@@ -113,46 +113,56 @@ function showDashboard(profile) {
   initSidebarScrollSpy();
 }
 
-// Highlight otomatis link sidebar yang lagi aktif sesuai section yang
-// kelihatan di layar (scroll-spy) — dipanggil sekali aja walau
-// showDashboard() bisa kepanggil 2x (cache optimistic + verifikasi ulang).
-let sidebarScrollSpyReady = false;
-function initSidebarScrollSpy() {
-  if (sidebarScrollSpyReady) return;
-  sidebarScrollSpyReady = true;
+// ---------- Router halaman panel ----------
+// Tiap menu sidebar = satu halaman sendiri (hanya satu yang tampil sekaligus),
+// dialamatkan lewat hash URL (mis. admin.html#products-panel) jadi tombol
+// back/refresh browser tetap kembali ke halaman yang sama. Halaman khusus
+// owner otomatis ditolak untuk role lain dan dialihkan ke Ringkasan —
+// ini cuma urusan tampilan; penegakan sebenarnya tetap di server.
+const PAGE_TITLES = {
+  'overview': 'Ringkasan',
+  'orders-panel': 'Pesanan & Chat',
+  'banner-panel': 'Banner Berjalan',
+  'categories-panel': 'Kategori',
+  'products-panel': 'Produk',
+  'testimonials-panel': 'Testimoni',
+  'hero-banner-panel': 'Banner Gambar / Video',
+  'social-panel': 'Media Sosial',
+  'team-panel': 'Manajemen Tim',
+};
+const ROLE_DESC = {
+  owner: 'Owner — akses penuh: konten toko, pesanan, banner utama, media sosial, dan manajemen tim.',
+  admin: 'Admin — kelola pesanan, produk, kategori, testimoni, dan banner berjalan. Pengaturan banner utama, media sosial, dan tim khusus Owner.',
+};
 
-  const links = document.querySelectorAll('.admin-nav-link');
-  if (!links.length || !('IntersectionObserver' in window)) return;
+function currentPageId() {
+  const id = decodeURIComponent((location.hash || '').replace(/^#/, ''));
+  const el = id && document.getElementById(id);
+  const allowed = el && el.classList.contains('admin-page') && !el.classList.contains('hidden');
+  return allowed ? id : 'overview';
+}
 
-  const sections = Array.from(links)
-    .map((link) => document.querySelector(link.getAttribute('href')))
-    .filter(Boolean);
-  if (!sections.length) return;
+function renderPage() {
+  const active = currentPageId();
+  document.querySelectorAll('.admin-page').forEach((el) => {
+    el.classList.toggle('page-off', el.id !== active);
+  });
+  document.querySelectorAll('.admin-nav-link').forEach((link) => {
+    link.classList.toggle('active', link.getAttribute('href') === `#${active}`);
+  });
+  const roleDesc = document.getElementById('overview-role-desc');
+  if (roleDesc) roleDesc.textContent = ROLE_DESC[currentRole] || '';
+  if (location.hash && location.hash !== `#${active}`) history.replaceState(null, '', `#${active}`);
+  document.querySelector('.admin-content')?.scrollIntoView({ block: 'start' });
+  window.scrollTo({ top: 0 });
+}
 
-  const setActive = (id) => {
-    links.forEach((link) => link.classList.toggle('active', link.getAttribute('href') === `#${id}`));
-  };
-
-  // State intersect per section disimpan sendiri (bukan cuma ngandelin
-  // array "entries" di tiap callback, yang isinya cuma section yang BARU
-  // berubah statusnya) — lalu pilih yang posisinya paling atas di layar,
-  // biar highlight-nya selalu konsisten walau beberapa section tumpang
-  // tindih kelihatan bareng pas di-scroll cepat.
-  const intersecting = new Map();
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => intersecting.set(entry.target.id, entry));
-
-    let topMost = null;
-    intersecting.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      if (!topMost || entry.boundingClientRect.top < topMost.boundingClientRect.top) {
-        topMost = entry;
-      }
-    });
-    if (topMost) setActive(topMost.target.id);
-  }, { rootMargin: '-84px 0px -70% 0px', threshold: 0 });
-
-  sections.forEach((el) => observer.observe(el));
+let pageRouterReady = false;
+function initSidebarScrollSpy() { // nama lama dipertahankan; sekarang = router
+  renderPage();
+  if (pageRouterReady) return;
+  pageRouterReady = true;
+  window.addEventListener('hashchange', renderPage);
 }
 
 // Taruh shimmer placeholder di semua daftar SEBELUM data aslinya kejawab
@@ -684,7 +694,10 @@ function renderDetailMedia() {
   document.getElementById('pde-showcase').innerHTML = detailState.showcase.map((s, i) => `
     <div class="pde-showcase-row">
       <img src="${escapeHtml(s.url)}" alt="">
-      <input type="text" class="pde-caption" data-index="${i}" value="${escapeHtml(s.caption || '')}" maxlength="25000" placeholder="Keterangan gambar (opsional)">
+      <div class="pde-showcase-fields">
+        <input type="text" class="pde-sc-title" data-index="${i}" value="${escapeHtml(s.title || '')}" placeholder="Judul gambar">
+        <textarea class="pde-sc-desc" data-index="${i}" rows="3" placeholder="Deskripsi / keterangan gambar">${escapeHtml(s.description || '')}</textarea>
+      </div>
       <button type="button" class="pde-remove" data-kind="showcase" data-index="${i}" aria-label="Hapus">✕</button>
     </div>
   `).join('');
@@ -696,12 +709,13 @@ function openDetailEditor(id) {
   detailState = {
     id,
     gallery: Array.isArray(p.gallery) ? [...p.gallery] : [],
-    showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, caption: s.caption || '' })) : [],
+    showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '' })) : [],
   };
   document.getElementById('pde-title').textContent = p.name;
   document.getElementById('pde-description').value = p.description || '';
   document.getElementById('pde-delivery').value = p.delivery_time || '';
   document.getElementById('pde-features').value = (Array.isArray(p.features) ? p.features : []).join('\n');
+  document.getElementById('product-detail-form')._updateWc?.();
   document.getElementById('pde-faq').value = (Array.isArray(p.faq) ? p.faq : []).map((f) => `${f.q} | ${f.a}`).join('\n');
   document.getElementById('pde-status').textContent = '';
   document.getElementById('pde-preview').href = `produk.html?id=${encodeURIComponent(id)}`;
@@ -729,7 +743,7 @@ async function uploadMany(inputEl, target) {
       const url = await uploadImageToCloudinary(file, 'ex-school/products', null);
       if (!detailState) return; // editor ditutup selama upload
       if (target === 'gallery') detailState.gallery.push(url);
-      else detailState.showcase.push({ url, caption: '' });
+      else detailState.showcase.push({ url, title: '', description: '' });
       done += 1;
       renderDetailMedia();
     } catch (err) {
@@ -742,9 +756,23 @@ async function uploadMany(inputEl, target) {
   inputEl.value = '';
 }
 
+const MAX_WORDS = 25000; // samakan dengan MAX_WORDS di api/products.js
+const countWords = (t) => (String(t || '').trim().match(/\S+/g) || []).length;
+
 function initDetailEditor() {
   const form = document.getElementById('product-detail-form');
   if (!form) return;
+
+  // Penghitung kata langsung untuk deskripsi
+  const descEl = document.getElementById('pde-description');
+  const wcEl = document.getElementById('pde-wordcount');
+  const updateWc = () => {
+    const n = countWords(descEl.value);
+    wcEl.textContent = `${n.toLocaleString('id-ID')} / ${MAX_WORDS.toLocaleString('id-ID')} kata`;
+    wcEl.style.color = n > MAX_WORDS ? '#B00020' : '';
+  };
+  descEl.addEventListener('input', updateWc);
+  form._updateWc = updateWc;
 
   document.getElementById('pde-gallery-input').addEventListener('change', (e) => uploadMany(e.target, 'gallery'));
   document.getElementById('pde-showcase-input').addEventListener('change', (e) => uploadMany(e.target, 'showcase'));
@@ -757,9 +785,10 @@ function initDetailEditor() {
     renderDetailMedia();
   });
   form.addEventListener('input', (e) => {
-    if (e.target.classList.contains('pde-caption') && detailState) {
-      detailState.showcase[Number(e.target.dataset.index)].caption = e.target.value;
-    }
+    if (!detailState) return;
+    const i = Number(e.target.dataset.index);
+    if (e.target.classList.contains('pde-sc-title')) detailState.showcase[i].title = e.target.value;
+    if (e.target.classList.contains('pde-sc-desc')) detailState.showcase[i].description = e.target.value;
   });
 
   form.addEventListener('submit', async (e) => {
@@ -782,6 +811,14 @@ function initDetailEditor() {
       showcase: detailState.showcase,
       faq,
     };
+
+    const tooLong = [['Deskripsi', payload.description], ...payload.features.map((f) => ['Poin fitur', f]),
+      ...payload.faq.flatMap((f) => [['Pertanyaan FAQ', f.q], ['Jawaban FAQ', f.a]])]
+      .find(([, t]) => countWords(t) > MAX_WORDS);
+    if (tooLong) {
+      statusEl.textContent = `${tooLong[0]} melebihi ${MAX_WORDS.toLocaleString('id-ID')} kata. Pendekkan dulu.`;
+      return;
+    }
 
     saveBtn.disabled = true;
     statusEl.textContent = 'Menyimpan...';
@@ -1125,19 +1162,20 @@ function updateUnreadBadge(orders) {
 
   document.title = count > 0 ? `(${count}) Admin — EX-SCHOOL` : 'Admin — EX-SCHOOL';
 
-  const link = document.getElementById('cs-panel-link');
-  if (!link) return;
-  let badge = link.querySelector('.unread-badge');
-  if (count > 0) {
-    if (!badge) {
-      badge = document.createElement('span');
-      badge.className = 'unread-badge';
-      link.appendChild(badge);
+  [document.getElementById('cs-panel-link'), document.querySelector('.admin-nav-link[href="#orders-panel"]')].forEach((link) => {
+    if (!link) return;
+    let badge = link.querySelector('.unread-badge');
+    if (count > 0) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'unread-badge';
+        link.appendChild(badge);
+      }
+      badge.textContent = count > 99 ? '99+' : String(count);
+    } else if (badge) {
+      badge.remove();
     }
-    badge.textContent = count > 99 ? '99+' : String(count);
-  } else if (badge) {
-    badge.remove();
-  }
+  });
 }
 
 async function loadOrdersAdmin() {
