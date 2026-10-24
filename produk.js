@@ -43,6 +43,9 @@ const PD_TEXT = {
     close: 'Tutup', prev: 'Sebelumnya', next: 'Berikutnya', zoom: 'Perbesar gambar',
     photo: 'Foto',
     detail: 'Lihat detail',
+    all: 'Semua',
+    source: 'Sumber',
+    category: 'Kategori',
   },
   en: {
     notFound: 'This product was not found or is no longer available.',
@@ -74,6 +77,9 @@ const PD_TEXT = {
     close: 'Close', prev: 'Previous', next: 'Next', zoom: 'Enlarge image',
     photo: 'Photo',
     detail: 'View details',
+    all: 'All',
+    source: 'Source',
+    category: 'Category',
   },
 };
 const pt = (k) => {
@@ -101,7 +107,41 @@ function paragraphsHTML(text) {
 
 // Bentuk lama {url, caption} tetap didukung: caption dianggap deskripsi.
 function normShowcase(s) {
-  return { url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '' };
+  return {
+    url: s.url,
+    title: s.title || '',
+    description: s.description ?? s.caption ?? '',
+    category: (s.category || '').trim(),
+    source_url: /^https?:\/\//i.test(s.source_url || '') ? s.source_url : '',
+    source_label: s.source_label || '',
+  };
+}
+
+function showcaseCategories(list) {
+  return [...new Set(list.map((x) => x.category).filter(Boolean))];
+}
+
+function sourceLinkHTML(s) {
+  if (!s.source_url) return '';
+  let host = '';
+  try { host = new URL(s.source_url).hostname.replace(/^www\./, ''); } catch (e) { /* abaikan */ }
+  const label = s.source_label || host || s.source_url;
+  return `<a class="pd-showcase-source" href="${escapeHtml(s.source_url)}" target="_blank" rel="noopener noreferrer nofollow">${escapeHtml(pt('source'))}: ${escapeHtml(label)} ↗</a>`;
+}
+
+// items: [{ item, index }] supaya index asli tetap dikenali saat difilter
+function showcaseCardsHTML(list, productName) {
+  return list.map((s, i) => `
+          <figure class="pd-showcase-item" data-index="${i}">
+            <button type="button" class="pd-showcase-btn" aria-label="${escapeHtml(pt('zoom'))}"><img src="${escapeHtml(s.url)}" alt="${escapeHtml(s.title || productName)}" loading="lazy"></button>
+            ${(s.title || s.description || s.category || s.source_url) ? `<figcaption>
+              ${s.category ? `<span class="pd-showcase-cat">${escapeHtml(s.category)}</span>` : ''}
+              ${s.title ? `<h3 class="pd-showcase-title">${escapeHtml(s.title)}</h3>` : ''}
+              ${s.description ? `<p class="pd-showcase-desc">${escapeHtml(s.description).replace(/\n/g, '<br>')}</p>` : ''}
+              <button type="button" class="pd-showcase-more">${escapeHtml(pt('detail'))}</button>
+              ${sourceLinkHTML(s)}
+            </figcaption>` : ''}
+          </figure>`).join('');
 }
 
 function galleryImages(p) {
@@ -191,15 +231,10 @@ function renderProduct() {
       <section class="pd-section" id="pd-showcase">
         <h2>${escapeHtml(pt('showcase'))}</h2>
         <p class="pd-sub">${escapeHtml(pt('showcaseSub'))}</p>
-        <div class="pd-showcase-grid">${showcase.map((s, i) => `
-          <figure class="pd-showcase-item" data-index="${i}">
-            <button type="button" class="pd-showcase-btn" aria-label="${escapeHtml(pt('zoom'))}"><img src="${escapeHtml(s.url)}" alt="${escapeHtml(s.title || p.name)}" loading="lazy"></button>
-            ${(s.title || s.description) ? `<figcaption>
-              ${s.title ? `<h3 class="pd-showcase-title">${escapeHtml(s.title)}</h3>` : ''}
-              ${s.description ? `<p class="pd-showcase-desc">${escapeHtml(s.description).replace(/\n/g, '<br>')}</p>` : ''}
-              <button type="button" class="pd-showcase-more">${escapeHtml(pt('detail'))}</button>
-            </figcaption>` : ''}
-          </figure>`).join('')}</div>
+        ${showcaseCategories(showcase).length ? `<div class="pd-sc-chips" id="pd-sc-chips" role="tablist" aria-label="${escapeHtml(pt('category'))}">${
+          [['', pt('all')], ...showcaseCategories(showcase).map((c) => [c, c])]
+            .map(([v, label], i) => `<button type="button" class="pd-sc-chip${i === 0 ? ' active' : ''}" data-cat="${escapeHtml(v)}">${escapeHtml(label)}</button>`).join('')}</div>` : ''}
+        <div class="pd-showcase-grid" id="pd-sc-grid">${showcaseCardsHTML(showcase, p.name)}</div>
       </section>` : ''}
 
       <section class="pd-section" id="pd-how">
@@ -288,10 +323,27 @@ function bindGallery(images) {
 }
 
 function bindShowcase(showcase) {
-  document.querySelectorAll('.pd-showcase-item').forEach((fig) => {
-    const open = () => openLightbox(showcase, Number(fig.dataset.index));
-    fig.querySelector('.pd-showcase-btn')?.addEventListener('click', open);
-    fig.querySelector('.pd-showcase-more')?.addEventListener('click', open);
+  const grid = document.getElementById('pd-sc-grid');
+  const chips = document.getElementById('pd-sc-chips');
+  let visible = showcase; // daftar yang sedang tampil (hasil filter kategori)
+
+  const bindCards = () => {
+    grid?.querySelectorAll('.pd-showcase-item').forEach((fig) => {
+      const open = () => openLightbox(visible, Number(fig.dataset.index));
+      fig.querySelector('.pd-showcase-btn')?.addEventListener('click', open);
+      fig.querySelector('.pd-showcase-more')?.addEventListener('click', open);
+    });
+  };
+  bindCards();
+
+  chips?.addEventListener('click', (e) => {
+    const chip = e.target.closest('.pd-sc-chip');
+    if (!chip) return;
+    chips.querySelectorAll('.pd-sc-chip').forEach((c) => c.classList.toggle('active', c === chip));
+    const cat = chip.dataset.cat;
+    visible = cat ? showcase.filter((x) => x.category === cat) : showcase;
+    grid.innerHTML = showcaseCardsHTML(visible, pdProduct?.name || '');
+    bindCards();
   });
   document.querySelectorAll('.testi-photo').forEach((btn) => {
     btn.addEventListener('click', () => openLightbox([{ url: btn.dataset.photo, title: '', description: '' }], 0));
@@ -330,7 +382,7 @@ function ensureLightbox() {
   el.innerHTML = `
     <button type="button" class="pd-lb-close" aria-label="${escapeHtml(pt('close'))}">${ICONS.close}</button>
     <button type="button" class="pd-lb-nav pd-lb-prev" aria-label="${escapeHtml(pt('prev'))}">‹</button>
-    <figure><img alt=""><figcaption><strong class="pd-lb-title"></strong><span class="pd-lb-desc"></span><small class="pd-lb-count"></small></figcaption></figure>
+    <figure><img alt=""><figcaption><span class="pd-lb-cat"></span><strong class="pd-lb-title"></strong><span class="pd-lb-desc"></span><a class="pd-lb-source" target="_blank" rel="noopener noreferrer nofollow"></a><small class="pd-lb-count"></small></figcaption></figure>
     <button type="button" class="pd-lb-nav pd-lb-next" aria-label="${escapeHtml(pt('next'))}">›</button>`;
   document.body.appendChild(el);
   el.addEventListener('click', (e) => {
@@ -349,8 +401,20 @@ function paintLightbox() {
   el.querySelector('img').alt = item.title || '';
   el.querySelector('.pd-lb-title').textContent = item.title || '';
   el.querySelector('.pd-lb-desc').textContent = item.description || '';
+  el.querySelector('.pd-lb-cat').textContent = item.category || '';
+  const src = el.querySelector('.pd-lb-source');
+  if (item.source_url) {
+    let host = '';
+    try { host = new URL(item.source_url).hostname.replace(/^www\./, ''); } catch (e) { /* abaikan */ }
+    src.href = item.source_url;
+    src.textContent = `${pt('source')}: ${item.source_label || host || item.source_url} ↗`;
+    src.classList.remove('hidden');
+  } else {
+    src.classList.add('hidden');
+    src.removeAttribute('href');
+  }
   el.querySelector('.pd-lb-count').textContent = lbList.length > 1 ? `${lbIndex + 1} / ${lbList.length}` : '';
-  el.querySelector('figcaption').classList.toggle('empty', !item.title && !item.description && lbList.length < 2);
+  el.querySelector('figcaption').classList.toggle('empty', !item.title && !item.description && !item.category && !item.source_url && lbList.length < 2);
   const multi = lbList.length > 1;
   el.querySelector('.pd-lb-prev').classList.toggle('hidden', !multi);
   el.querySelector('.pd-lb-next').classList.toggle('hidden', !multi);

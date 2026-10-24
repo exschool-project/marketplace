@@ -5,7 +5,7 @@ const { withErrorHandling } = require('./_lib/http');
 const EDITABLE_FIELDS = [
   'name', 'shop_name', 'price', 'old_price',
   'icon', 'image_url', 'category_id', 'badge', 'is_active', 'sort_order', 'is_featured',
-  'description', 'features', 'gallery', 'showcase', 'faq', 'delivery_time',
+  'description', 'features', 'gallery', 'showcase', 'faq', 'delivery_time', 'options',
 ];
 
 // ---------- Sanitasi field detail produk ----------
@@ -48,8 +48,27 @@ function cleanDetailField(key, value) {
           title: clip(x.title, 'Judul gambar'),
           // 'caption' = nama lama; dipakai sebagai deskripsi kalau belum ada
           description: clip(x.description ?? x.caption, 'Deskripsi gambar'),
+          category: clip(x.category, 'Kategori dokumentasi'),
+          // Sumber: hanya tautan http(s); skema lain (javascript:, data:) dibuang.
+          source_url: isHttpUrl(x.source_url) ? x.source_url.trim() : '',
+          source_label: clip(x.source_label, 'Nama sumber'),
         }))
         .slice(0, 50);
+    case 'options': {
+      // Pilihan/varian: maks 10 grup, 50 nilai per grup. Harga tambahan
+      // harus angka >= 0. Nama grup & label unik (dipakai sebagai kunci saat checkout).
+      const seenGroups = new Set();
+      return (Array.isArray(value) ? value : []).map((g) => {
+        const name = clip(g && g.name, 'Nama pilihan');
+        const seen = new Set();
+        const values = (Array.isArray(g && g.values) ? g.values : []).map((v) => {
+          const label = clip(v && v.label, 'Label pilihan');
+          const add = Number(v && v.price_add);
+          return { label, price_add: Number.isFinite(add) && add > 0 ? Math.round(add) : 0, sold_out: !!(v && v.sold_out) };
+        }).filter((v) => v.label && !seen.has(v.label) && seen.add(v.label)).slice(0, 50);
+        return { name, values };
+      }).filter((g) => g.name && g.values.length && !seenGroups.has(g.name) && seenGroups.add(g.name)).slice(0, 10);
+    }
     case 'faq':
       return (Array.isArray(value) ? value : [])
         .map((x) => ({ q: clip(x && x.q, 'Pertanyaan FAQ'), a: clip(x && x.a, 'Jawaban FAQ') }))
@@ -58,7 +77,7 @@ function cleanDetailField(key, value) {
     default: return value;
   }
 }
-const DETAIL_FIELDS = ['description', 'features', 'gallery', 'showcase', 'faq', 'delivery_time'];
+const DETAIL_FIELDS = ['description', 'features', 'gallery', 'showcase', 'faq', 'delivery_time', 'options'];
 
 // Satu file menangani /api/products (list & create) DAN /api/products?id=xxx
 // (ambil satu, update, hapus) — digabung supaya jumlah Vercel Functions

@@ -687,7 +687,41 @@ document.getElementById('social-list')?.addEventListener('click', async (e) => {
 // ---------- Editor detail produk (deskripsi, fitur, galeri, contoh, FAQ) ----------
 let detailState = null; // { id, gallery: [url], showcase: [{url, caption}] }
 
+// Saran kategori (datalist) = kategori yang sudah dipakai di produk ini
+function fillCategoryList() {
+  let dl = document.getElementById('pde-cat-list');
+  if (!dl) { dl = document.createElement('datalist'); dl.id = 'pde-cat-list'; document.body.appendChild(dl); }
+  const cats = [...new Set((detailState?.showcase || []).map((s) => (s.category || '').trim()).filter(Boolean))];
+  dl.innerHTML = cats.map((c) => `<option value="${escapeHtml(c)}"></option>`).join('');
+}
+
+function renderDetailOptions() {
+  const box = document.getElementById('pde-options');
+  if (!box || !detailState) return;
+  box.innerHTML = detailState.options.map((g, i) => `
+    <div class="pde-option-group">
+      <div class="pde-option-head">
+        <input type="text" class="pde-og-name" data-index="${i}" value="${escapeHtml(g.name)}" placeholder="Nama grup (mis. Kapasitas)">
+        <button type="button" class="pde-remove" data-kind="options" data-index="${i}" aria-label="Hapus grup">✕</button>
+      </div>
+      <textarea class="pde-og-vals" data-index="${i}" rows="4" placeholder="256GB&#10;512GB | 2000000&#10;2TB | 0 | habis">${escapeHtml(g.text)}</textarea>
+    </div>
+  `).join('');
+}
+
+// "Label | tambahan harga | habis" per baris -> [{label, price_add, sold_out}]
+function parseOptionValues(text) {
+  return String(text || '').split('\n').map((line) => {
+    const parts = line.split('|').map((x) => x.trim());
+    if (!parts[0]) return null;
+    const price = Number((parts[1] || '').replace(/[^\d]/g, '')) || 0;
+    return { label: parts[0], price_add: price, sold_out: parts.slice(1).some((x) => /^(habis|sold ?out)$/i.test(x)) };
+  }).filter(Boolean);
+}
+
 function renderDetailMedia() {
+  fillCategoryList();
+  renderDetailOptions();
   document.getElementById('pde-gallery').innerHTML = detailState.gallery.map((u, i) => `
     <div class="pde-thumb"><img src="${escapeHtml(u)}" alt=""><button type="button" class="pde-remove" data-kind="gallery" data-index="${i}" aria-label="Hapus">✕</button></div>
   `).join('');
@@ -695,8 +729,15 @@ function renderDetailMedia() {
     <div class="pde-showcase-row">
       <img src="${escapeHtml(s.url)}" alt="">
       <div class="pde-showcase-fields">
-        <input type="text" class="pde-sc-title" data-index="${i}" value="${escapeHtml(s.title || '')}" placeholder="Judul gambar">
+        <div class="pde-sc-pair">
+          <input type="text" class="pde-sc-cat" data-index="${i}" list="pde-cat-list" value="${escapeHtml(s.category || '')}" placeholder="Kategori (mis. Logo, Website, Poster)">
+          <input type="text" class="pde-sc-title" data-index="${i}" value="${escapeHtml(s.title || '')}" placeholder="Judul gambar">
+        </div>
         <textarea class="pde-sc-desc" data-index="${i}" rows="3" placeholder="Deskripsi / keterangan gambar">${escapeHtml(s.description || '')}</textarea>
+        <div class="pde-sc-pair">
+          <input type="url" class="pde-sc-src" data-index="${i}" value="${escapeHtml(s.source_url || '')}" placeholder="Link sumber / referensi (https://...)">
+          <input type="text" class="pde-sc-srclabel" data-index="${i}" value="${escapeHtml(s.source_label || '')}" placeholder="Nama sumber (opsional)">
+        </div>
       </div>
       <button type="button" class="pde-remove" data-kind="showcase" data-index="${i}" aria-label="Hapus">✕</button>
     </div>
@@ -709,7 +750,11 @@ function openDetailEditor(id) {
   detailState = {
     id,
     gallery: Array.isArray(p.gallery) ? [...p.gallery] : [],
-    showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '' })) : [],
+    options: (Array.isArray(p.options) ? p.options : []).map((g) => ({
+      name: g.name || '',
+      text: (g.values || []).map((v) => [v.label, v.price_add ? v.price_add : '', v.sold_out ? 'habis' : ''].join(' | ').replace(/( \| )+$/, '')).join('\n'),
+    })),
+    showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '', category: s.category || '', source_url: s.source_url || '', source_label: s.source_label || '' })) : [],
   };
   document.getElementById('pde-title').textContent = p.name;
   document.getElementById('pde-description').value = p.description || '';
@@ -743,7 +788,7 @@ async function uploadMany(inputEl, target) {
       const url = await uploadImageToCloudinary(file, 'ex-school/products', null);
       if (!detailState) return; // editor ditutup selama upload
       if (target === 'gallery') detailState.gallery.push(url);
-      else detailState.showcase.push({ url, title: '', description: '' });
+      else detailState.showcase.push({ url, title: '', description: '', category: '', source_url: '', source_label: '' });
       done += 1;
       renderDetailMedia();
     } catch (err) {
@@ -777,6 +822,11 @@ function initDetailEditor() {
   document.getElementById('pde-gallery-input').addEventListener('change', (e) => uploadMany(e.target, 'gallery'));
   document.getElementById('pde-showcase-input').addEventListener('change', (e) => uploadMany(e.target, 'showcase'));
   document.getElementById('pde-cancel').addEventListener('click', closeDetailEditor);
+  document.getElementById('pde-add-option').addEventListener('click', () => {
+    if (!detailState) return;
+    detailState.options.push({ name: '', text: '' });
+    renderDetailOptions();
+  });
 
   form.addEventListener('click', (e) => {
     const btn = e.target.closest('.pde-remove');
@@ -787,7 +837,12 @@ function initDetailEditor() {
   form.addEventListener('input', (e) => {
     if (!detailState) return;
     const i = Number(e.target.dataset.index);
+    if (e.target.classList.contains('pde-og-name')) { detailState.options[i].name = e.target.value; return; }
+    if (e.target.classList.contains('pde-og-vals')) { detailState.options[i].text = e.target.value; return; }
     if (e.target.classList.contains('pde-sc-title')) detailState.showcase[i].title = e.target.value;
+    if (e.target.classList.contains('pde-sc-cat')) { detailState.showcase[i].category = e.target.value; fillCategoryList(); }
+    if (e.target.classList.contains('pde-sc-src')) detailState.showcase[i].source_url = e.target.value;
+    if (e.target.classList.contains('pde-sc-srclabel')) detailState.showcase[i].source_label = e.target.value;
     if (e.target.classList.contains('pde-sc-desc')) detailState.showcase[i].description = e.target.value;
   });
 
@@ -807,10 +862,17 @@ function initDetailEditor() {
       description: document.getElementById('pde-description').value.trim() || null,
       delivery_time: document.getElementById('pde-delivery').value.trim() || null,
       features: lines('pde-features'),
+      options: detailState.options.map((g) => ({ name: g.name.trim(), values: parseOptionValues(g.text) })).filter((g) => g.name && g.values.length),
       gallery: detailState.gallery,
-      showcase: detailState.showcase,
+      showcase: detailState.showcase.map((s) => ({ ...s, category: (s.category || '').trim(), source_url: (s.source_url || '').trim() })),
       faq,
     };
+
+    const badSrc = detailState.showcase.find((s) => s.source_url && !/^https?:\/\//i.test(s.source_url.trim()));
+    if (badSrc) {
+      statusEl.textContent = 'Link sumber harus diawali http:// atau https://';
+      return;
+    }
 
     const tooLong = [['Deskripsi', payload.description], ...payload.features.map((f) => ['Poin fitur', f]),
       ...payload.faq.flatMap((f) => [['Pertanyaan FAQ', f.q], ['Jawaban FAQ', f.a]])]

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=2">
-<link rel="stylesheet" href="admin.css?v=6">
+<link rel="stylesheet" href="admin.css?v=8">
 <style>
   /* Anti-kedip: sama seperti cs.html, tapi butuh role admin/owner. */
   html.staff-cached-session #login-view{ display:none !important; }
@@ -254,9 +254,16 @@
           </div>
 
           <div class="field">
-            <span>Contoh &amp; dokumentasi (hasil kerja, screenshot, bukti) — isi judul &amp; deskripsi tiap gambar (tampil di bawah gambar dan di jendela detail saat gambar diklik)</span>
+            <span>Contoh &amp; dokumentasi (hasil kerja, screenshot, bukti) — isi kategori, judul, deskripsi, dan link sumber tiap gambar (kategori jadi filter di halaman produk)</span>
             <input type="file" id="pde-showcase-input" accept="image/*" multiple>
             <div id="pde-showcase" class="pde-showcase"></div>
+          </div>
+
+          <div class="field">
+            <span>Pilihan / varian untuk halaman beli (mis. Kapasitas, Warna, Paket)</span>
+            <small class="pde-hint">Pembeli wajib memilih satu dari tiap grup. Tulis satu pilihan per baris dengan format <code>Label | tambahan harga | habis</code> — tambahan harga dan "habis" boleh dikosongkan. Contoh: <code>512GB | 2000000</code>, <code>2TB | 0 | habis</code>.</small>
+            <div id="pde-options"></div>
+            <button type="button" class="mini-btn" id="pde-add-option">+ Tambah grup pilihan</button>
           </div>
 
           <label class="field"><span>FAQ (satu per baris, format: Pertanyaan | Jawaban)</span>

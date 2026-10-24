@@ -245,3 +245,16 @@ File baru/berubah: `produk.html`, `produk.js`, `ADD_PRODUCT_DETAIL.sql`,
 Banner beranda sekarang bisa **foto atau video** (MP4/WebM, **maks. 60 detik**,
 maks. 100 MB). Video main otomatis, tanpa suara, berulang. Batas durasi
 dicek di browser admin sebelum upload. Tidak perlu SQL tambahan.
+
+### Halaman Beli + Pilihan/Varian (beli.html)
+"Beli Sekarang" sekarang membuka **halaman** `beli.html?id=...` (bukan popup):
+pilih varian (diatur admin), jumlah, isi data pemesan, lihat ringkasan & total,
+lalu buat pesanan. Harga SELALU dihitung ulang di server (`api/orders.js`) dari
+data produk — harga/varian dari browser tidak dipercaya.
+
+**Langkah wajib:** jalankan `ADD_PRODUCT_OPTIONS.sql` di Supabase (sekali).
+Admin → Produk → **Edit Detail** → bagian *Pilihan / varian*: tambah grup
+(mis. Kapasitas, Warna), satu pilihan per baris `Label | tambahan harga | habis`.
+Produk tanpa pilihan tetap bisa dibeli (hanya jumlah + data pemesan).
+Ringkasan varian & jumlah ikut tertulis di nama pesanan (admin/CS/pembeli), dan
+`product_price` pesanan = total bayar.

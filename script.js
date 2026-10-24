@@ -376,87 +376,12 @@ function saveOrderToLocal(order) {
 }
 
 function initOrderModal() {
-  const overlay = document.getElementById('order-modal');
-  const closeBtn = document.getElementById('order-modal-close');
-  const stepForm = document.getElementById('order-step-form');
-  const stepSuccess = document.getElementById('order-step-success');
-  const form = document.getElementById('order-form');
-  const errEl = document.getElementById('order-form-error');
-  const nameEl = document.getElementById('order-product-name');
-  const priceEl = document.getElementById('order-product-price');
-  if (!overlay || !form) return;
-
-  let selectedProductId = null;
-
-  function openModal(productId, productName, productPrice) {
-    selectedProductId = productId;
-    nameEl.textContent = productName;
-    priceEl.textContent = rupiah(productPrice);
-    errEl.classList.add('hidden');
-    form.reset();
-    stepForm.classList.remove('hidden');
-    stepSuccess.classList.add('hidden');
-    overlay.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    overlay.classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
+  // "Beli Sekarang" sekarang membuka HALAMAN beli sendiri (beli.html),
+  // bukan popup mengambang. Nama fungsi dipertahankan biar init lama tetap jalan.
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.addbtn');
-    if (!btn) return;
-    openModal(btn.dataset.id, btn.dataset.name, btn.dataset.price);
-  });
-
-  closeBtn?.addEventListener('click', closeModal);
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal();
-  });
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    errEl.classList.add('hidden');
-    const submitBtn = form.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Memproses...';
-
-    try {
-      const payload = {
-        product_id: selectedProductId,
-        buyer_name: document.getElementById('order-buyer-name').value.trim(),
-        buyer_phone: document.getElementById('order-buyer-phone').value.trim(),
-        buyer_note: document.getElementById('order-buyer-note').value.trim(),
-      };
-      const res = await fetch(`${API_BASE}/orders`, {
-        method: 'POST',
-        headers: Object.assign(
-          { 'Content-Type': 'application/json' },
-          currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {}
-        ),
-        body: JSON.stringify(payload),
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error || 'Gagal membuat pesanan.');
-
-      const order = body.data;
-      saveOrderToLocal(order);
-
-      document.getElementById('order-success-code').textContent = order.order_code;
-      const chatLink = document.getElementById('order-success-chat-link');
-      chatLink.href = `pesanan.html?code=${encodeURIComponent(order.order_code)}&token=${encodeURIComponent(order.access_token)}`;
-
-      stepForm.classList.add('hidden');
-      stepSuccess.classList.remove('hidden');
-    } catch (err) {
-      errEl.textContent = err.message;
-      errEl.classList.remove('hidden');
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Buat Pesanan';
-    }
+    if (!btn || !btn.dataset.id) return;
+    window.location.href = `beli.html?id=${encodeURIComponent(btn.dataset.id)}`;
   });
 }
 

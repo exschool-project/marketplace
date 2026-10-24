@@ -755,3 +755,14 @@ a.stat-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
   /* di HP: menu jadi satu baris geser; link yang aktif tetap terlihat */
   .admin-nav-link.active{ box-shadow:var(--shadow-sm); }
 }
+
+.pde-sc-pair{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+@media (max-width:560px){ .pde-sc-pair{ grid-template-columns:1fr; } }
+
+.pde-hint{ display:block; font-weight:400; font-family:'Inter', sans-serif; color:#3E6B85; line-height:1.5; margin:2px 0 6px; }
+.pde-hint code{ background:#EAF1F7; padding:1px 5px; border-radius:4px; font-size:.78rem; }
+.pde-option-group{ background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px; margin:8px 0; display:flex; flex-direction:column; gap:8px; }
+.pde-option-head{ display:flex; gap:8px; align-items:center; }
+.pde-option-head input{ flex:1; min-width:0; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; font-weight:700; }
+.pde-option-head .pde-remove{ position:static; flex-shrink:0; }
+.pde-option-group textarea{ width:100%; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; font-family:'JetBrains Mono', monospace; font-size:.84rem; }

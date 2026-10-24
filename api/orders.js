@@ -41,9 +41,13 @@ async function insertOrder(supabase, payload, attempt = 0) {
     // dijalankan di database ini. Jangan sampai checkout (fitur inti)
     // ikut rusak gara-gara satu kolom opsional belum ada — coba lagi
     // tanpa user_id, biar guest checkout tetap jalan seperti biasa.
-    if (error.code === '42703' && 'user_id' in payload) {
-      const { user_id, ...payloadWithoutUserId } = payload;
-      return insertOrder(supabase, payloadWithoutUserId, attempt);
+    // Kolom opsional yang mungkin belum dimigrasi: lepas satu per satu & coba lagi.
+    if (error.code === '42703') {
+      const optional = ['selected_options', 'quantity', 'user_id'].find((k) => k in payload);
+      if (optional) {
+        const { [optional]: _omit, ...rest } = payload;
+        return insertOrder(supabase, rest, attempt);
+      }
     }
     throw new Error(error.message);
   }
@@ -250,7 +254,7 @@ module.exports = withErrorHandling(async (req, res) => {
 
   // ---------- POST — buat pesanan baru (publik, tanpa login WAJIB) ----------
   if (req.method === 'POST') {
-    const { product_id, buyer_name, buyer_phone, buyer_note } = req.body || {};
+    const { product_id, buyer_name, buyer_phone, buyer_note, quantity, selected } = req.body || {};
 
     if (!product_id) {
       res.status(400).json({ error: 'Produk wajib dipilih.' });
@@ -272,11 +276,19 @@ module.exports = withErrorHandling(async (req, res) => {
     const ctx = await getUserFromRequest(req);
     const user_id = ctx?.user?.id || null;
 
-    const { data: product, error: productError } = await supabase
+    let { data: product, error: productError } = await supabase
       .from('products')
-      .select('id, name, price, shop_name, is_active')
+      .select('id, name, price, shop_name, is_active, options')
       .eq('id', product_id)
       .maybeSingle();
+    if (productError && productError.code === '42703') {
+      // kolom options belum ada (ADD_PRODUCT_OPTIONS.sql belum jalan) -> produk tanpa pilihan
+      ({ data: product, error: productError } = await supabase
+        .from('products')
+        .select('id, name, price, shop_name, is_active')
+        .eq('id', product_id)
+        .maybeSingle());
+    }
 
     if (productError) {
       res.status(500).json({ error: productError.message });
@@ -287,10 +299,42 @@ module.exports = withErrorHandling(async (req, res) => {
       return;
     }
 
+    // ---- jumlah & pilihan: harga SELALU dihitung ulang di server ----
+    const qty = Math.floor(Number(quantity === undefined ? 1 : quantity));
+    if (!Number.isFinite(qty) || qty < 1 || qty > 99) {
+      res.status(400).json({ error: 'Jumlah harus antara 1 dan 99.' });
+      return;
+    }
+    const groups = Array.isArray(product.options) ? product.options : [];
+    let unitPrice = Number(product.price);
+    const chosen = [];
+    for (const g of groups) {
+      if (!g || !Array.isArray(g.values) || !g.values.length) continue;
+      const label = selected && selected[g.name];
+      const v = label && g.values.find((x) => x.label === label);
+      if (!v) {
+        res.status(400).json({ error: `Pilih ${g.name} dulu.` });
+        return;
+      }
+      if (v.sold_out) {
+        res.status(400).json({ error: `${g.name} "${v.label}" sedang habis. Pilih yang lain.` });
+        return;
+      }
+      unitPrice += Number(v.price_add) || 0;
+      chosen.push({ group: g.name, label: v.label });
+    }
+    const total = unitPrice * qty;
+    const variantText = chosen.map((c) => c.label).join(', ');
+    // Ringkasan varian & jumlah ikut ditaruh di nama pesanan supaya langsung
+    // terlihat di semua tampilan (admin, CS, pembeli); product_price = TOTAL bayar.
+    const orderName = `${product.name}${variantText ? ` (${variantText})` : ''}${qty > 1 ? ` ×${qty}` : ''}`;
+
     const order = await insertOrder(supabase, {
       product_id: product.id,
-      product_name: product.name,
-      product_price: product.price,
+      product_name: orderName,
+      product_price: total,
+      quantity: qty,
+      selected_options: chosen,
       shop_name: product.shop_name,
       buyer_name: String(buyer_name).trim(),
       buyer_phone: String(buyer_phone).trim(),
@@ -303,7 +347,7 @@ module.exports = withErrorHandling(async (req, res) => {
       order_id: order.id,
       sender_type: 'system',
       sender_name: 'Sistem',
-      message: `Pesanan ${order.order_code} dibuat untuk "${product.name}". Admin akan segera menghubungi kamu di sini.`,
+      message: `Pesanan ${order.order_code} dibuat untuk "${orderName}" — total Rp${total.toLocaleString('id-ID')}. Admin akan segera menghubungi kamu di sini.`,
     });
 
     res.status(201).json({ data: order });

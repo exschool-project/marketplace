@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Beli — EX-SCHOOL</title>
+<meta name="description" content="Pilih varian dan buat pesanan di EX-SCHOOL.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=10">
+</head>
+<body>
+
+  <!-- NAV (sama seperti beranda — TANPA strip banner promo & TANPA hero.
+       Banner cuma ada di beranda; halaman ini murni buat belanja, jadi
+       dibikin bersih & fokus ke produk. -->
+  <header class="site">
+    <div class="nav-wrap">
+      <a href="index.html" class="logo" style="text-decoration:none;">EX-SCHOOL</a>
+      <form class="search" role="search" id="search-form">
+        <input type="text" id="search-input" data-i18n-placeholder="nav.search_placeholder" placeholder="Cari produk atau jasa digital...">
+        <button type="submit" aria-label="Cari" data-i18n="nav.search_btn">CARI</button>
+      </form>
+      <div class="nav-actions">
+        <div class="lang-switch" id="lang-switch" role="group" aria-label="Bahasa / Language">
+          <button type="button" data-lang="id">ID</button>
+          <button type="button" data-lang="en">EN</button>
+        </div>
+        <a class="btn btn-blue hover-lift-sm brutal-sm" href="akun.html" id="nav-account-btn" data-i18n="nav.login">Masuk</a>
+        <a class="btn btn-ink hover-lift-sm brutal-sm" href="pesanan.html"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg> <span data-i18n="nav.history">Riwayat</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="pd-crumb-bar">
+      <p class="pd-crumb"><a href="index.html">Beranda</a> <span>/</span> <a href="belanja.html">Belanja</a> <span>/</span> <a id="buy-crumb-product" href="belanja.html">Produk</a> <span>/</span> <span>Beli</span></p>
+    </div>
+    <div id="buy-root" aria-live="polite">
+      <div class="buy-wrap"><div class="buy-card"><div class="sk-line" style="height:90px"></div></div></div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-wrap">
+      <div>
+        <div class="logo" style="display:inline-block; margin-bottom:12px;">EX-SCHOOL</div>
+        <p class="foot-desc" data-i18n="footer.desc">Marketplace jasa &amp; produk digital dari kreator-kreator terpercaya.</p>
+        <div id="social-links" class="social-links"></div>
+      </div>
+      <div>
+        <h4 data-i18n="footer.shop_heading">Belanja</h4>
+        <ul>
+          <li><a href="belanja.html#kategori" data-i18n="footer.category">Kategori</a></li>
+          <li><a href="belanja.html" data-i18n="footer.all_products">Semua Produk</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 data-i18n="footer.help_heading">Bantuan</h4>
+        <ul>
+          <li><a href="#" data-i18n="footer.help_center">Pusat Bantuan</a></li>
+          <li><a href="pesanan.html" data-i18n="footer.order_history">Riwayat Pesanan</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 data-i18n="footer.company_heading">Perusahaan</h4>
+        <ul>
+          <li><a href="index.html" data-i18n="footer.about">Tentang Kami</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span data-i18n="footer.copyright">© 2026 EX-SCHOOL — Yayasan Aqilah Hidayah. Semua hak dilindungi.</span>
+      <span data-i18n="footer.credit">Dibuat exschool-project</span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="icons.js"></script>
+  <script src="i18n.js"></script>
+  <script src="script.js"></script>
+  <script src="beli.js"></script>
+</body>
+</html>
