@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=2">
-<link rel="stylesheet" href="admin.css?v=8">
+<link rel="stylesheet" href="admin.css?v=10">
 <style>
   /* Anti-kedip: sama seperti cs.html, tapi butuh role admin/owner. */
   html.staff-cached-session #login-view{ display:none !important; }
@@ -97,6 +97,10 @@
           <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg>
           Produk
         </a>
+        <a href="#options-panel" class="admin-nav-link">
+          <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+          Pilihan &amp; Harga
+        </a>
         <a href="#testimonials-panel" class="admin-nav-link">
           <svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5z"/></svg>
           Testimoni
@@ -151,6 +155,7 @@
         <div class="quick-links">
           <a class="quick-card brutal-sm" href="#orders-panel"><strong>Pesanan &amp; Chat</strong><span>Balas pembeli &amp; ubah status pesanan</span></a>
           <a class="quick-card brutal-sm" href="#products-panel"><strong>Produk</strong><span>Tambah produk &amp; isi halaman detailnya</span></a>
+          <a class="quick-card brutal-sm" href="#options-panel"><strong>Pilihan &amp; Harga</strong><span>Varian produk &amp; harga tiap pilihan</span></a>
           <a class="quick-card brutal-sm" href="#testimonials-panel"><strong>Testimoni</strong><span>Ulasan pembeli per produk</span></a>
           <a class="quick-card brutal-sm" href="#categories-panel"><strong>Kategori</strong><span>Filter kategori di halaman belanja</span></a>
           <a class="quick-card brutal-sm owner-only hidden" href="#hero-banner-panel"><strong>Banner Gambar / Video</strong><span>Banner utama beranda</span></a>
@@ -259,13 +264,6 @@
             <div id="pde-showcase" class="pde-showcase"></div>
           </div>
 
-          <div class="field">
-            <span>Pilihan / varian untuk halaman beli (mis. Kapasitas, Warna, Paket)</span>
-            <small class="pde-hint">Pembeli wajib memilih satu dari tiap grup. Satu pilihan per baris: <code>Label | harga | habis</code>. Kolom <b>harga</b>: <code>27199000</code> = harga sendiri untuk pilihan itu (menggantikan harga produk), <code>+2000000</code> = tambahan di atas harga produk, kosong = harga produk (tidak naik). Kolom <b>habis</b> menutup pilihan. Contoh: <code>256GB</code> · <code>512GB | 27199000</code> · <code>1TB | +5000000</code> · <code>2TB | | habis</code>. Harga sendiri sebaiknya diisi di satu grup saja (mis. Kapasitas), grup lain (mis. Warna) kosong.</small>
-            <div id="pde-options"></div>
-            <button type="button" class="mini-btn" id="pde-add-option">+ Tambah grup pilihan</button>
-          </div>
-
           <label class="field"><span>FAQ (satu per baris, format: Pertanyaan | Jawaban)</span>
             <textarea id="pde-faq" rows="5" placeholder="Berapa kali bisa revisi? | Maksimal 2x revisi minor."></textarea>
           </label>
@@ -277,6 +275,24 @@
             <a id="pde-preview" class="btn brutal-sm" href="#" target="_blank" rel="noopener">Lihat Halaman ↗</a>
           </div>
         </form>
+      </section>
+
+      <!-- PILIHAN & HARGA (varian produk) -->
+      <section class="admin-panel admin-page brutal" id="options-panel">
+        <h2>Pilihan &amp; Harga</h2>
+        <p class="panel-sub">Atur pilihan yang harus dipilih pembeli di halaman beli (mis. Kapasitas, Warna, Paket) — masing-masing bisa punya harga sendiri, harga tambahan, atau sama dengan harga produk.</p>
+        <label class="field"><span>Produk</span><select id="opt-product"></select></label>
+
+        <div id="opt-area" class="hidden">
+          <p id="opt-base" class="opt-base"></p>
+          <div id="opt-groups"></div>
+          <button type="button" class="mini-btn" id="opt-add-group">+ Tambah grup pilihan</button>
+          <p id="opt-status" class="mono pde-status"></p>
+          <div class="pde-actions">
+            <button type="button" class="btn btn-green brutal-sm" id="opt-save">Simpan Pilihan</button>
+            <a id="opt-preview" class="btn brutal-sm" href="#" target="_blank" rel="noopener">Lihat halaman beli ↗</a>
+          </div>
+        </div>
       </section>
 
       <!-- TESTIMONI -->

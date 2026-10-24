@@ -258,3 +258,9 @@ Admin → Produk → **Edit Detail** → bagian *Pilihan / varian*: tambah grup
 Produk tanpa pilihan tetap bisa dibeli (hanya jumlah + data pemesan).
 Ringkasan varian & jumlah ikut tertulis di nama pesanan (admin/CS/pembeli), dan
 `product_price` pesanan = total bayar.
+
+### Admin: halaman "Pilihan & Harga"
+Varian produk sekarang diatur di halaman sendiri (menu **Pilihan & Harga**, atau tombol
+di baris produk), tanpa format `|`: tiap pilihan = satu baris form berisi nama pilihan,
+jenis harga (*Sama dengan harga produk* / *Harga sendiri* / *Tambahan harga*), nominal,
+dan centang *Habis*. Pratinjau "Pembeli bayar Rp…" muncul di tiap baris.

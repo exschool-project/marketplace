@@ -766,3 +766,25 @@ a.stat-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
 .pde-option-head input{ flex:1; min-width:0; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; font-weight:700; }
 .pde-option-head .pde-remove{ position:static; flex-shrink:0; }
 .pde-option-group textarea{ width:100%; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; font-family:'JetBrains Mono', monospace; font-size:.84rem; }
+
+/* ---------- Pilihan & Harga ---------- */
+.opt-base{ margin:0 0 14px; font-size:.9rem; color:#3E6B85; }
+.opt-group{ border:1px solid var(--border-strong); border-radius:var(--radius); background:var(--surface); padding:16px; margin-bottom:14px; display:flex; flex-direction:column; gap:10px; }
+.opt-group-head{ display:flex; gap:10px; align-items:center; }
+.opt-group-head input{ flex:1; min-width:0; border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1rem; background:#fff; }
+.opt-cols, .opt-row{ display:grid; grid-template-columns:minmax(120px,1.1fr) minmax(210px,1.4fr) minmax(110px,.9fr) 78px 34px; gap:8px; align-items:center; }
+.opt-cols{ font-family:'JetBrains Mono', monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:#6B8CA3; padding:0 2px; }
+.opt-row{ background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px; }
+.opt-row input[type=text], .opt-row input[type=number], .opt-row select{ width:100%; min-width:0; border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:.88rem; background:#fff; }
+.opt-row input:disabled{ background:var(--surface); color:#9AAEBD; }
+.opt-soldout{ display:flex; align-items:center; gap:6px; font-size:.82rem; cursor:pointer; }
+.opt-row .pde-remove{ position:static; }
+.opt-preview-text{ grid-column:1 / -1; font-size:.78rem; color:#1C7A5C; font-family:'JetBrains Mono', monospace; padding:0 2px; }
+@media (max-width:760px){
+  .opt-cols{ display:none; }
+  .opt-row{ grid-template-columns:1fr 1fr; }
+  .opt-row .opt-label{ grid-column:1 / -1; }
+  .opt-row .opt-mode{ grid-column:1 / -1; }
+  .opt-row .opt-soldout{ justify-self:start; }
+  .opt-row .pde-remove{ justify-self:end; }
+}

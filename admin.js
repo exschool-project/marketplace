@@ -125,6 +125,7 @@ const PAGE_TITLES = {
   'banner-panel': 'Banner Berjalan',
   'categories-panel': 'Kategori',
   'products-panel': 'Produk',
+  'options-panel': 'Pilihan & Harga',
   'testimonials-panel': 'Testimoni',
   'hero-banner-panel': 'Banner Gambar / Video',
   'social-panel': 'Media Sosial',
@@ -479,6 +480,7 @@ async function loadProductsAdmin() {
   const { data } = await authedFetch(`${API_BASE}/products`);
   productsCache = data;
   fillTestimonialProductSelect();
+  fillOptionsProductSelect();
   const list = document.getElementById('product-list');
   list.innerHTML = data.map((p) => `
     <div class="admin-row" data-id="${p.id}">
@@ -487,6 +489,7 @@ async function loadProductsAdmin() {
       <span class="admin-row-tag">${p.is_active ? 'Aktif' : 'Nonaktif'}</span>
       ${p.is_featured ? '<span class="role-badge role-owner">POPULER</span>' : ''}
       <button class="mini-btn edit-detail" type="button">Edit Detail</button>
+      <button class="mini-btn edit-options" type="button">Pilihan &amp; Harga</button>
       <button class="mini-btn toggle-featured">${p.is_featured ? 'Batal Populer' : 'Jadikan Populer'}</button>
       <button class="mini-btn toggle-product" type="button">${p.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
       <button class="mini-btn danger delete-product" type="button">Hapus</button>
@@ -539,6 +542,14 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
   const row = e.target.closest('.admin-row');
   if (!row) return;
   const id = row.dataset.id;
+
+  if (e.target.classList.contains('edit-options')) {
+    location.hash = '#options-panel';
+    const sel = document.getElementById('opt-product');
+    sel.value = id;
+    loadOptionsEditor(id);
+    return;
+  }
 
   if (e.target.classList.contains('edit-detail')) {
     openDetailEditor(id);
@@ -695,41 +706,8 @@ function fillCategoryList() {
   dl.innerHTML = cats.map((c) => `<option value="${escapeHtml(c)}"></option>`).join('');
 }
 
-function renderDetailOptions() {
-  const box = document.getElementById('pde-options');
-  if (!box || !detailState) return;
-  box.innerHTML = detailState.options.map((g, i) => `
-    <div class="pde-option-group">
-      <div class="pde-option-head">
-        <input type="text" class="pde-og-name" data-index="${i}" value="${escapeHtml(g.name)}" placeholder="Nama grup (mis. Kapasitas)">
-        <button type="button" class="pde-remove" data-kind="options" data-index="${i}" aria-label="Hapus grup">✕</button>
-      </div>
-      <textarea class="pde-og-vals" data-index="${i}" rows="4" placeholder="256GB&#10;512GB | 2000000&#10;2TB | 0 | habis">${escapeHtml(g.text)}</textarea>
-    </div>
-  `).join('');
-}
-
-// "Label | tambahan harga | habis" per baris -> [{label, price_add, sold_out}]
-function parseOptionValues(text) {
-  return String(text || '').split('\n').map((line) => {
-    const parts = line.split('|').map((x) => x.trim());
-    if (!parts[0]) return null;
-    // kolom 2: "27199000" = harga sendiri, "+2000000" = tambahan harga, kosong = harga produk
-    const raw = parts[1] || '';
-    const amount = Number(raw.replace(/[^\d]/g, '')) || 0;
-    const isAdd = raw.startsWith('+');
-    return {
-      label: parts[0],
-      price: !isAdd ? amount : 0,
-      price_add: isAdd ? amount : 0,
-      sold_out: parts.slice(1).some((x) => /^(habis|sold ?out)$/i.test(x)),
-    };
-  }).filter(Boolean);
-}
-
 function renderDetailMedia() {
   fillCategoryList();
-  renderDetailOptions();
   document.getElementById('pde-gallery').innerHTML = detailState.gallery.map((u, i) => `
     <div class="pde-thumb"><img src="${escapeHtml(u)}" alt=""><button type="button" class="pde-remove" data-kind="gallery" data-index="${i}" aria-label="Hapus">✕</button></div>
   `).join('');
@@ -758,10 +736,6 @@ function openDetailEditor(id) {
   detailState = {
     id,
     gallery: Array.isArray(p.gallery) ? [...p.gallery] : [],
-    options: (Array.isArray(p.options) ? p.options : []).map((g) => ({
-      name: g.name || '',
-      text: (g.values || []).map((v) => [v.label, v.price > 0 ? v.price : (v.price_add > 0 ? '+' + v.price_add : ''), v.sold_out ? 'habis' : ''].join(' | ').replace(/( \| )+$/, '')).join('\n'),
-    })),
     showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '', category: s.category || '', source_url: s.source_url || '', source_label: s.source_label || '' })) : [],
   };
   document.getElementById('pde-title').textContent = p.name;
@@ -830,11 +804,6 @@ function initDetailEditor() {
   document.getElementById('pde-gallery-input').addEventListener('change', (e) => uploadMany(e.target, 'gallery'));
   document.getElementById('pde-showcase-input').addEventListener('change', (e) => uploadMany(e.target, 'showcase'));
   document.getElementById('pde-cancel').addEventListener('click', closeDetailEditor);
-  document.getElementById('pde-add-option').addEventListener('click', () => {
-    if (!detailState) return;
-    detailState.options.push({ name: '', text: '' });
-    renderDetailOptions();
-  });
 
   form.addEventListener('click', (e) => {
     const btn = e.target.closest('.pde-remove');
@@ -845,8 +814,6 @@ function initDetailEditor() {
   form.addEventListener('input', (e) => {
     if (!detailState) return;
     const i = Number(e.target.dataset.index);
-    if (e.target.classList.contains('pde-og-name')) { detailState.options[i].name = e.target.value; return; }
-    if (e.target.classList.contains('pde-og-vals')) { detailState.options[i].text = e.target.value; return; }
     if (e.target.classList.contains('pde-sc-title')) detailState.showcase[i].title = e.target.value;
     if (e.target.classList.contains('pde-sc-cat')) { detailState.showcase[i].category = e.target.value; fillCategoryList(); }
     if (e.target.classList.contains('pde-sc-src')) detailState.showcase[i].source_url = e.target.value;
@@ -870,17 +837,10 @@ function initDetailEditor() {
       description: document.getElementById('pde-description').value.trim() || null,
       delivery_time: document.getElementById('pde-delivery').value.trim() || null,
       features: lines('pde-features'),
-      options: detailState.options.map((g) => ({ name: g.name.trim(), values: parseOptionValues(g.text) })).filter((g) => g.name && g.values.length),
       gallery: detailState.gallery,
       showcase: detailState.showcase.map((s) => ({ ...s, category: (s.category || '').trim(), source_url: (s.source_url || '').trim() })),
       faq,
     };
-
-    const pricedGroups = payload.options.filter((g) => g.values.some((v) => v.price > 0));
-    if (pricedGroups.length > 1) {
-      statusEl.textContent = `Harga sendiri hanya boleh diisi di SATU grup pilihan (sekarang: ${pricedGroups.map((g) => g.name).join(', ')}). Di grup lain pakai tambahan harga (+angka) atau kosongkan.`;
-      return;
-    }
 
     const badSrc = detailState.showcase.find((s) => s.source_url && !/^https?:\/\//i.test(s.source_url.trim()));
     if (badSrc) {
@@ -906,6 +866,188 @@ function initDetailEditor() {
       statusEl.textContent = /column|schema/i.test(err.message)
         ? 'Gagal: kolom detail belum ada di database. Jalankan ADD_PRODUCT_DETAIL.sql di Supabase dulu.'
         : `Gagal menyimpan: ${err.message}`;
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+}
+
+
+// ---------- Pilihan & Harga (varian produk) — halaman sendiri ----------
+// Tiap pilihan = satu baris form: nama pilihan, tipe harga, nominal, habis.
+//   tipe "same" = pakai harga produk (tidak naik)
+//   tipe "own"  = harga sendiri (menggantikan harga produk)
+//   tipe "add"  = tambahan di atas harga produk
+let optState = null; // { productId, base, groups: [{ name, values: [{ label, mode, amount, sold_out }] }] }
+
+const rupiahFull = (n) => 'Rp' + Math.round(Number(n) || 0).toLocaleString('id-ID');
+
+function fillOptionsProductSelect() {
+  const sel = document.getElementById('opt-product');
+  if (!sel) return;
+  const keep = sel.value;
+  sel.innerHTML = '<option value="">— Pilih produk —</option>' +
+    productsCache.map((p) => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+  if (keep && productsCache.some((p) => p.id === keep)) sel.value = keep;
+}
+
+function loadOptionsEditor(productId) {
+  const area = document.getElementById('opt-area');
+  const p = productsCache.find((x) => x.id === productId);
+  if (!p) { optState = null; area.classList.add('hidden'); return; }
+  optState = {
+    productId,
+    base: Number(p.price),
+    groups: (Array.isArray(p.options) ? p.options : []).map((g) => ({
+      name: g.name || '',
+      values: (g.values || []).map((v) => ({
+        label: v.label || '',
+        mode: v.price > 0 ? 'own' : (v.price_add > 0 ? 'add' : 'same'),
+        amount: v.price > 0 ? v.price : (v.price_add > 0 ? v.price_add : ''),
+        sold_out: !!v.sold_out,
+      })),
+    })),
+  };
+  document.getElementById('opt-status').textContent = '';
+  document.getElementById('opt-preview').href = `beli.html?id=${encodeURIComponent(productId)}`;
+  area.classList.remove('hidden');
+  renderOptionsEditor();
+}
+
+function optPreviewText(v) {
+  if (v.mode === 'own') return `Pembeli bayar ${rupiahFull(v.amount)}`;
+  if (v.mode === 'add') return `Pembeli bayar ${rupiahFull(optState.base + (Number(v.amount) || 0))}`;
+  return `Pembeli bayar ${rupiahFull(optState.base)}`;
+}
+
+function renderOptionsEditor() {
+  document.getElementById('opt-base').innerHTML = `Harga produk: <strong>${rupiahFull(optState.base)}</strong>`;
+  document.getElementById('opt-groups').innerHTML = optState.groups.map((g, gi) => `
+    <div class="opt-group" data-g="${gi}">
+      <div class="opt-group-head">
+        <input type="text" class="opt-gname" data-g="${gi}" value="${escapeHtml(g.name)}" placeholder="Nama pilihan (mis. Kapasitas, Warna, Paket)">
+        <button type="button" class="mini-btn danger opt-del-group" data-g="${gi}">Hapus grup</button>
+      </div>
+      <div class="opt-cols" aria-hidden="true"><span>Pilihan</span><span>Harga</span><span>Nominal (Rp)</span><span>Habis</span><span></span></div>
+      ${g.values.map((v, vi) => `
+      <div class="opt-row" data-g="${gi}" data-v="${vi}">
+        <input type="text" class="opt-label" value="${escapeHtml(v.label)}" placeholder="Mis. 256GB" aria-label="Nama pilihan">
+        <select class="opt-mode" aria-label="Jenis harga">
+          <option value="same"${v.mode === 'same' ? ' selected' : ''}>Sama dengan harga produk</option>
+          <option value="own"${v.mode === 'own' ? ' selected' : ''}>Harga sendiri</option>
+          <option value="add"${v.mode === 'add' ? ' selected' : ''}>Tambahan harga</option>
+        </select>
+        <input type="number" class="opt-amount" min="0" step="1000" inputmode="numeric" value="${v.amount === '' ? '' : escapeHtml(v.amount)}" placeholder="${v.mode === 'add' ? 'Tambahan' : 'Harga'}" ${v.mode === 'same' ? 'disabled' : ''} aria-label="Nominal">
+        <label class="opt-soldout"><input type="checkbox" class="opt-sold"${v.sold_out ? ' checked' : ''}> Habis</label>
+        <button type="button" class="pde-remove opt-del-row" aria-label="Hapus pilihan">✕</button>
+        <span class="opt-preview-text">${escapeHtml(optPreviewText(v))}</span>
+      </div>`).join('')}
+      <button type="button" class="mini-btn opt-add-row" data-g="${gi}">+ Tambah pilihan</button>
+    </div>
+  `).join('') || '<p class="empty-msg">Produk ini belum punya pilihan. Klik "+ Tambah grup pilihan" untuk mulai.</p>';
+}
+
+function initOptionsEditor() {
+  const sel = document.getElementById('opt-product');
+  const wrap = document.getElementById('opt-groups');
+  if (!sel || !wrap) return;
+  sel.addEventListener('change', () => loadOptionsEditor(sel.value));
+
+  document.getElementById('opt-add-group').addEventListener('click', () => {
+    if (!optState) return;
+    optState.groups.push({ name: '', values: [{ label: '', mode: 'same', amount: '', sold_out: false }] });
+    renderOptionsEditor();
+  });
+
+  wrap.addEventListener('click', (e) => {
+    if (!optState) return;
+    const g = Number(e.target.closest('[data-g]')?.dataset.g);
+    if (e.target.classList.contains('opt-add-row')) {
+      optState.groups[g].values.push({ label: '', mode: 'same', amount: '', sold_out: false });
+      renderOptionsEditor();
+    } else if (e.target.classList.contains('opt-del-row')) {
+      const v = Number(e.target.closest('.opt-row').dataset.v);
+      optState.groups[g].values.splice(v, 1);
+      renderOptionsEditor();
+    } else if (e.target.classList.contains('opt-del-group')) {
+      optState.groups.splice(g, 1);
+      renderOptionsEditor();
+    }
+  });
+
+  const syncRow = (el) => {
+    const row = el.closest('.opt-row');
+    if (!row || !optState) return;
+    const v = optState.groups[Number(row.dataset.g)].values[Number(row.dataset.v)];
+    v.label = row.querySelector('.opt-label').value;
+    v.mode = row.querySelector('.opt-mode').value;
+    v.amount = row.querySelector('.opt-amount').value;
+    v.sold_out = row.querySelector('.opt-sold').checked;
+    const amt = row.querySelector('.opt-amount');
+    amt.disabled = v.mode === 'same';
+    amt.placeholder = v.mode === 'add' ? 'Tambahan' : 'Harga';
+    row.querySelector('.opt-preview-text').textContent = optPreviewText(v);
+  };
+  wrap.addEventListener('input', (e) => {
+    if (!optState) return;
+    if (e.target.classList.contains('opt-gname')) {
+      optState.groups[Number(e.target.dataset.g)].name = e.target.value;
+    } else syncRow(e.target);
+  });
+  wrap.addEventListener('change', (e) => { if (e.target.classList.contains('opt-mode') || e.target.classList.contains('opt-sold')) syncRow(e.target); });
+
+  document.getElementById('opt-save').addEventListener('click', async () => {
+    if (!optState) return;
+    const statusEl = document.getElementById('opt-status');
+    const saveBtn = document.getElementById('opt-save');
+    const fail = (msg) => { statusEl.textContent = msg; statusEl.style.color = '#B00020'; };
+    statusEl.style.color = '';
+
+    const groups = [];
+    const names = new Set();
+    for (const g of optState.groups) {
+      const name = g.name.trim();
+      const values = g.values.filter((v) => v.label.trim() || v.amount !== '');
+      if (!name && !values.length) continue; // grup kosong diabaikan
+      if (!name) return fail('Ada grup pilihan yang belum diberi nama.');
+      if (names.has(name)) return fail(`Nama grup "${name}" dobel. Pakai nama berbeda.`);
+      names.add(name);
+      if (!values.length) return fail(`Grup "${name}" belum punya pilihan.`);
+      const labels = new Set();
+      const outValues = [];
+      for (const v of values) {
+        const label = v.label.trim();
+        if (!label) return fail(`Ada pilihan di grup "${name}" yang belum diberi nama.`);
+        if (labels.has(label)) return fail(`Pilihan "${label}" dobel di grup "${name}".`);
+        labels.add(label);
+        const amount = Number(v.amount) || 0;
+        if (v.mode !== 'same' && amount <= 0) return fail(`Isi nominal untuk "${label}" (grup "${name}"), atau ubah jenis harganya jadi "Sama dengan harga produk".`);
+        outValues.push({
+          label,
+          price: v.mode === 'own' ? Math.round(amount) : 0,
+          price_add: v.mode === 'add' ? Math.round(amount) : 0,
+          sold_out: !!v.sold_out,
+        });
+      }
+      groups.push({ name, values: outValues });
+    }
+    const pricedGroups = groups.filter((g) => g.values.some((v) => v.price > 0));
+    if (pricedGroups.length > 1) {
+      return fail(`"Harga sendiri" hanya boleh dipakai di SATU grup (sekarang: ${pricedGroups.map((g) => g.name).join(', ')}). Di grup lain pakai "Tambahan harga" atau "Sama dengan harga produk".`);
+    }
+
+    saveBtn.disabled = true;
+    statusEl.textContent = 'Menyimpan...';
+    try {
+      await authedFetch(`${API_BASE}/products?id=${optState.productId}`, { method: 'PUT', body: JSON.stringify({ options: groups }) });
+      statusEl.textContent = 'Tersimpan ✓';
+      const keepId = optState.productId;
+      await loadProductsAdmin();
+      document.getElementById('opt-product').value = keepId;
+    } catch (err) {
+      fail(/column|schema/i.test(err.message)
+        ? 'Gagal: kolom pilihan belum ada di database. Jalankan ADD_PRODUCT_OPTIONS.sql di Supabase dulu.'
+        : `Gagal menyimpan: ${err.message}`);
     } finally {
       saveBtn.disabled = false;
     }
@@ -1461,6 +1603,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('hero-banner-form').addEventListener('submit', handleHeroBannerSubmit);
   initProductImageInput();
   initDetailEditor();
+  initOptionsEditor();
   initTestimonialImageInput();
   initHeroBannerImageInput();
   initNotifyButton();
