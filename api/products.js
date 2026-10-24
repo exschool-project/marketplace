@@ -64,7 +64,13 @@ function cleanDetailField(key, value) {
         const values = (Array.isArray(g && g.values) ? g.values : []).map((v) => {
           const label = clip(v && v.label, 'Label pilihan');
           const add = Number(v && v.price_add);
-          return { label, price_add: Number.isFinite(add) && add > 0 ? Math.round(add) : 0, sold_out: !!(v && v.sold_out) };
+          const own = Number(v && v.price);
+          return {
+            label,
+            price: Number.isFinite(own) && own > 0 ? Math.round(own) : 0,         // harga sendiri (0 = pakai harga produk)
+            price_add: Number.isFinite(add) && add > 0 ? Math.round(add) : 0,     // tambahan harga
+            sold_out: !!(v && v.sold_out),
+          };
         }).filter((v) => v.label && !seen.has(v.label) && seen.add(v.label)).slice(0, 50);
         return { name, values };
       }).filter((g) => g.name && g.values.length && !seenGroups.has(g.name) && seenGroups.add(g.name)).slice(0, 10);

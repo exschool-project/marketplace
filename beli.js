@@ -9,16 +9,9 @@ const buySel = {};      // { namaGrup: label }
 let buyQty = 1;
 
 const idr = (v) => 'Rp' + Math.round(Number(v) || 0).toLocaleString('id-ID');
-const optGroups = () => (Array.isArray(buyProduct.options) ? buyProduct.options : []).filter((g) => g && Array.isArray(g.values) && g.values.length);
+const optGroups = () => variantGroups(buyProduct);
 
-function unitPrice() {
-  let price = Number(buyProduct.price);
-  optGroups().forEach((g) => {
-    const v = g.values.find((x) => x.label === buySel[g.name]);
-    if (v) price += Number(v.price_add) || 0;
-  });
-  return price;
-}
+const unitPrice = () => variantUnitPrice(buyProduct, buySel);
 
 function renderBuy() {
   const p = buyProduct;
@@ -41,7 +34,7 @@ function renderBuy() {
             <div class="buy-product-info">
               <p class="buy-shop">${escapeHtml(p.shop_name)}</p>
               <h1>${escapeHtml(p.name)}</h1>
-              <p class="buy-price"><strong id="buy-unit">${idr(unitPrice())}</strong>${p.old_price ? ` <s>${idr(p.old_price)}</s>` : ''}</p>
+              <p class="buy-price"><strong id="buy-unit">${idr(unitPrice())}</strong>${p.old_price && !variantOverridesPrice(p, buySel) ? ` <s id="buy-old">${idr(p.old_price)}</s>` : ''}</p>
               ${p.delivery_time ? `<p class="buy-delivery">${ICONS.check} ${escapeHtml(p.delivery_time)}</p>` : ''}
             </div>
           </section>
@@ -50,7 +43,7 @@ function renderBuy() {
           <section class="buy-card" data-group="${gi}">
             <h2>${escapeHtml(g.name)}</h2>
             <div class="buy-chips" role="radiogroup" aria-label="${escapeHtml(g.name)}">
-              ${g.values.map((v, vi) => `<button type="button" class="buy-chip${buySel[g.name] === v.label ? ' active' : ''}" role="radio" aria-checked="${buySel[g.name] === v.label}" data-g="${gi}" data-v="${vi}" ${v.sold_out ? 'disabled' : ''}>${escapeHtml(v.label)}${v.sold_out ? ' <em>habis</em>' : (Number(v.price_add) > 0 ? ` <em>+${idr(v.price_add)}</em>` : '')}</button>`).join('')}
+              ${g.values.map((v, vi) => `<button type="button" class="buy-chip${buySel[g.name] === v.label ? ' active' : ''}" role="radio" aria-checked="${buySel[g.name] === v.label}" data-g="${gi}" data-v="${vi}" ${v.sold_out ? 'disabled' : ''}>${escapeHtml(v.label)}${v.sold_out ? ' <em>habis</em>' : (Number(v.price) > 0 ? ` <em>${idr(v.price)}</em>` : (Number(v.price_add) > 0 ? ` <em>+${idr(v.price_add)}</em>` : ''))}</button>`).join('')}
             </div>
             <p class="buy-field-error hidden" data-err="${gi}">Pilih ${escapeHtml(g.name)} dulu.</p>
           </section>`).join('')}
@@ -103,6 +96,8 @@ function saveBuyer(name, phone) {
 function updateSummary() {
   const unit = unitPrice();
   document.getElementById('buy-unit').textContent = idr(unit);
+  const oldEl = document.getElementById('buy-old');
+  if (oldEl) oldEl.classList.toggle('hidden', variantOverridesPrice(buyProduct, buySel));
   document.getElementById('sum-unit').textContent = idr(unit);
   document.getElementById('sum-qty').textContent = `× ${buyQty}`;
   document.getElementById('sum-total').textContent = idr(unit * buyQty);

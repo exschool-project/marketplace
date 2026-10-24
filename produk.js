@@ -170,7 +170,9 @@ function renderProduct() {
   const hasDesc = !!(p.description && p.description.trim());
   const ownReviews = !pdReviewsAreGeneral ? pdReviews : [];
   const avg = ownReviews.length ? ownReviews.reduce((s, r) => s + (Number(r.rating) || 0), 0) / ownReviews.length : 0;
-  const discount = p.old_price && Number(p.old_price) > Number(p.price)
+  const range = variantPriceRange(p);
+  const ranged = range.min !== range.max;
+  const discount = !ranged && p.old_price && Number(p.old_price) > Number(p.price)
     ? Math.round((1 - Number(p.price) / Number(p.old_price)) * 100) : 0;
 
   const tabs = [];
@@ -197,8 +199,8 @@ function renderProduct() {
         ${ownReviews.length ? `<a class="pd-rating" href="#pd-reviews"><span class="pd-stars">${starsHTML(avg)}</span> <strong>${avg.toFixed(1)}</strong> <span>(${escapeHtml(pt('reviewCount')(ownReviews.length))})</span></a>` : ''}
 
         <div class="pd-price-row">
-          <span class="pd-price">${pdRupiah(p.price)}</span>
-          ${p.old_price ? `<span class="pd-old">${pdRupiah(p.old_price)}</span>` : ''}
+          <span class="pd-price">${pdRupiah(range.min)}${ranged ? `<span class="pd-range-sep">–</span>${pdRupiah(range.max)}` : ''}</span>
+          ${p.old_price && !ranged ? `<span class="pd-old">${pdRupiah(p.old_price)}</span>` : ''}
           ${discount ? `<span class="pd-save">${escapeHtml(pt('save'))} ${discount}%</span>` : ''}
         </div>
 
@@ -263,7 +265,7 @@ function renderProduct() {
     </div>
 
     <div class="pd-sticky-buy" id="pd-sticky-buy">
-      <div><strong>${pdRupiah(p.price)}</strong>${p.old_price ? `<small>${pdRupiah(p.old_price)}</small>` : ''}</div>
+      <div><strong>${ranged ? 'dari ' : ''}${pdRupiah(range.min)}</strong>${p.old_price && !ranged ? `<small>${pdRupiah(p.old_price)}</small>` : ''}</div>
       <button type="button" class="btn btn-green addbtn" data-id="${escapeHtml(p.id)}" data-name="${escapeHtml(p.name)}" data-price="${Number(p.price)}">${escapeHtml(pt('buy'))}</button>
     </div>
   `;

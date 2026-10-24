@@ -306,7 +306,8 @@ module.exports = withErrorHandling(async (req, res) => {
       return;
     }
     const groups = Array.isArray(product.options) ? product.options : [];
-    let unitPrice = Number(product.price);
+    let ownPrice = null; // harga sendiri dari varian (grup pertama yang punya)
+    let addPrice = 0;    // total tambahan harga
     const chosen = [];
     for (const g of groups) {
       if (!g || !Array.isArray(g.values) || !g.values.length) continue;
@@ -320,9 +321,11 @@ module.exports = withErrorHandling(async (req, res) => {
         res.status(400).json({ error: `${g.name} "${v.label}" sedang habis. Pilih yang lain.` });
         return;
       }
-      unitPrice += Number(v.price_add) || 0;
+      if (ownPrice === null && Number(v.price) > 0) ownPrice = Number(v.price);
+      addPrice += Number(v.price_add) || 0;
       chosen.push({ group: g.name, label: v.label });
     }
+    const unitPrice = (ownPrice === null ? Number(product.price) : ownPrice) + addPrice;
     const total = unitPrice * qty;
     const variantText = chosen.map((c) => c.label).join(', ');
     // Ringkasan varian & jumlah ikut ditaruh di nama pesanan supaya langsung

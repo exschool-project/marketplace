@@ -13,8 +13,11 @@ alter table public.orders
   add column if not exists selected_options jsonb not null default '[]'::jsonb;
   -- [{"group":"Kapasitas","label":"256GB"}]
 
--- Supaya kolom baru ikut tampil di view CS Panel, buat ulang view-nya:
-create or replace view public.orders_with_last_message as
+-- Supaya kolom baru ikut tampil di view CS Panel, view-nya dibuat ulang.
+-- Pakai DROP + CREATE (bukan CREATE OR REPLACE) karena urutan/nama kolom
+-- view berubah setelah orders mendapat kolom baru (error 42P16 kalau di-replace).
+drop view if exists public.orders_with_last_message;
+create view public.orders_with_last_message as
 select
   o.*,
   lm.message as last_message,

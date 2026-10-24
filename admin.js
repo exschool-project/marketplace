@@ -714,8 +714,16 @@ function parseOptionValues(text) {
   return String(text || '').split('\n').map((line) => {
     const parts = line.split('|').map((x) => x.trim());
     if (!parts[0]) return null;
-    const price = Number((parts[1] || '').replace(/[^\d]/g, '')) || 0;
-    return { label: parts[0], price_add: price, sold_out: parts.slice(1).some((x) => /^(habis|sold ?out)$/i.test(x)) };
+    // kolom 2: "27199000" = harga sendiri, "+2000000" = tambahan harga, kosong = harga produk
+    const raw = parts[1] || '';
+    const amount = Number(raw.replace(/[^\d]/g, '')) || 0;
+    const isAdd = raw.startsWith('+');
+    return {
+      label: parts[0],
+      price: !isAdd ? amount : 0,
+      price_add: isAdd ? amount : 0,
+      sold_out: parts.slice(1).some((x) => /^(habis|sold ?out)$/i.test(x)),
+    };
   }).filter(Boolean);
 }
 
@@ -752,7 +760,7 @@ function openDetailEditor(id) {
     gallery: Array.isArray(p.gallery) ? [...p.gallery] : [],
     options: (Array.isArray(p.options) ? p.options : []).map((g) => ({
       name: g.name || '',
-      text: (g.values || []).map((v) => [v.label, v.price_add ? v.price_add : '', v.sold_out ? 'habis' : ''].join(' | ').replace(/( \| )+$/, '')).join('\n'),
+      text: (g.values || []).map((v) => [v.label, v.price > 0 ? v.price : (v.price_add > 0 ? '+' + v.price_add : ''), v.sold_out ? 'habis' : ''].join(' | ').replace(/( \| )+$/, '')).join('\n'),
     })),
     showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '', category: s.category || '', source_url: s.source_url || '', source_label: s.source_label || '' })) : [],
   };
@@ -867,6 +875,12 @@ function initDetailEditor() {
       showcase: detailState.showcase.map((s) => ({ ...s, category: (s.category || '').trim(), source_url: (s.source_url || '').trim() })),
       faq,
     };
+
+    const pricedGroups = payload.options.filter((g) => g.values.some((v) => v.price > 0));
+    if (pricedGroups.length > 1) {
+      statusEl.textContent = `Harga sendiri hanya boleh diisi di SATU grup pilihan (sekarang: ${pricedGroups.map((g) => g.name).join(', ')}). Di grup lain pakai tambahan harga (+angka) atau kosongkan.`;
+      return;
+    }
 
     const badSrc = detailState.showcase.find((s) => s.source_url && !/^https?:\/\//i.test(s.source_url.trim()));
     if (badSrc) {

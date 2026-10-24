@@ -184,8 +184,60 @@ function initSearch() {
   }
 }
 
+// ---------- Harga varian (dipakai produk.js, beli.js, kartu produk) ----------
+// Tiap pilihan varian boleh punya:
+//   price      = HARGA SENDIRI (menggantikan harga produk), 0/kosong = pakai harga produk
+//   price_add  = TAMBAHAN harga di atas harga yang berlaku
+// Kalau beberapa grup punya harga sendiri, yang dipakai grup PERTAMA (admin
+// dianjurkan mengisi harga sendiri di satu grup saja). Server (api/orders.js)
+// memakai rumus yang sama dan menghitung ulang saat pesanan dibuat.
+function variantGroups(product) {
+  return (Array.isArray(product.options) ? product.options : []).filter((g) => g && Array.isArray(g.values) && g.values.length);
+}
+
+function variantUnitPrice(product, selection) {
+  let own = null;
+  let add = 0;
+  variantGroups(product).forEach((g) => {
+    const v = g.values.find((x) => x.label === (selection || {})[g.name]);
+    if (!v) return;
+    if (own === null && Number(v.price) > 0) own = Number(v.price);
+    add += Number(v.price_add) || 0;
+  });
+  return (own === null ? Number(product.price) : own) + add;
+}
+
+function variantOverridesPrice(product, selection) {
+  return variantGroups(product).some((g) => {
+    const v = g.values.find((x) => x.label === (selection || {})[g.name]);
+    return v && Number(v.price) > 0;
+  });
+}
+
+// { min, max } harga yang mungkin (hanya pilihan yang belum habis)
+function variantPriceRange(product) {
+  const groups = variantGroups(product);
+  const base = Number(product.price);
+  const usable = (g) => {
+    const ok = g.values.filter((v) => !v.sold_out);
+    return ok.length ? ok : g.values;
+  };
+  const ownGroup = groups.find((g) => g.values.some((v) => Number(v.price) > 0));
+  const baseCandidates = ownGroup ? usable(ownGroup).map((v) => (Number(v.price) > 0 ? Number(v.price) : base)) : [base];
+  let addMin = 0;
+  let addMax = 0;
+  groups.forEach((g) => {
+    const adds = usable(g).map((v) => Number(v.price_add) || 0);
+    addMin += Math.min(...adds);
+    addMax += Math.max(...adds);
+  });
+  return { min: Math.min(...baseCandidates) + addMin, max: Math.max(...baseCandidates) + addMax };
+}
+
 // ---------- Produk ----------
 function productCardHTML(p) {
+  const range = variantPriceRange(p);
+  const ranged = range.min !== range.max;
   return `
     <div class="pcard">
       <div class="hole"></div>
@@ -195,8 +247,8 @@ function productCardHTML(p) {
         <div class="shop">${escapeHtml(p.shop_name)}</div>
         <a class="name" href="produk.html?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a>
         <div class="price-row">
-          <span class="price">${rupiah(p.price)}</span>
-          ${p.old_price ? `<span class="old">${rupiah(p.old_price)}</span>` : ''}
+          ${ranged ? '<span class="from">dari</span>' : ''}<span class="price">${rupiah(range.min)}</span>
+          ${p.old_price && !ranged ? `<span class="old">${rupiah(p.old_price)}</span>` : ''}
         </div>
         <button class="addbtn" type="button" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price}">Beli Sekarang</button>
       </div>

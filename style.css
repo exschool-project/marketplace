@@ -1514,3 +1514,7 @@ footer{
   .buy-card{ padding:16px; }
   .buy-thumb{ flex-basis:84px; width:84px; }
 }
+
+.pcard .from{ font-size:.7rem; color:#3E6B85; margin-right:2px; }
+.pd-from{ font-size:.9rem; color:#3E6B85; margin-right:6px; font-weight:500; }
+.pd-range-sep{ margin:0 6px; color:#3E6B85; }

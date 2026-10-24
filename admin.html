@@ -261,7 +261,7 @@
 
           <div class="field">
             <span>Pilihan / varian untuk halaman beli (mis. Kapasitas, Warna, Paket)</span>
-            <small class="pde-hint">Pembeli wajib memilih satu dari tiap grup. Tulis satu pilihan per baris dengan format <code>Label | tambahan harga | habis</code> — tambahan harga dan "habis" boleh dikosongkan. Contoh: <code>512GB | 2000000</code>, <code>2TB | 0 | habis</code>.</small>
+            <small class="pde-hint">Pembeli wajib memilih satu dari tiap grup. Satu pilihan per baris: <code>Label | harga | habis</code>. Kolom <b>harga</b>: <code>27199000</code> = harga sendiri untuk pilihan itu (menggantikan harga produk), <code>+2000000</code> = tambahan di atas harga produk, kosong = harga produk (tidak naik). Kolom <b>habis</b> menutup pilihan. Contoh: <code>256GB</code> · <code>512GB | 27199000</code> · <code>1TB | +5000000</code> · <code>2TB | | habis</code>. Harga sendiri sebaiknya diisi di satu grup saja (mis. Kapasitas), grup lain (mis. Warna) kosong.</small>
             <div id="pde-options"></div>
             <button type="button" class="mini-btn" id="pde-add-option">+ Tambah grup pilihan</button>
           </div>
