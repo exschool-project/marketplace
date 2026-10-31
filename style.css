@@ -1518,3 +1518,208 @@ footer{
 .pcard .from{ font-size:.7rem; color:#3E6B85; margin-right:2px; }
 .pd-from{ font-size:.9rem; color:#3E6B85; margin-right:6px; font-weight:500; }
 .pd-range-sep{ margin:0 6px; color:#3E6B85; }
+
+/* =====================================================================
+   CLEAN v12 — tampilan bersih & profesional (storefront)
+   Ditaruh paling bawah supaya menimpa aturan lama. Satu keluarga font
+   (Inter), tanpa label huruf kapital/mono, permukaan putih + abu muda,
+   navy hanya untuk aksi utama, bayangan hampir tidak ada.
+   ===================================================================== */
+:root{
+  --ink:#0F1B2D;
+  --muted:#5B6878;
+  --line:#E5E9EE;
+  --surface:#F7F8FA;
+  --radius:12px;
+  --radius-sm:8px;
+}
+body{ font-family:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; color:var(--ink); }
+h1, h2, h3, h4, .display, .btn, .chip, .pcard .addbtn, .logo, .lang-switch button, .mini-btn{
+  font-family:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+h1, h2, h3{ line-height:1.25; letter-spacing:-0.015em; font-weight:650; }
+
+/* ---------- banner promo teks ---------- */
+.banner{ background:var(--green); padding:7px 0; border-bottom:0; }
+.banner-track span{
+  font-family:'Inter', system-ui, sans-serif; font-weight:500; font-size:.8rem;
+  letter-spacing:0; text-transform:none; opacity:.92;
+}
+.banner-track span::after{ content:"•"; color:var(--gold); }
+
+/* ---------- nav ---------- */
+header.site{ background:rgba(255,255,255,.94); backdrop-filter:saturate(1.4) blur(8px); border-bottom:1px solid var(--line); }
+header.site.is-scrolled{ box-shadow:none; }
+.nav-wrap{ padding:12px 24px; gap:20px; }
+header.site .logo, footer .logo{
+  background:none; padding:0; border-radius:0; color:var(--green);
+  font-size:1.2rem; font-weight:700; letter-spacing:.02em; text-decoration:none;
+}
+.search input{ border-radius:8px 0 0 8px; border-color:var(--line); background:var(--surface); font-size:.92rem; }
+.search input:focus{ background:#fff; border-color:var(--border-strong); outline:none; }
+.search button{ border-radius:0 8px 8px 0; font-family:'Inter', sans-serif; font-weight:600; font-size:.85rem; }
+.lang-switch{ border-color:var(--line); border-radius:8px; }
+.lang-switch button{ font-weight:600; font-size:.74rem; letter-spacing:.02em; padding:7px 10px; }
+.lang-switch button.active{ background:var(--green); }
+.lang-switch button:hover:not(.active){ background:var(--surface); }
+
+/* ---------- tombol ---------- */
+.btn{ font-weight:600; font-size:.88rem; letter-spacing:0; padding:9px 18px; border-color:var(--line); border-radius:8px; box-shadow:none; }
+.btn.brutal, .btn.brutal-sm{ box-shadow:none; }
+.btn:not(.btn-green):not(.btn-blue):not(.btn-ink){ background:#fff; }
+.btn-green, .btn-blue, .btn-ink{ border-color:transparent; }
+.btn-blue{ background:var(--green); }
+.btn-ink{ background:#fff; color:var(--ink); border-color:var(--line); }
+.btn-ink:hover{ background:var(--surface); }
+.btn-green:hover, .btn-blue:hover{ background:var(--green-deep); }
+.btn-lg{ padding:13px 32px; font-size:.95rem; min-width:190px; }
+.hover-lift:hover, .hover-lift-sm:hover{ transform:none; box-shadow:none; }
+
+/* ---------- hero: banner di dalam wadah, sudut membulat ---------- */
+.hero{ margin:20px 0 0; }
+.hero-visual{ max-width:1180px; margin:0 auto; padding:0 24px; }
+.hero-banner-wrap, .hero-skeleton{ border:0; border-radius:16px; }
+.hero-skeleton{ background:linear-gradient(100deg, #EEF1F4 30%, #F7F8FA 50%, #EEF1F4 70%); background-size:200% 100%; max-height:none; }
+.hero-cta-bar{ padding:24px 24px 0; }
+
+/* ---------- keunggulan (3 poin singkat) ---------- */
+.trust{ margin-top:40px; }
+.trust-inner{
+  max-width:1180px; margin:0 auto; padding:0 24px;
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;
+}
+.trust-item{
+  display:flex; align-items:center; gap:14px;
+  padding:18px 20px; border:1px solid var(--line); border-radius:var(--radius); background:#fff;
+}
+.trust-icon{
+  flex-shrink:0; width:42px; height:42px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  background:#EEF3F9; color:var(--green);
+}
+.trust-icon svg{ width:22px; height:22px; }
+.trust-item h3{ font-size:.95rem; margin:0 0 2px; font-weight:600; letter-spacing:0; }
+.trust-item p{ margin:0; font-size:.83rem; color:var(--muted); }
+
+/* ---------- section ---------- */
+.section{ padding:48px 24px; }
+.section-head{ align-items:center; margin-bottom:22px; }
+.section-head h2{ font-size:1.4rem; }
+.link-more{ font-size:.88rem; font-weight:600; color:var(--green); }
+.link-more:hover{ text-decoration:underline; text-underline-offset:3px; }
+
+/* ---------- kartu produk ---------- */
+.grid{ gap:20px; }
+.pcard{ border-color:var(--line); border-radius:var(--radius); box-shadow:none; display:flex; flex-direction:column; }
+.pcard:hover{ transform:none; box-shadow:0 8px 24px rgba(15,27,45,.07); border-color:var(--border-strong); }
+.pcard .thumb{ height:auto; aspect-ratio:4 / 3; border-bottom:0; background:var(--surface); }
+.pcard .badge{
+  top:10px; left:10px; right:auto; background:#fff; color:var(--ink);
+  font-family:'Inter', sans-serif; font-size:.7rem; font-weight:600;
+  letter-spacing:0; text-transform:none; border:1px solid var(--line);
+}
+.pcard .body{ padding:14px 16px 16px; display:flex; flex-direction:column; flex:1; }
+.pcard .shop{
+  font-family:'Inter', sans-serif; font-size:.76rem; color:var(--muted);
+  text-transform:none; letter-spacing:0; margin-bottom:4px;
+}
+.pcard .name{
+  font-weight:600; font-size:.95rem; line-height:1.35; margin-bottom:10px;
+  display:-webkit-box !important; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.pcard a.name:hover{ text-decoration:none; color:var(--green); }
+.pcard .price-row{ margin-top:auto; }
+.pcard .price{ font-family:'Inter', sans-serif; font-weight:700; font-size:1.05rem; }
+.pcard .old{ font-family:'Inter', sans-serif; font-size:.8rem; color:#97A2B0; }
+.pcard .from{ font-size:.76rem; color:var(--muted); }
+.pcard .addbtn{
+  font-family:'Inter', sans-serif; font-weight:600; font-size:.84rem;
+  border-color:var(--green); color:var(--green); background:#fff; padding:9px;
+}
+.pcard .addbtn:hover{ background:var(--green); color:#fff; }
+.pcard-skeleton{ border-color:var(--line); box-shadow:none; border-radius:var(--radius); }
+.pcard-skeleton .thumb{ height:auto; aspect-ratio:4 / 3; border-bottom:0; background:#EEF1F4; }
+.pcard-skeleton .sk-line{ background:#EEF1F4; }
+.pcard-skeleton .sk-btn{ background:#F3F5F7; }
+
+/* ---------- testimoni ---------- */
+.testimonials{ background:var(--surface); }
+.testi-card{ border-color:var(--line); box-shadow:none; border-radius:var(--radius); }
+.testi-quote{ color:var(--ink); }
+.testi-avatar{ background:var(--green); }
+.testi-author span{ color:var(--muted); }
+
+/* ---------- halaman belanja ---------- */
+.shop-head{ background:#fff; border-bottom:0; }
+.shop-head-inner{ padding:32px 24px 8px; }
+.shop-head h1{ color:var(--ink); font-size:1.6rem; margin:0; }
+.shop-section{ padding-top:20px; }
+.shop-result-count{ font-family:'Inter', sans-serif; font-size:.85rem; text-transform:none; letter-spacing:0; color:var(--muted); margin-bottom:16px; }
+.cats{ margin-top:12px; gap:8px; padding-bottom:4px; scrollbar-width:none; }
+.cats::-webkit-scrollbar{ display:none; }
+.chip{ font-weight:500; font-size:.85rem; padding:8px 16px; border-radius:999px; border-color:var(--line); }
+.chip:hover{ background:var(--surface); color:var(--ink); transform:none; }
+.chip.active{ background:var(--green); color:#fff; border-color:var(--green); }
+.grid-msg{ font-family:'Inter', sans-serif; font-size:.9rem; color:var(--muted); }
+
+/* ---------- footer ---------- */
+footer{ background:#fff; border-top:1px solid var(--line); padding:28px 24px 24px; margin-top:24px; }
+.foot-wrap{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  gap:16px 32px; padding-bottom:20px; grid-template-columns:none;
+}
+.foot-links{ display:flex; gap:24px; flex-wrap:wrap; }
+.foot-links a{ font-size:.88rem; color:var(--muted); }
+.foot-links a:hover{ color:var(--ink); }
+.social-links{ margin-top:0; gap:8px; }
+.social-links a{
+  font-family:'Inter', sans-serif; font-size:.8rem; font-weight:500; text-transform:none;
+  background:#fff; color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:6px 12px;
+}
+.social-links a:hover{ background:var(--surface); color:var(--ink); }
+.foot-bottom{
+  border-top:1px solid var(--line); padding-top:16px;
+  font-family:'Inter', sans-serif; font-size:.8rem; text-transform:none; letter-spacing:0; color:var(--muted);
+}
+
+/* ---------- responsif ---------- */
+@media (max-width:1100px){
+  .grid{ grid-template-columns:repeat(3, 1fr); }
+}
+@media (max-width:900px){
+  .grid{ grid-template-columns:repeat(2, 1fr); }
+  .foot-wrap{ grid-template-columns:none; }
+}
+@media (max-width:720px){
+  .trust-inner{ grid-template-columns:1fr; gap:10px; }
+  .trust-item{ padding:14px 16px; }
+  .hero-visual{ padding:0 16px; }
+  .hero-banner-wrap, .hero-skeleton{ border-radius:12px; }
+  .section{ padding:36px 16px; }
+}
+@media (max-width:560px){
+  .grid{ grid-template-columns:1fr 1fr; gap:12px; }
+  .pcard .body{ padding:12px; }
+  .pcard .name{ font-size:.88rem; }
+  .pcard .addbtn{ font-size:.8rem; padding:8px; }
+  .foot-wrap{ flex-direction:column; align-items:flex-start; }
+}
+/* nav beranda (logo + bahasa + Belanja) tetap satu baris di HP */
+.nav-wrap.simple{ flex-wrap:nowrap; }
+@media (max-width:480px){
+  .nav-wrap.simple{ padding:10px 16px; }
+  .nav-wrap.simple .nav-actions{ width:auto; margin-left:auto; flex-wrap:nowrap; }
+  .nav-wrap.simple .nav-actions .btn{ flex:0 0 auto; }
+}
+
+/* penyelarasan tepi kiri-kanan antar blok */
+.foot-wrap, .foot-bottom{ max-width:1132px; }
+@media (max-width:720px){
+  .trust-inner{ padding:0 16px; }
+  footer{ padding-left:16px; padding-right:16px; }
+  .foot-wrap, .foot-bottom{ max-width:none; }
+}
+@media (max-width:720px){
+  .cats{ padding-left:16px; padding-right:16px; }
+  .shop-head-inner{ padding-left:16px; padding-right:16px; }
+}
