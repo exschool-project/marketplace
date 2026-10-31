@@ -111,10 +111,12 @@ function initNotifyButton() {
   }
   const sync = () => {
     if (Notification.permission === 'granted') {
-      btn.innerHTML = `${ICONS.bell} Notifikasi Aktif`;
+      btn.innerHTML = ICONS.bell;
+      btn.title = 'Notifikasi aktif';
       btn.disabled = true;
     } else {
-      btn.innerHTML = `${ICONS.bell} Aktifkan Notifikasi`;
+      btn.innerHTML = ICONS.bell;
+      btn.title = 'Aktifkan notifikasi';
       btn.disabled = false;
     }
   };
@@ -192,6 +194,7 @@ function showDashboard(profile) {
   const badge = document.getElementById('role-badge');
   badge.textContent = normalizedRole.toUpperCase();
   badge.className = `role-badge role-${normalizedRole}`;
+  document.body.dataset.role = normalizedRole;
 
   // Role "cs" murni gak punya akses ke admin.html — sembunyikan link-nya
   // biar gak nyasar ke halaman yang bakal nolak dia masuk.
@@ -442,7 +445,7 @@ document.getElementById('cs-h-status').addEventListener('change', async (e) => {
     renderActiveOrderHeader();
     await loadActiveMessages();
   } catch (err) {
-    alert(err.message);
+    notify(err.message);
   }
 });
 
@@ -502,7 +505,7 @@ document.getElementById('cs-chat-form').addEventListener('submit', async (e) => 
     await loadActiveMessages();
     await loadOrderList({ silent: true });
   } catch (err) {
-    alert(err.message);
+    notify(err.message);
     input.value = message;
   } finally {
     submitBtn.disabled = false;

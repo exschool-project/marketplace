@@ -6,9 +6,9 @@
 <meta name="robots" content="noindex, nofollow, noarchive">
 <title>CS — EX-SCHOOL</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2">
-<link rel="stylesheet" href="admin.css?v=2">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="admin.css?v=12">
 <style>
   /* Anti-kedip: kalau ada profil ke-cache dari halaman panel lain (dalam
      tab yang sama) dan rolenya cukup buat CS Panel, langsung tampilkan
@@ -38,10 +38,10 @@
 
   <!-- LOGIN -->
   <section id="login-view" class="login-view">
-    <form id="login-form" class="login-card brutal">
-      <div class="logo" style="margin-bottom:20px;">EX-SCHOOL CS</div>
-      <h1>Masuk ke CS Panel</h1>
-      <p class="login-sub">Khusus akun dengan role admin atau owner.</p>
+    <form id="login-form" class="login-card">
+      <div class="logo">EX-SCHOOL</div>
+      <h1>Masuk</h1>
+      <p class="login-sub">Panel untuk CS, admin, dan owner.</p>
 
       <label class="field">
         <span>Email</span>
@@ -54,21 +54,21 @@
 
       <p id="login-error" class="login-error" style="display:none;"></p>
 
-      <button type="submit" class="btn btn-green brutal hover-lift" style="width:100%;">Masuk</button>
-      <a href="index.html" class="back-link">← Kembali ke beranda</a>
+      <button type="submit" class="btn btn-green btn-block">Masuk</button>
+      <a href="index.html" class="back-link">Kembali ke beranda</a>
     </form>
   </section>
 
   <!-- CS DASHBOARD -->
   <section id="dashboard-view" class="dashboard-view cs-dashboard-view hidden">
     <header class="admin-header">
-      <div class="logo">EX-SCHOOL CS</div>
+      <div class="admin-brand"><span class="logo">EX-SCHOOL</span><span class="admin-brand-tag">CS</span></div>
       <div class="admin-header-right">
         <span id="role-badge" class="role-badge"></span>
-        <span id="admin-name" class="admin-name mono"></span>
-        <a href="admin.html" id="admin-panel-link" class="btn btn-blue brutal-sm hover-lift-sm">Admin Panel</a>
-        <button id="notif-btn" type="button" class="btn btn-ink brutal-sm hover-lift-sm"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg> Aktifkan Notifikasi</button>
-        <button id="logout-btn" class="btn btn-ink brutal-sm hover-lift-sm" type="button">Keluar</button>
+        <span id="admin-name" class="admin-name"></span>
+        <a href="admin.html" id="admin-panel-link" class="btn">Admin Panel</a>
+        <button id="notif-btn" type="button" class="btn" aria-label="Notifikasi"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg></button>
+        <button id="logout-btn" class="btn" type="button">Keluar</button>
       </div>
     </header>
 
@@ -115,7 +115,7 @@
           <p id="cs-closed-banner" class="chat-closed-banner hidden"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Pesanan ini sudah selesai/dibatalkan — chat ditutup. Ubah status di atas buat buka lagi.</p>
           <form id="cs-chat-form" class="chat-form">
             <input type="text" id="cs-chat-input" placeholder="Balas pesan ke pembeli..." maxlength="2000" required autocomplete="off">
-            <button type="submit" class="btn btn-green brutal-sm">Kirim</button>
+            <button type="submit" class="btn btn-green">Kirim</button>
           </form>
         </div>
       </section>
@@ -124,6 +124,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="icons.js"></script>
+  <script src="admin-ui.js"></script>
   <script src="cs.js"></script>
 </body>
 </html>

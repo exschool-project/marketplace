@@ -37,7 +37,16 @@ function clientRoleLevel(role) {
 // endpoint yang mengubah data (requireAdmin/requireOwner).
 async function fetchProfileAndEnforceRole() {
   const profile = await authedFetch(`${API_BASE}/auth/profile`);
-  if (clientRoleLevel(profile.role) < ROLE_LEVEL.admin) {
+  const lvl = clientRoleLevel(profile.role);
+  if (lvl === ROLE_LEVEL.cs) {
+    // CS punya panel sendiri — arahkan ke sana, bukan ditolak.
+    cacheProfile(profile);
+    const redir = new Error('Mengalihkan ke CS Panel');
+    redir.redirecting = true;
+    location.replace('cs.html');
+    throw redir;
+  }
+  if (lvl < ROLE_LEVEL.admin) {
     const err = new Error('Akun ini tidak memiliki akses yang cukup.');
     err.status = 403;
     throw err;
@@ -98,16 +107,17 @@ function showDashboard(profile) {
   badge.textContent = normalizedRole.toUpperCase();
   badge.className = `role-badge role-${normalizedRole}`;
 
-  // Semua elemen "khusus owner" — baik panelnya sendiri MAUPUN link-nya
-  // di sidebar (.admin-nav-link + grup labelnya) — ditandain class
-  // "owner-only" yang sama, jadi cukup satu toggle buat keduanya
-  // sekaligus. Ini yang bikin tampilan "wajib sesuai role": role selain
-  // owner nggak akan pernah lihat menu ATAU link menuju ke situ sama
-  // sekali, bukan cuma kontennya aja yang disembunyikan.
-  const isOwner = normalizedRole === 'owner';
-  document.querySelectorAll('.owner-only').forEach((el) => {
-    el.classList.toggle('hidden', !isOwner);
+  // Tampilan menyesuaikan role: setiap elemen bertanda data-min-role
+  // hanya muncul kalau level role-nya cukup (menu, panel, kartu ringkasan,
+  // pintasan). Penegakan sebenarnya tetap di server.
+  const level = ROLE_LEVEL[normalizedRole] || 0;
+  document.body.dataset.role = normalizedRole;
+  document.querySelectorAll('[data-min-role]').forEach((el) => {
+    el.classList.toggle('hidden', level < (ROLE_LEVEL[el.dataset.minRole] || 99));
   });
+  const first = String(profile.full_name || profile.email || '').trim().split(/\s+/)[0];
+  const title = document.getElementById('overview-title');
+  if (title) title.textContent = first ? `Halo, ${first}` : 'Ringkasan';
 
   seedListSkeletons();
   initSidebarScrollSpy();
@@ -119,21 +129,9 @@ function showDashboard(profile) {
 // back/refresh browser tetap kembali ke halaman yang sama. Halaman khusus
 // owner otomatis ditolak untuk role lain dan dialihkan ke Ringkasan —
 // ini cuma urusan tampilan; penegakan sebenarnya tetap di server.
-const PAGE_TITLES = {
-  'overview': 'Ringkasan',
-  'orders-panel': 'Pesanan & Chat',
-  'banner-panel': 'Banner Berjalan',
-  'categories-panel': 'Kategori',
-  'products-panel': 'Produk',
-  'options-panel': 'Pilihan & Harga',
-  'testimonials-panel': 'Testimoni',
-  'hero-banner-panel': 'Banner Gambar / Video',
-  'social-panel': 'Media Sosial',
-  'team-panel': 'Manajemen Tim',
-};
 const ROLE_DESC = {
-  owner: 'Owner — akses penuh: konten toko, pesanan, banner utama, media sosial, dan manajemen tim.',
-  admin: 'Admin — kelola pesanan, produk, kategori, testimoni, dan banner berjalan. Pengaturan banner utama, media sosial, dan tim khusus Owner.',
+  owner: 'Akses penuh: toko, pesanan, banner utama, media sosial, dan tim.',
+  admin: 'Kelola produk, pesanan, dan konten toko.',
 };
 
 function currentPageId() {
@@ -207,6 +205,7 @@ async function handleLogin(e) {
     const me = await fetchProfileAndEnforceRole();
     showDashboard(me);
   } catch (err) {
+    if (err.redirecting) return;
     let msg = err.message;
 
     if (err.status === 403) {
@@ -267,6 +266,7 @@ async function checkExistingSession() {
     const me = await fetchProfileAndEnforceRole();
     showDashboard(me);
   } catch (err) {
+    if (err.redirecting) return;
     if (err.status === 401 || err.status === 403) {
       // Sesi memang tidak valid / role tidak cukup — logout beneran.
       await supabaseClient.auth.signOut();
@@ -288,21 +288,32 @@ async function checkExistingSession() {
   await safeLoadAllData();
 }
 
-// ---------- Banner ----------
+// ---------- Util baris daftar ----------
+const STAR_SVG = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8L12 3.5z"/></svg>';
+const switchHTML = (on, cls) => `<button type="button" class="switch ${on ? 'on' : ''} ${cls}" role="switch" aria-checked="${on ? 'true' : 'false'}" aria-label="${on ? 'Nonaktifkan' : 'Aktifkan'}"><span></span></button>`;
+const iconBtn = (icon, label, cls) => `<button type="button" class="icon-btn ${cls}" title="${label}" aria-label="${label}">${icon}</button>`;
+const rupiahShort = (n) => 'Rp' + Math.round(Number(n) || 0).toLocaleString('id-ID');
+const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+// Ubah satu field lewat PUT, lalu muat ulang daftar.
+async function putJSON(path, id, body, reload) {
+  await authedFetch(`${API_BASE}/${path}?id=${id}`, { method: 'PUT', body: JSON.stringify(body) });
+  await reload();
+}
+
+// ---------- Teks banner ----------
+let bannersCache = [];
 async function loadBannerAdmin() {
   const { data } = await authedFetch(`${API_BASE}/banner`);
-  const list = document.getElementById('banner-list');
-  list.innerHTML = data.map((b) => `
-    <div class="admin-row" data-id="${b.id}">
-      <span class="admin-row-text">${escapeHtml(b.message)}</span>
-      <span class="admin-row-tag">${b.is_active ? 'Aktif' : 'Nonaktif'}</span>
-      <button class="mini-btn toggle-banner" type="button">${b.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
-      <button class="mini-btn danger delete-banner" type="button">Hapus</button>
+  bannersCache = data;
+  document.getElementById('banner-list').innerHTML = data.map((b) => `
+    <div class="admin-row" data-id="${b.id}" data-active="${b.is_active ? 1 : 0}">
+      <span class="admin-row-text ${b.is_active ? '' : 'is-off'}">${escapeHtml(b.message)}</span>
+      ${switchHTML(b.is_active, 'toggle-banner')}
+      ${iconBtn(ICONS.edit, 'Edit', 'edit-banner')}
+      ${iconBtn(ICONS.trash, 'Hapus', 'delete-banner danger')}
     </div>
-  `).join('') || '<p class="empty-msg">Belum ada pesan banner.</p>';
-
-  const statEl = document.getElementById('stat-banners');
-  if (statEl) statEl.textContent = data.filter((b) => b.is_active).length;
+  `).join('') || '<p class="empty-msg">Belum ada teks banner.</p>';
 }
 
 async function handleBannerSubmit(e) {
@@ -315,7 +326,7 @@ async function handleBannerSubmit(e) {
     input.value = '';
     await loadBannerAdmin();
   } catch (err) {
-    alert(`Gagal menambah pesan banner: ${err.message}`);
+    notify(`Gagal menambah: ${err.message}`);
   }
 }
 
@@ -323,47 +334,48 @@ document.getElementById('banner-list')?.addEventListener('click', async (e) => {
   const row = e.target.closest('.admin-row');
   if (!row) return;
   const id = row.dataset.id;
-
   try {
-    if (e.target.classList.contains('delete-banner')) {
-      if (!confirm('Hapus pesan banner ini?')) return;
+    if (e.target.closest('.delete-banner')) {
+      if (!await askConfirm('Hapus teks banner ini?')) return;
       await authedFetch(`${API_BASE}/banner?id=${id}`, { method: 'DELETE' });
       await loadBannerAdmin();
-    }
-
-    if (e.target.classList.contains('toggle-banner')) {
-      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-      await authedFetch(`${API_BASE}/banner?id=${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ is_active: !isActive }),
+    } else if (e.target.closest('.toggle-banner')) {
+      await putJSON('banner', id, { is_active: row.dataset.active !== '1' }, loadBannerAdmin);
+    } else if (e.target.closest('.edit-banner')) {
+      const b = bannersCache.find((x) => String(x.id) === String(id));
+      openFormModal({
+        title: 'Edit teks banner',
+        fields: [{ name: 'message', label: 'Pesan', value: b?.message || '', required: true, full: true }],
+        onSubmit: (v) => putJSON('banner', id, { message: v.message.trim() }, loadBannerAdmin),
       });
-      await loadBannerAdmin();
     }
   } catch (err) {
-    alert(`Gagal memperbarui banner: ${err.message}`);
+    notify(`Gagal memperbarui: ${err.message}`);
   }
 });
 
 // ---------- Kategori ----------
+let categoriesCache = [];
 async function loadCategoriesAdmin() {
   const { data } = await authedFetch(`${API_BASE}/categories`);
+  categoriesCache = data;
 
-  const list = document.getElementById('category-list');
-  list.innerHTML = data.map((c) => `
+  document.getElementById('category-list').innerHTML = data.map((c) => `
     <div class="admin-row" data-id="${c.id}">
-      <span class="admin-row-text">${escapeHtml(c.name)} <span class="admin-row-sub">/${escapeHtml(c.slug)}</span></span>
-      <button class="mini-btn danger delete-category" type="button">Hapus</button>
+      <span class="admin-row-text">${escapeHtml(c.name)}</span>
+      ${iconBtn(ICONS.edit, 'Edit', 'edit-category')}
+      ${iconBtn(ICONS.trash, 'Hapus', 'delete-category danger')}
     </div>
   `).join('') || '<p class="empty-msg">Belum ada kategori.</p>';
 
   const select = document.getElementById('product-category');
   if (select) {
+    const keep = select.value;
     select.innerHTML = '<option value="">Tanpa kategori</option>' +
       data.map((c) => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+    select.value = keep;
   }
-
-  const statEl = document.getElementById('stat-categories');
-  if (statEl) statEl.textContent = data.length;
+  setText('stat-categories', data.length);
 }
 
 async function handleCategorySubmit(e) {
@@ -372,28 +384,33 @@ async function handleCategorySubmit(e) {
   const name = input.value.trim();
   if (!name) return;
   try {
-    await authedFetch(`${API_BASE}/categories`, {
-      method: 'POST',
-      body: JSON.stringify({ name, slug: slugify(name) }),
-    });
+    await authedFetch(`${API_BASE}/categories`, { method: 'POST', body: JSON.stringify({ name, slug: slugify(name) }) });
     input.value = '';
     await loadCategoriesAdmin();
   } catch (err) {
-    alert(`Gagal menambah kategori: ${err.message}`);
+    notify(`Gagal menambah: ${err.message}`);
   }
 }
 
 document.getElementById('category-list')?.addEventListener('click', async (e) => {
   const row = e.target.closest('.admin-row');
   if (!row) return;
-  if (e.target.classList.contains('delete-category')) {
-    if (!confirm('Hapus kategori ini? Produk terkait tidak ikut terhapus.')) return;
-    try {
-      await authedFetch(`${API_BASE}/categories?id=${row.dataset.id}`, { method: 'DELETE' });
+  const id = row.dataset.id;
+  try {
+    if (e.target.closest('.delete-category')) {
+      if (!await askConfirm('Hapus kategori ini? Produknya tidak ikut terhapus.')) return;
+      await authedFetch(`${API_BASE}/categories?id=${id}`, { method: 'DELETE' });
       await loadCategoriesAdmin();
-    } catch (err) {
-      alert(`Gagal menghapus kategori: ${err.message}`);
+    } else if (e.target.closest('.edit-category')) {
+      const c = categoriesCache.find((x) => String(x.id) === String(id));
+      openFormModal({
+        title: 'Edit kategori',
+        fields: [{ name: 'name', label: 'Nama kategori', value: c?.name || '', required: true, full: true }],
+        onSubmit: (v) => putJSON('categories', id, { name: v.name.trim(), slug: slugify(v.name) }, loadCategoriesAdmin),
+      });
     }
+  } catch (err) {
+    notify(`Gagal memperbarui: ${err.message}`);
   }
 });
 
@@ -446,6 +463,7 @@ async function uploadImageToCloudinary(file, folder, statusEl) {
 
 const isVideoUrl = (u) => /\/video\/upload\//.test(String(u || '')) || /\.(mp4|webm|mov)(\?|$)/i.test(String(u || ''));
 
+let productImageBusy = false;
 function initProductImageInput() {
   const input = document.getElementById('product-image');
   const previewWrap = document.getElementById('product-image-preview');
@@ -454,50 +472,104 @@ function initProductImageInput() {
 
   input?.addEventListener('change', async () => {
     const file = input.files?.[0];
-    pendingImageUrl = null;
-    if (!file) {
-      previewWrap.classList.add('hidden');
-      return;
-    }
+    if (!file) return;
 
     previewWrap.classList.remove('hidden');
     previewImg.src = URL.createObjectURL(file);
+    productImageBusy = true;
 
     try {
       pendingImageUrl = await uploadImageToCloudinary(file, 'ex-school/products', statusEl);
-      statusEl.innerHTML = `Berhasil diunggah ${ICONS.check}`;
+      statusEl.innerHTML = `Foto terunggah ${ICONS.check}`;
     } catch (err) {
       statusEl.textContent = `Gagal: ${err.message}`;
-      pendingImageUrl = null;
+    } finally {
+      productImageBusy = false;
     }
   });
 }
 
 // ---------- Produk ----------
 let productsCache = [];
+let editingProductId = null;
 
 async function loadProductsAdmin() {
   const { data } = await authedFetch(`${API_BASE}/products`);
   productsCache = data;
   fillTestimonialProductSelect();
   fillOptionsProductSelect();
-  const list = document.getElementById('product-list');
-  list.innerHTML = data.map((p) => `
-    <div class="admin-row" data-id="${p.id}">
-      ${p.image_url ? `<img class="admin-row-thumb" src="${escapeHtml(p.image_url)}" alt="">` : ''}
-      <span class="admin-row-text">${p.image_url ? '' : (p.icon ? escapeHtml(p.icon) + ' ' : ICONS.box + ' ')}${escapeHtml(p.name)} — Rp${Number(p.price).toLocaleString('id-ID')}</span>
-      <span class="admin-row-tag">${p.is_active ? 'Aktif' : 'Nonaktif'}</span>
-      ${p.is_featured ? '<span class="role-badge role-owner">POPULER</span>' : ''}
-      <button class="mini-btn edit-detail" type="button">Edit Detail</button>
-      <button class="mini-btn edit-options" type="button">Pilihan &amp; Harga</button>
-      <button class="mini-btn toggle-featured">${p.is_featured ? 'Batal Populer' : 'Jadikan Populer'}</button>
-      <button class="mini-btn toggle-product" type="button">${p.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
-      <button class="mini-btn danger delete-product" type="button">Hapus</button>
+  document.getElementById('product-list').innerHTML = data.map((p) => `
+    <div class="admin-row prow" data-id="${p.id}" data-active="${p.is_active ? 1 : 0}" data-featured="${p.is_featured ? 1 : 0}">
+      <span class="prow-thumb">${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="" loading="lazy">` : `<span class="prow-ph">${p.icon ? escapeHtml(p.icon) : ICONS.box}</span>`}</span>
+      <span class="admin-row-text ${p.is_active ? '' : 'is-off'}">
+        <strong>${escapeHtml(p.name)}</strong>
+        <span class="admin-row-sub">${escapeHtml(p.shop_name)} · ${rupiahShort(p.price)}${p.category?.name ? ` · ${escapeHtml(p.category.name)}` : ''}</span>
+      </span>
+      ${p.is_featured ? '<span class="pill pill-gold">Unggulan</span>' : ''}
+      <div class="row-actions">
+        <button type="button" class="btn btn-sm edit-product">Edit</button>
+        <button type="button" class="btn btn-sm edit-detail">Detail</button>
+        <button type="button" class="btn btn-sm edit-options">Harga</button>
+        ${iconBtn(STAR_SVG, p.is_featured ? 'Lepas dari unggulan' : 'Jadikan unggulan', `toggle-featured ${p.is_featured ? 'is-on' : ''}`)}
+        ${switchHTML(p.is_active, 'toggle-product')}
+        ${iconBtn(ICONS.trash, 'Hapus', 'delete-product danger')}
+      </div>
     </div>
   `).join('') || '<p class="empty-msg">Belum ada produk.</p>';
 
-  const statEl = document.getElementById('stat-products');
-  if (statEl) statEl.textContent = data.length;
+  setText('stat-products', data.length);
+}
+
+// ----- modal tambah / edit produk -----
+function openProductModal(product) {
+  editingProductId = product?.id || null;
+  const form = document.getElementById('product-form');
+  form.reset();
+  document.getElementById('product-image').dispatchEvent(new Event('tile-reset'));
+  document.getElementById('product-modal-title').textContent = product ? 'Edit produk' : 'Tambah produk';
+
+  const previewWrap = document.getElementById('product-image-preview');
+  const previewImg = document.getElementById('product-image-preview-img');
+  const statusEl = document.getElementById('product-image-status');
+  statusEl.textContent = '';
+  pendingImageUrl = null;
+
+  if (product) {
+    document.getElementById('product-name').value = product.name || '';
+    document.getElementById('product-shop').value = product.shop_name || '';
+    document.getElementById('product-price').value = product.price ?? '';
+    document.getElementById('product-old-price').value = product.old_price ?? '';
+    document.getElementById('product-icon').value = product.icon || '';
+    document.getElementById('product-category').value = product.category_id || '';
+    document.getElementById('product-badge').value = product.badge || '';
+    document.getElementById('product-featured').checked = !!product.is_featured;
+    document.getElementById('product-active').checked = product.is_active !== false;
+    if (product.image_url) {
+      pendingImageUrl = product.image_url;
+      previewImg.src = product.image_url;
+      statusEl.textContent = 'Foto saat ini';
+      previewWrap.classList.remove('hidden');
+    } else {
+      previewWrap.classList.add('hidden');
+    }
+  } else {
+    document.getElementById('product-active').checked = true;
+    previewWrap.classList.add('hidden');
+  }
+
+  const overlay = document.getElementById('product-modal');
+  overlay.classList.remove('hidden');
+  document.body.classList.add('am-lock');
+  requestAnimationFrame(() => overlay.classList.add('in'));
+  setTimeout(() => document.getElementById('product-name').focus(), 60);
+}
+
+function closeProductModal() {
+  const overlay = document.getElementById('product-modal');
+  overlay.classList.remove('in');
+  document.body.classList.remove('am-lock');
+  setTimeout(() => overlay.classList.add('hidden'), 160);
+  editingProductId = null;
 }
 
 async function handleProductSubmit(e) {
@@ -508,8 +580,12 @@ async function handleProductSubmit(e) {
   const shopName = form.querySelector('#product-shop').value.trim();
   const price = form.querySelector('#product-price').value;
 
-  if (!name || !shopName || !price) {
-    alert('Nama produk, toko, dan harga wajib diisi.');
+  if (!name || !shopName || price === '') {
+    notify('Nama produk, toko, dan harga wajib diisi.');
+    return;
+  }
+  if (productImageBusy) {
+    notify('Tunggu foto selesai diunggah.', 'info');
     return;
   }
 
@@ -517,24 +593,32 @@ async function handleProductSubmit(e) {
     name,
     shop_name: shopName,
     price: Number(price),
-    old_price: form.querySelector('#product-old-price').value
-      ? Number(form.querySelector('#product-old-price').value)
-      : null,
+    old_price: form.querySelector('#product-old-price').value ? Number(form.querySelector('#product-old-price').value) : null,
     icon: form.querySelector('#product-icon').value.trim() || '',
     image_url: pendingImageUrl || null,
     category_id: form.querySelector('#product-category').value || null,
     badge: form.querySelector('#product-badge').value.trim() || null,
     is_featured: form.querySelector('#product-featured').checked,
+    is_active: form.querySelector('#product-active').checked,
   };
 
+  const saveBtn = document.getElementById('product-modal-save');
+  const wasEdit = !!editingProductId;
+  saveBtn.disabled = true;
   try {
-    await authedFetch(`${API_BASE}/products`, { method: 'POST', body: JSON.stringify(payload) });
-    form.reset();
+    if (editingProductId) {
+      await authedFetch(`${API_BASE}/products?id=${editingProductId}`, { method: 'PUT', body: JSON.stringify(payload) });
+    } else {
+      await authedFetch(`${API_BASE}/products`, { method: 'POST', body: JSON.stringify(payload) });
+    }
     pendingImageUrl = null;
-    document.getElementById('product-image-preview').classList.add('hidden');
+    closeProductModal();
+    notify(wasEdit ? 'Produk diperbarui.' : 'Produk ditambahkan.', 'success');
     await loadProductsAdmin();
   } catch (err) {
-    alert(`Gagal menambah produk: ${err.message}`);
+    notify(`Gagal menyimpan: ${err.message}`);
+  } finally {
+    saveBtn.disabled = false;
   }
 }
 
@@ -542,8 +626,11 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
   const row = e.target.closest('.admin-row');
   if (!row) return;
   const id = row.dataset.id;
+  const product = productsCache.find((x) => String(x.id) === String(id));
 
-  if (e.target.classList.contains('edit-options')) {
+  if (e.target.closest('.edit-product')) { openProductModal(product); return; }
+  if (e.target.closest('.edit-detail')) { openDetailEditor(id); return; }
+  if (e.target.closest('.edit-options')) {
     location.hash = '#options-panel';
     const sel = document.getElementById('opt-product');
     sel.value = id;
@@ -551,37 +638,18 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
     return;
   }
 
-  if (e.target.classList.contains('edit-detail')) {
-    openDetailEditor(id);
-    return;
-  }
-
   try {
-    if (e.target.classList.contains('delete-product')) {
-      if (!confirm('Hapus produk ini?')) return;
+    if (e.target.closest('.delete-product')) {
+      if (!await askConfirm('Hapus produk ini? Tindakan ini tidak bisa dibatalkan.')) return;
       await authedFetch(`${API_BASE}/products?id=${id}`, { method: 'DELETE' });
       await loadProductsAdmin();
-    }
-
-    if (e.target.classList.contains('toggle-product')) {
-      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-      await authedFetch(`${API_BASE}/products?id=${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ is_active: !isActive }),
-      });
-      await loadProductsAdmin();
-    }
-
-    if (e.target.classList.contains('toggle-featured')) {
-      const isFeatured = e.target.textContent.trim() === 'Batal Populer';
-      await authedFetch(`${API_BASE}/products?id=${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ is_featured: !isFeatured }),
-      });
-      await loadProductsAdmin();
+    } else if (e.target.closest('.toggle-product')) {
+      await putJSON('products', id, { is_active: row.dataset.active !== '1' }, loadProductsAdmin);
+    } else if (e.target.closest('.toggle-featured')) {
+      await putJSON('products', id, { is_featured: row.dataset.featured !== '1' }, loadProductsAdmin);
     }
   } catch (err) {
-    alert(`Gagal memperbarui produk: ${err.message}`);
+    notify(`Gagal memperbarui: ${err.message}`);
   }
 });
 
@@ -607,6 +675,7 @@ async function loadTeamAdmin() {
       </select>
     </div>
   `).join('') || '<p class="empty-msg">Belum ada akun.</p>';
+  setText('stat-team', data.length);
 }
 
 document.getElementById('team-list')?.addEventListener('change', async (e) => {
@@ -623,29 +692,29 @@ document.getElementById('team-list')?.addEventListener('change', async (e) => {
     });
     await loadTeamAdmin();
   } catch (err) {
-    alert(err.message);
+    notify(err.message);
     await loadTeamAdmin();
   }
 });
 
 // ---------- Media Sosial (khusus owner) ----------
+let socialCache = [];
 async function loadSocialAdmin() {
   if (currentRole !== 'owner') return;
 
   const { data } = await authedFetch(`${API_BASE}/social-links`);
-  const list = document.getElementById('social-list');
-
-  list.innerHTML = data.map((s) => `
-    <div class="admin-row" data-id="${s.id}">
-      <span class="admin-row-text">
-        ${escapeHtml(s.platform)}
+  socialCache = data;
+  document.getElementById('social-list').innerHTML = data.map((s) => `
+    <div class="admin-row" data-id="${s.id}" data-active="${s.is_active ? 1 : 0}">
+      <span class="admin-row-text ${s.is_active ? '' : 'is-off'}">
+        <strong>${escapeHtml(s.platform)}</strong>
         <span class="admin-row-sub">${escapeHtml(s.url)}</span>
       </span>
-      <span class="admin-row-tag">${s.is_active ? 'Aktif' : 'Nonaktif'}</span>
-      <button class="mini-btn toggle-social" type="button">${s.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
-      <button class="mini-btn danger delete-social" type="button">Hapus</button>
+      ${switchHTML(s.is_active, 'toggle-social')}
+      ${iconBtn(ICONS.edit, 'Edit', 'edit-social')}
+      ${iconBtn(ICONS.trash, 'Hapus', 'delete-social danger')}
     </div>
-  `).join('') || '<p class="empty-msg">Belum ada link media sosial.</p>';
+  `).join('') || '<p class="empty-msg">Belum ada link.</p>';
 }
 
 async function handleSocialSubmit(e) {
@@ -657,15 +726,12 @@ async function handleSocialSubmit(e) {
   if (!platform || !url) return;
 
   try {
-    await authedFetch(`${API_BASE}/social-links`, {
-      method: 'POST',
-      body: JSON.stringify({ platform, url }),
-    });
+    await authedFetch(`${API_BASE}/social-links`, { method: 'POST', body: JSON.stringify({ platform, url }) });
     platformInput.value = '';
     urlInput.value = '';
     await loadSocialAdmin();
   } catch (err) {
-    alert(`Gagal menambah link media sosial: ${err.message}`);
+    notify(`Gagal menambah: ${err.message}`);
   }
 }
 
@@ -675,22 +741,25 @@ document.getElementById('social-list')?.addEventListener('click', async (e) => {
   const id = row.dataset.id;
 
   try {
-    if (e.target.classList.contains('delete-social')) {
-      if (!confirm('Hapus link media sosial ini?')) return;
+    if (e.target.closest('.delete-social')) {
+      if (!await askConfirm('Hapus link ini?')) return;
       await authedFetch(`${API_BASE}/social-links?id=${id}`, { method: 'DELETE' });
       await loadSocialAdmin();
-    }
-
-    if (e.target.classList.contains('toggle-social')) {
-      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-      await authedFetch(`${API_BASE}/social-links?id=${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ is_active: !isActive }),
+    } else if (e.target.closest('.toggle-social')) {
+      await putJSON('social-links', id, { is_active: row.dataset.active !== '1' }, loadSocialAdmin);
+    } else if (e.target.closest('.edit-social')) {
+      const x = socialCache.find((i) => String(i.id) === String(id));
+      openFormModal({
+        title: 'Edit media sosial',
+        fields: [
+          { name: 'platform', label: 'Platform', value: x?.platform || '', required: true },
+          { name: 'url', label: 'Link', type: 'url', value: x?.url || '', required: true, full: true },
+        ],
+        onSubmit: (v) => putJSON('social-links', id, { platform: v.platform.trim(), url: v.url.trim() }, loadSocialAdmin),
       });
-      await loadSocialAdmin();
     }
   } catch (err) {
-    alert(`Gagal memperbarui link media sosial: ${err.message}`);
+    notify(`Gagal memperbarui: ${err.message}`);
   }
 });
 
@@ -751,11 +820,15 @@ function openDetailEditor(id) {
   renderDetailMedia();
   const form = document.getElementById('product-detail-form');
   form.classList.remove('hidden');
-  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('drawer-backdrop').classList.remove('hidden');
+  document.body.classList.add('am-lock');
+  form.querySelector('.de-body').scrollTop = 0;
 }
 
 function closeDetailEditor() {
   document.getElementById('product-detail-form')?.classList.add('hidden');
+  document.getElementById('drawer-backdrop')?.classList.add('hidden');
+  document.body.classList.remove('am-lock');
   detailState = null;
 }
 
@@ -779,7 +852,7 @@ async function uploadMany(inputEl, target) {
       return;
     }
   }
-  statusEl.textContent = `${done} gambar berhasil diunggah. Jangan lupa klik "Simpan Detail".`;
+  statusEl.textContent = `${done} gambar terunggah. Klik Simpan untuk menyimpan.`;
   inputEl.value = '';
 }
 
@@ -804,6 +877,8 @@ function initDetailEditor() {
   document.getElementById('pde-gallery-input').addEventListener('change', (e) => uploadMany(e.target, 'gallery'));
   document.getElementById('pde-showcase-input').addEventListener('change', (e) => uploadMany(e.target, 'showcase'));
   document.getElementById('pde-cancel').addEventListener('click', closeDetailEditor);
+  document.getElementById('pde-close')?.addEventListener('click', closeDetailEditor);
+  document.getElementById('drawer-backdrop')?.addEventListener('click', closeDetailEditor);
 
   form.addEventListener('click', (e) => {
     const btn = e.target.closest('.pde-remove');
@@ -860,7 +935,7 @@ function initDetailEditor() {
     statusEl.textContent = 'Menyimpan...';
     try {
       await authedFetch(`${API_BASE}/products?id=${detailState.id}`, { method: 'PUT', body: JSON.stringify(payload) });
-      statusEl.textContent = 'Tersimpan ✓';
+      statusEl.textContent = 'Tersimpan';
       await loadProductsAdmin();
     } catch (err) {
       statusEl.textContent = /column|schema/i.test(err.message)
@@ -1040,7 +1115,7 @@ function initOptionsEditor() {
     statusEl.textContent = 'Menyimpan...';
     try {
       await authedFetch(`${API_BASE}/products?id=${optState.productId}`, { method: 'PUT', body: JSON.stringify({ options: groups }) });
-      statusEl.textContent = 'Tersimpan ✓';
+      statusEl.textContent = 'Tersimpan';
       const keepId = optState.productId;
       await loadProductsAdmin();
       document.getElementById('opt-product').value = keepId;
@@ -1082,21 +1157,24 @@ function initTestimonialImageInput() {
   });
 }
 
+let testimonialsCache = [];
 async function loadTestimonialsAdmin() {
   const { data } = await authedFetch(`${API_BASE}/testimonials`);
-  const list = document.getElementById('testimonial-list');
+  testimonialsCache = data;
+  setText('stat-testimonials', data.length);
 
-  list.innerHTML = data.map((t) => `
-    <div class="admin-row" data-id="${t.id}">
-      <span class="admin-row-text">
-        ${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)} — ${escapeHtml(t.author_name)}${t.author_role ? ` · ${escapeHtml(t.author_role)}` : ''}${t.product_id ? ` · <em>${escapeHtml((productsCache.find((p) => p.id === t.product_id) || {}).name || 'produk')}</em>` : ''}${t.image_url ? ' · foto' : ''}
-        <span class="admin-row-sub">${escapeHtml(t.quote)}</span>
+  document.getElementById('testimonial-list').innerHTML = data.map((t) => `
+    <div class="admin-row" data-id="${t.id}" data-active="${t.is_active ? 1 : 0}">
+      <span class="admin-row-text ${t.is_active ? '' : 'is-off'}">
+        <strong>${escapeHtml(t.author_name)}</strong>
+        <span class="admin-row-sub"><span class="stars">${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}</span>${t.author_role ? ` · ${escapeHtml(t.author_role)}` : ''}${t.product_id ? ` · ${escapeHtml((productsCache.find((p) => p.id === t.product_id) || {}).name || 'produk')}` : ''}</span>
+        <span class="admin-row-quote">${escapeHtml(t.quote)}</span>
       </span>
-      <span class="admin-row-tag">${t.is_active ? 'Aktif' : 'Nonaktif'}</span>
-      <button class="mini-btn toggle-testimonial" type="button">${t.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
-      <button class="mini-btn danger delete-testimonial" type="button">Hapus</button>
+      ${switchHTML(t.is_active, 'toggle-testimonial')}
+      ${iconBtn(ICONS.edit, 'Edit', 'edit-testimonial')}
+      ${iconBtn(ICONS.trash, 'Hapus', 'delete-testimonial danger')}
     </div>
-  `).join('') || '<p class="empty-msg">Belum ada testimoni. Section testimoni di beranda masih disembunyikan sampai ada yang ditambahkan di sini.</p>';
+  `).join('') || '<p class="empty-msg">Belum ada testimoni.</p>';
 }
 
 async function handleTestimonialSubmit(e) {
@@ -1123,7 +1201,9 @@ async function handleTestimonialSubmit(e) {
       }),
     });
     pendingTestimonialImage = null;
-    document.getElementById('testimonial-image').value = '';
+    const img = document.getElementById('testimonial-image');
+    img.value = '';
+    img.dispatchEvent(new Event('tile-reset'));
     document.getElementById('testimonial-image-status').textContent = '';
     nameInput.value = '';
     roleInput.value = '';
@@ -1131,7 +1211,7 @@ async function handleTestimonialSubmit(e) {
     ratingInput.value = '5';
     await loadTestimonialsAdmin();
   } catch (err) {
-    alert(`Gagal menambah testimoni: ${err.message}`);
+    notify(`Gagal menambah: ${err.message}`);
   }
 }
 
@@ -1141,22 +1221,34 @@ document.getElementById('testimonial-list')?.addEventListener('click', async (e)
   const id = row.dataset.id;
 
   try {
-    if (e.target.classList.contains('delete-testimonial')) {
-      if (!confirm('Hapus testimoni ini?')) return;
+    if (e.target.closest('.delete-testimonial')) {
+      if (!await askConfirm('Hapus testimoni ini?')) return;
       await authedFetch(`${API_BASE}/testimonials?id=${id}`, { method: 'DELETE' });
       await loadTestimonialsAdmin();
-    }
-
-    if (e.target.classList.contains('toggle-testimonial')) {
-      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-      await authedFetch(`${API_BASE}/testimonials?id=${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ is_active: !isActive }),
+    } else if (e.target.closest('.toggle-testimonial')) {
+      await putJSON('testimonials', id, { is_active: row.dataset.active !== '1' }, loadTestimonialsAdmin);
+    } else if (e.target.closest('.edit-testimonial')) {
+      const t = testimonialsCache.find((x) => String(x.id) === String(id));
+      openFormModal({
+        title: 'Edit testimoni',
+        fields: [
+          { name: 'author_name', label: 'Nama pembeli', value: t?.author_name || '', required: true },
+          { name: 'author_role', label: 'Keterangan', value: t?.author_role || '' },
+          { name: 'rating', label: 'Rating', type: 'select', value: t?.rating || 5, options: [5, 4, 3, 2, 1].map((n) => ({ value: n, label: `${n} bintang` })) },
+          { name: 'product_id', label: 'Untuk produk', type: 'select', value: t?.product_id || '', options: [{ value: '', label: 'Semua produk' }].concat(productsCache.map((p) => ({ value: p.id, label: p.name }))) },
+          { name: 'quote', label: 'Isi testimoni', type: 'textarea', value: t?.quote || '', required: true, full: true },
+        ],
+        onSubmit: (v) => putJSON('testimonials', id, {
+          author_name: v.author_name.trim(),
+          author_role: v.author_role.trim() || null,
+          rating: Number(v.rating),
+          product_id: v.product_id || null,
+          quote: v.quote.trim(),
+        }, loadTestimonialsAdmin),
       });
-      await loadTestimonialsAdmin();
     }
   } catch (err) {
-    alert(`Gagal memperbarui testimoni: ${err.message}`);
+    notify(`Gagal memperbarui: ${err.message}`);
   }
 });
 
@@ -1187,7 +1279,7 @@ function initHeroBannerImageInput() {
 
     try {
       pendingHeroBannerUrl = await uploadImageToCloudinary(file, 'ex-school/hero-banners', statusEl);
-      statusEl.innerHTML = `Berhasil diunggah ${ICONS.check}`;
+      statusEl.innerHTML = `Terunggah ${ICONS.check}`;
     } catch (err) {
       statusEl.textContent = `Gagal: ${err.message}`;
       pendingHeroBannerUrl = null;
@@ -1195,33 +1287,35 @@ function initHeroBannerImageInput() {
   });
 }
 
+let heroCache = [];
 async function loadHeroBannerAdmin() {
   if (currentRole !== 'owner') return;
 
   const { data } = await authedFetch(`${API_BASE}/hero-banners`);
-  const list = document.getElementById('hero-banner-list');
+  heroCache = data;
+  setText('stat-hero', data.filter((b) => b.is_active).length);
 
-  list.innerHTML = data.map((b) => `
-    <div class="admin-row" data-id="${b.id}">
-      ${isVideoUrl(b.image_url)
-        ? `<video class="admin-row-thumb" src="${escapeHtml(b.image_url)}" muted preload="metadata"></video>`
-        : `<img class="admin-row-thumb" src="${escapeHtml(b.image_url)}" alt="">`}
-      <span class="admin-row-text">
-        ${isVideoUrl(b.image_url) ? '<span class="role-badge role-owner">VIDEO</span> ' : ''}${b.title ? escapeHtml(b.title) : '<span class="admin-row-sub">Tanpa judul</span>'}
-        ${b.link_url ? `· ${escapeHtml(b.link_url)}` : ''}
+  document.getElementById('hero-banner-list').innerHTML = data.map((b) => `
+    <div class="admin-row" data-id="${b.id}" data-active="${b.is_active ? 1 : 0}">
+      <span class="prow-thumb wide">${isVideoUrl(b.image_url)
+        ? `<video src="${escapeHtml(b.image_url)}" muted preload="metadata"></video>`
+        : `<img src="${escapeHtml(b.image_url)}" alt="" loading="lazy">`}</span>
+      <span class="admin-row-text ${b.is_active ? '' : 'is-off'}">
+        <strong>${b.title ? escapeHtml(b.title) : 'Tanpa judul'}</strong>
+        <span class="admin-row-sub">${isVideoUrl(b.image_url) ? 'Video' : 'Gambar'}${b.link_url ? ` · ${escapeHtml(b.link_url)}` : ''}</span>
       </span>
-      <span class="admin-row-tag">${b.is_active ? 'Aktif' : 'Nonaktif'}</span>
-      <button class="mini-btn toggle-hero-banner" type="button">${b.is_active ? 'Nonaktifkan' : 'Aktifkan'}</button>
-      <button class="mini-btn danger delete-hero-banner" type="button">Hapus</button>
+      ${switchHTML(b.is_active, 'toggle-hero-banner')}
+      ${iconBtn(ICONS.edit, 'Edit', 'edit-hero-banner')}
+      ${iconBtn(ICONS.trash, 'Hapus', 'delete-hero-banner danger')}
     </div>
-  `).join('') || '<p class="empty-msg">Belum ada banner gambar.</p>';
+  `).join('') || '<p class="empty-msg">Belum ada banner.</p>';
 }
 
 async function handleHeroBannerSubmit(e) {
   e.preventDefault();
 
   if (!pendingHeroBannerUrl) {
-    alert('Tunggu file selesai diunggah dulu (atau pilih gambar/video).');
+    notify('Pilih gambar atau video dan tunggu sampai terunggah.', 'info');
     return;
   }
 
@@ -1230,10 +1324,7 @@ async function handleHeroBannerSubmit(e) {
   try {
     await authedFetch(`${API_BASE}/hero-banners`, {
       method: 'POST',
-      body: JSON.stringify({
-        image_url: pendingHeroBannerUrl,
-        link_url: linkInput.value.trim() || null,
-      }),
+      body: JSON.stringify({ image_url: pendingHeroBannerUrl, link_url: linkInput.value.trim() || null }),
     });
 
     document.getElementById('hero-banner-form').reset();
@@ -1241,7 +1332,7 @@ async function handleHeroBannerSubmit(e) {
     document.getElementById('hero-banner-preview').classList.add('hidden');
     await loadHeroBannerAdmin();
   } catch (err) {
-    alert(`Gagal menambah banner gambar: ${err.message}`);
+    notify(`Gagal menambah: ${err.message}`);
   }
 }
 
@@ -1251,22 +1342,25 @@ document.getElementById('hero-banner-list')?.addEventListener('click', async (e)
   const id = row.dataset.id;
 
   try {
-    if (e.target.classList.contains('delete-hero-banner')) {
-      if (!confirm('Hapus banner gambar ini?')) return;
+    if (e.target.closest('.delete-hero-banner')) {
+      if (!await askConfirm('Hapus banner ini?')) return;
       await authedFetch(`${API_BASE}/hero-banners?id=${id}`, { method: 'DELETE' });
       await loadHeroBannerAdmin();
-    }
-
-    if (e.target.classList.contains('toggle-hero-banner')) {
-      const isActive = row.querySelector('.admin-row-tag').textContent.trim() === 'Aktif';
-      await authedFetch(`${API_BASE}/hero-banners?id=${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ is_active: !isActive }),
+    } else if (e.target.closest('.toggle-hero-banner')) {
+      await putJSON('hero-banners', id, { is_active: row.dataset.active !== '1' }, loadHeroBannerAdmin);
+    } else if (e.target.closest('.edit-hero-banner')) {
+      const b = heroCache.find((x) => String(x.id) === String(id));
+      openFormModal({
+        title: 'Edit banner',
+        fields: [
+          { name: 'title', label: 'Judul', value: b?.title || '', full: true },
+          { name: 'link_url', label: 'Link saat diklik', type: 'url', value: b?.link_url || '', placeholder: 'https://', full: true },
+        ],
+        onSubmit: (v) => putJSON('hero-banners', id, { title: v.title.trim() || null, link_url: v.link_url.trim() || null }, loadHeroBannerAdmin),
       });
-      await loadHeroBannerAdmin();
     }
   } catch (err) {
-    alert(`Gagal memperbarui banner gambar: ${err.message}`);
+    notify(`Gagal memperbarui: ${err.message}`);
   }
 });
 
@@ -1310,10 +1404,13 @@ function initNotifyButton() {
   }
   const sync = () => {
     if (Notification.permission === 'granted') {
-      btn.innerHTML = `${ICONS.bell} Notifikasi Aktif`;
+      btn.innerHTML = ICONS.bell;
+      btn.title = 'Notifikasi aktif';
+      btn.classList.add('is-on');
       btn.disabled = true;
     } else {
-      btn.innerHTML = `${ICONS.bell} Aktifkan Notifikasi`;
+      btn.innerHTML = ICONS.bell;
+      btn.title = 'Aktifkan notifikasi';
       btn.disabled = false;
     }
   };
@@ -1408,13 +1505,13 @@ async function loadOrdersAdmin() {
   list.innerHTML = data.map((o) => `
     <div class="admin-row ${orderNeedsReply(o) ? 'needs-reply' : ''}" data-id="${o.id}" data-code="${escapeHtml(o.order_code)}" data-buyer="${escapeHtml(o.buyer_name)}" data-status="${o.status}">
       <span class="admin-row-text">
-        ${orderNeedsReply(o) ? '<span class="unread-dot" title="Perlu dibalas"></span>' : ''}<span class="mono">${escapeHtml(o.order_code)}</span> — ${escapeHtml(o.product_name)} · Rp${Number(o.product_price).toLocaleString('id-ID')}
-        <span class="admin-row-sub">${escapeHtml(o.buyer_name)} · ${escapeHtml(o.buyer_phone)} · ${formatOrderTime(o.created_at)}</span>
+        <strong>${orderNeedsReply(o) ? '<span class="unread-dot" title="Perlu dibalas"></span>' : ''}${escapeHtml(o.product_name)}</strong>
+        <span class="admin-row-sub">${escapeHtml(o.order_code)} · ${escapeHtml(o.buyer_name)} · ${rupiahShort(o.product_price)} · ${formatOrderTime(o.created_at)}</span>
       </span>
       <select class="team-row-select order-status-select">
         ${Object.entries(ORDER_STATUS_LABEL).map(([val, label]) => `<option value="${val}" ${o.status === val ? 'selected' : ''}>${label}</option>`).join('')}
       </select>
-      <button class="mini-btn open-order-chat" type="button">${ICONS.chat} Chat</button>
+      <button class="btn btn-sm open-order-chat" type="button">${ICONS.chat}<span>Chat</span></button>
     </div>
   `).join('') || '<p class="empty-msg">Belum ada pesanan masuk.</p>';
 
@@ -1428,7 +1525,7 @@ document.getElementById('order-list')?.addEventListener('click', async (e) => {
   const row = e.target.closest('.admin-row');
   if (!row) return;
 
-  if (e.target.classList.contains('open-order-chat')) {
+  if (e.target.closest('.open-order-chat')) {
     openOrderChat(row.dataset.id, row.dataset.code, row.dataset.buyer, row.dataset.status);
   }
 });
@@ -1446,7 +1543,7 @@ document.getElementById('order-list')?.addEventListener('change', async (e) => {
     });
     await loadOrdersAdmin();
   } catch (err) {
-    alert(err.message);
+    notify(err.message);
     await loadOrdersAdmin();
   }
 });
@@ -1535,7 +1632,7 @@ document.getElementById('oc-form')?.addEventListener('submit', async (e) => {
     });
     await loadOrderChatMessages();
   } catch (err) {
-    alert(err.message);
+    notify(err.message);
     input.value = message;
   } finally {
     submitBtn.disabled = false;
@@ -1601,6 +1698,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('social-form').addEventListener('submit', handleSocialSubmit);
   document.getElementById('testimonial-form').addEventListener('submit', handleTestimonialSubmit);
   document.getElementById('hero-banner-form').addEventListener('submit', handleHeroBannerSubmit);
+  // ganti input file bawaan browser dengan tile + modal unggah sendiri
+  document.querySelectorAll('input[type=file][data-up-label]').forEach((el) => {
+    enhanceFileInput(el, { label: el.dataset.upLabel, hint: el.dataset.upHint });
+  });
+  document.getElementById('product-add-btn')?.addEventListener('click', () => openProductModal(null));
+  document.getElementById('product-modal-close')?.addEventListener('click', closeProductModal);
+  document.getElementById('product-modal-cancel')?.addEventListener('click', closeProductModal);
+  document.getElementById('product-modal')?.addEventListener('mousedown', (e) => { if (e.target.id === 'product-modal') closeProductModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!document.getElementById('product-modal').classList.contains('hidden') && !document.querySelector('.am-overlay:not(#product-modal):not(#drawer-backdrop)')) closeProductModal();
+    else if (detailState && !document.querySelector('.am-overlay:not(#product-modal):not(#drawer-backdrop)')) closeDetailEditor();
+  });
   initProductImageInput();
   initDetailEditor();
   initOptionsEditor();
