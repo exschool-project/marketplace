@@ -360,11 +360,16 @@ async function loadCategoriesAdmin() {
   const { data } = await authedFetch(`${API_BASE}/categories`);
   categoriesCache = data;
 
-  document.getElementById('category-list').innerHTML = data.map((c) => `
+  document.getElementById('category-list').innerHTML = data.map((c, i) => `
     <div class="admin-row" data-id="${c.id}">
+      <span class="row-order">${i + 1}</span>
       <span class="admin-row-text">${escapeHtml(c.name)}</span>
-      ${iconBtn(ICONS.edit, 'Edit', 'edit-category')}
-      ${iconBtn(ICONS.trash, 'Hapus', 'delete-category danger')}
+      <div class="row-actions">
+        <button type="button" class="icon-btn move-category" data-dir="-1" ${i === 0 ? 'disabled' : ''} title="Naikkan" aria-label="Naikkan">${ARROW_UP}</button>
+        <button type="button" class="icon-btn move-category" data-dir="1" ${i === data.length - 1 ? 'disabled' : ''} title="Turunkan" aria-label="Turunkan">${ARROW_DOWN}</button>
+        ${iconBtn(ICONS.edit, 'Edit', 'edit-category')}
+        ${iconBtn(ICONS.trash, 'Hapus', 'delete-category danger')}
+      </div>
     </div>
   `).join('') || '<p class="empty-msg">Belum ada kategori.</p>';
 
@@ -384,7 +389,7 @@ async function handleCategorySubmit(e) {
   const name = input.value.trim();
   if (!name) return;
   try {
-    await authedFetch(`${API_BASE}/categories`, { method: 'POST', body: JSON.stringify({ name, slug: slugify(name) }) });
+    await authedFetch(`${API_BASE}/categories`, { method: 'POST', body: JSON.stringify({ name, slug: slugify(name), sort_order: categoriesCache.length }) });
     input.value = '';
     await loadCategoriesAdmin();
   } catch (err) {
@@ -400,6 +405,18 @@ document.getElementById('category-list')?.addEventListener('click', async (e) =>
     if (e.target.closest('.delete-category')) {
       if (!await askConfirm('Hapus kategori ini? Produknya tidak ikut terhapus.')) return;
       await authedFetch(`${API_BASE}/categories?id=${id}`, { method: 'DELETE' });
+      await loadCategoriesAdmin();
+    } else if (e.target.closest('.move-category')) {
+      const btn = e.target.closest('.move-category');
+      if (btn.disabled) return;
+      const order = categoriesCache.map((c) => c);
+      const i = order.findIndex((c) => String(c.id) === String(id));
+      const j = i + Number(btn.dataset.dir);
+      if (i < 0 || j < 0 || j >= order.length) return;
+      [order[i], order[j]] = [order[j], order[i]];
+      // beri nomor urut 0..n-1; hanya yang berubah yang dikirim ke server
+      await Promise.all(order.map((c, idx) => (c.sort_order === idx ? null
+        : authedFetch(`${API_BASE}/categories?id=${c.id}`, { method: 'PUT', body: JSON.stringify({ sort_order: idx }) }))));
       await loadCategoriesAdmin();
     } else if (e.target.closest('.edit-category')) {
       const c = categoriesCache.find((x) => String(x.id) === String(id));
@@ -765,10 +782,60 @@ document.getElementById('social-list')?.addEventListener('click', async (e) => {
 
 
 // ---------- Editor detail produk (deskripsi, fitur, galeri, contoh, FAQ) ----------
+const PIN_SVG = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6l-1 6 3 3v2H7v-2l3-3-1-6z"/><path d="M12 15v5"/></svg>';
 let detailState = null; // { id, gallery: [url], showcase: [{url, caption}] }
 
 // Saran kategori (datalist) = kategori yang sudah dipakai di produk ini
+// Urutan kategori contoh = urutan tampil di halaman produk: yang di-pin (Hot)
+// dulu, lalu sesuai urutan di daftar. Panah hanya menggeser di dalam kelompok
+// yang sama (pin atau biasa). Urutan disimpan lewat susunan foto di data.
+const ARROW_UP = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg>';
+const ARROW_DOWN = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10l6 6 6-6"/></svg>';
+
+function showcaseGroupOrder() {
+  const map = new Map();
+  (detailState?.showcase || []).forEach((s) => {
+    const k = (s.category || '').trim();
+    if (!k) return;
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(s);
+  });
+  return [...map.entries()]
+    .map(([name, items], order) => ({ name, items, hot: items.some((x) => x.hot), order }))
+    .sort((x, y) => (Number(y.hot) - Number(x.hot)) || (x.order - y.order));
+}
+
+// Susun ulang daftar foto mengikuti urutan nama kategori; tanpa kategori di akhir.
+function applyGroupOrder(names) {
+  const list = detailState.showcase;
+  const rest = list.filter((x) => !(x.category || '').trim());
+  const next = [];
+  names.forEach((n) => next.push(...list.filter((x) => (x.category || '').trim() === n)));
+  detailState.showcase = next.concat(rest);
+}
+
+function renderCatBar() {
+  const bar = document.getElementById('pde-cats');
+  if (!bar) return;
+  const groups = showcaseGroupOrder();
+  bar.innerHTML = groups.map((g, i) => {
+    const prev = groups[i - 1];
+    const next = groups[i + 1];
+    const canUp = prev && prev.hot === g.hot;
+    const canDown = next && next.hot === g.hot;
+    return `<div class="pde-cat-row ${g.hot ? 'is-hot' : ''}" data-cat="${escapeHtml(g.name)}">
+      <button type="button" class="pde-cat-pin" aria-pressed="${g.hot}" title="${g.hot ? 'Lepas pin' : 'Pin sebagai Hot'}">${PIN_SVG}</button>
+      <span class="pde-cat-name">${escapeHtml(g.name)}</span>
+      ${g.hot ? '<span class="pill pill-hot">Hot</span>' : ''}
+      <em>${g.items.length} foto</em>
+      <button type="button" class="pde-cat-move" data-dir="-1" ${canUp ? '' : 'disabled'} aria-label="Naikkan">${ARROW_UP}</button>
+      <button type="button" class="pde-cat-move" data-dir="1" ${canDown ? '' : 'disabled'} aria-label="Turunkan">${ARROW_DOWN}</button>
+    </div>`;
+  }).join('');
+}
+
 function fillCategoryList() {
+  renderCatBar();
   let dl = document.getElementById('pde-cat-list');
   if (!dl) { dl = document.createElement('datalist'); dl.id = 'pde-cat-list'; document.body.appendChild(dl); }
   const cats = [...new Set((detailState?.showcase || []).map((s) => (s.category || '').trim()).filter(Boolean))];
@@ -805,7 +872,7 @@ function openDetailEditor(id) {
   detailState = {
     id,
     gallery: Array.isArray(p.gallery) ? [...p.gallery] : [],
-    showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '', category: s.category || '', source_url: s.source_url || '', source_label: s.source_label || '' })) : [],
+    showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '', category: s.category || '', source_url: s.source_url || '', source_label: s.source_label || '', hot: !!s.hot })) : [],
   };
   document.getElementById('pde-title').textContent = p.name;
   document.getElementById('pde-description').value = p.description || '';
@@ -843,7 +910,7 @@ async function uploadMany(inputEl, target) {
       const url = await uploadImageToCloudinary(file, 'ex-school/products', null);
       if (!detailState) return; // editor ditutup selama upload
       if (target === 'gallery') detailState.gallery.push(url);
-      else detailState.showcase.push({ url, title: '', description: '', category: '', source_url: '', source_label: '' });
+      else detailState.showcase.push({ url, title: '', description: '', category: '', source_url: '', source_label: '', hot: false });
       done += 1;
       renderDetailMedia();
     } catch (err) {
@@ -881,6 +948,28 @@ function initDetailEditor() {
   document.getElementById('drawer-backdrop')?.addEventListener('click', closeDetailEditor);
 
   form.addEventListener('click', (e) => {
+    const row = e.target.closest('.pde-cat-row');
+    if (row && detailState) {
+      const name = row.dataset.cat;
+      if (e.target.closest('.pde-cat-pin')) {
+        const items = detailState.showcase.filter((x) => (x.category || '').trim() === name);
+        const makeHot = !items.some((x) => x.hot);
+        items.forEach((x) => { x.hot = makeHot; });
+        applyGroupOrder(showcaseGroupOrder().map((g) => g.name));
+        renderDetailMedia();
+      } else if (e.target.closest('.pde-cat-move')) {
+        const btn = e.target.closest('.pde-cat-move');
+        if (btn.disabled) return;
+        const names = showcaseGroupOrder().map((g) => g.name);
+        const i = names.indexOf(name);
+        const j = i + Number(btn.dataset.dir);
+        if (i < 0 || j < 0 || j >= names.length) return;
+        [names[i], names[j]] = [names[j], names[i]];
+        applyGroupOrder(names);
+        renderDetailMedia();
+      }
+      return;
+    }
     const btn = e.target.closest('.pde-remove');
     if (!btn || !detailState) return;
     detailState[btn.dataset.kind].splice(Number(btn.dataset.index), 1);

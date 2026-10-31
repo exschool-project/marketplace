@@ -1167,3 +1167,25 @@ body[data-role="admin"] .quick-links{ grid-template-columns:repeat(4, 1fr); }
   .prow .row-actions .btn-sm{ padding:6px 8px !important; }
   .prow .row-actions .icon-btn{ width:32px; height:32px; }
 }
+
+/* ---------- urutan kategori (contoh & toko) ---------- */
+.pde-cats{ display:flex; flex-direction:column; gap:6px; margin:12px 0 0; }
+.pde-cats:empty{ display:none; }
+.pde-cat-row{
+  display:flex; align-items:center; gap:10px; padding:6px 8px 6px 6px; border:1px solid var(--line); border-radius:10px; background:#fff;
+}
+.pde-cat-row.is-hot{ background:#FFF8F1; border-color:#F5C9A8; }
+.pde-cat-name{ font-size:.88rem; font-weight:600; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pde-cat-row em{ font-style:normal; font-size:.78rem; color:var(--muted); flex-shrink:0; }
+.pde-cat-pin, .pde-cat-move{
+  width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  border:1px solid transparent; border-radius:8px; background:transparent; color:#8C99A8; cursor:pointer;
+}
+.pde-cat-pin svg, .pde-cat-move svg{ width:16px; height:16px; }
+.pde-cat-pin:hover, .pde-cat-move:hover:not(:disabled){ background:var(--surface); color:var(--ink); }
+.pde-cat-row.is-hot .pde-cat-pin{ color:#B5420A; }
+.pde-cat-row.is-hot .pde-cat-pin svg{ fill:currentColor; }
+.pde-cat-move:disabled{ opacity:.3; cursor:default; }
+.pill-hot{ background:#FFE8D9; color:#B5420A; }
+.row-order{ width:24px; height:24px; border-radius:50%; background:var(--surface); color:var(--muted); font-size:.76rem; font-weight:600; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.icon-btn:disabled{ opacity:.35; cursor:default; pointer-events:none; }

@@ -52,6 +52,8 @@ function cleanDetailField(key, value) {
           // Sumber: hanya tautan http(s); skema lain (javascript:, data:) dibuang.
           source_url: isHttpUrl(x.source_url) ? x.source_url.trim() : '',
           source_label: clip(x.source_label, 'Nama sumber'),
+          // hot = kategori di-pin admin (tampil paling atas dengan label Hot)
+          hot: !!x.hot,
         }))
         .slice(0, 50);
     case 'options': {
