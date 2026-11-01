@@ -419,7 +419,11 @@ function paintLightbox() {
   const el = ensureLightbox();
   const item = lbList[lbIndex];
   if (!item) return;
-  el.querySelector('img').src = item.url;
+  const lbImg = el.querySelector('img');
+  lbImg.classList.remove('swap');
+  void lbImg.offsetWidth; // paksa reflow supaya animasi bisa diputar ulang
+  lbImg.classList.add('swap');
+  lbImg.src = item.url;
   el.querySelector('img').alt = item.title || '';
   el.querySelector('.pd-lb-title').textContent = item.title || '';
   el.querySelector('.pd-lb-desc').textContent = item.description || '';

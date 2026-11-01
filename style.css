@@ -1793,3 +1793,82 @@ footer{ background:#fff; border-top:1px solid var(--line); padding:28px 24px 24p
   #pd-lightbox .pd-lb-count{ margin-top:4px; }
   #pd-lightbox .pd-lb-close{ top:10px; right:10px; }
 }
+
+
+/* =====================================================================
+   MOTION v13 — animasi halus & konsisten
+   Sistem masuk-elemen ada di motion.js (kelas .motion-item / .in-view).
+   Hanya opacity & transform yang dianimasikan; semuanya mati otomatis
+   kalau perangkat memakai "kurangi gerakan".
+   ===================================================================== */
+:root{ --ease-out:cubic-bezier(.22,.8,.3,1); --ease-soft:cubic-bezier(.4,0,.2,1); }
+
+@media (prefers-reduced-motion: no-preference){
+  /* animasi sederhana lama diganti sistem scroll-reveal */
+  .pcard, .testi-card, .admin-row{ animation:none; }
+
+  html.js-motion .motion-item:not(.in-view){ opacity:0; transform:translateY(24px) scale(.985); }
+  html.js-motion .motion-item{
+    transition:opacity .75s var(--ease-out), transform .75s var(--ease-out), box-shadow .3s ease, border-color .2s ease;
+    will-change:opacity, transform;
+  }
+  html.js-motion .motion-item.in-view{ opacity:1; transform:none; }
+  /* judul bagian bergeser lebih pendek supaya terasa ringan */
+  html.js-motion .section-head.motion-item:not(.in-view),
+  html.js-motion .pd-cat-head.motion-item:not(.in-view),
+  html.js-motion .page-head.motion-item:not(.in-view),
+  html.js-motion .shop-head h1.motion-item:not(.in-view){ transform:translateY(12px); }
+  html.js-motion .admin-row.motion-item:not(.in-view){ transform:translateY(10px); }
+
+  /* halaman masuk dengan fade */
+  body{ animation:page-in .55s var(--ease-soft) both; }
+  @keyframes page-in{ from{ opacity:0; } to{ opacity:1; } }
+
+  /* transisi antar halaman (browser yang mendukung View Transitions) */
+  ::view-transition-old(root){ animation:vt-out .22s var(--ease-soft) both; }
+  ::view-transition-new(root){ animation:vt-in .38s var(--ease-soft) both; }
+  @keyframes vt-out{ to{ opacity:0; } }
+  @keyframes vt-in{ from{ opacity:0; } }
+
+  /* hover & tekan */
+  .btn, .addbtn, .chip, .pde-cat-chip, .icon-btn{ transition:background-color .2s ease, color .2s ease, border-color .2s ease, transform .15s var(--ease-out), box-shadow .2s ease; }
+  .btn:active, .addbtn:active, .chip:active, .icon-btn:active{ transform:scale(.96); }
+  .btn-green:hover, .btn-blue:hover{ box-shadow:0 6px 16px rgba(11,42,84,.22); }
+
+  .pcard{ transition:transform .4s var(--ease-out), box-shadow .4s var(--ease-out), border-color .2s ease; }
+  .pcard:hover{ transform:translateY(-5px); box-shadow:0 16px 36px rgba(15,27,45,.11); border-color:var(--border-strong); }
+  .pcard .thumb{ overflow:hidden; }
+  .pcard .thumb img{ transition:transform .8s var(--ease-out); }
+  .pcard:hover .thumb img{ transform:scale(1.05); }
+
+  .trust-item, .testi-card{ transition:transform .35s var(--ease-out), box-shadow .35s var(--ease-out), border-color .2s ease; }
+  .trust-item:hover, .testi-card:hover{ transform:translateY(-3px); box-shadow:0 10px 26px rgba(15,27,45,.07); border-color:var(--border-strong); }
+  .pd-showcase-item{ transition:transform .4s var(--ease-out), box-shadow .4s var(--ease-out); }
+  .pd-showcase-item:hover{ transform:translateY(-4px); box-shadow:0 14px 32px rgba(15,27,45,.1); }
+  .pd-sc-chip{ transition:background-color .2s ease, border-color .2s ease, transform .15s ease; }
+  .pd-sc-chip:hover{ transform:translateY(-1px); }
+
+  /* lightbox foto: latar memudar, lembar naik sambil membesar sedikit */
+  .pd-lightbox:not(.hidden){ animation:lb-fade .25s var(--ease-soft) both; }
+  .pd-lightbox:not(.hidden) .pd-lb-sheet{ animation:lb-pop .4s var(--ease-out) both; }
+  .pd-lb-stage img.swap{ animation:lb-img .45s var(--ease-out) both; }
+  @keyframes lb-fade{ from{ opacity:0; } }
+  @keyframes lb-pop{ from{ opacity:0; transform:translateY(22px) scale(.97); } }
+  @keyframes lb-img{ from{ opacity:0; transform:scale(.97); } }
+  @media (max-width:820px){
+    @keyframes lb-pop{ from{ opacity:1; transform:translateY(60px); } }
+  }
+
+  /* gambar utama banner & foto produk muncul perlahan saat selesai dimuat */
+  .pd-main-img{ animation:img-in .6s var(--ease-out) both; }
+  @keyframes img-in{ from{ opacity:0; transform:scale(1.02); } }
+
+  /* navigasi chip kategori & tab */
+  .chip.active{ transition:background-color .25s ease, color .25s ease, border-color .25s ease; }
+}
+
+@view-transition{ navigation:auto; }
+
+@media (prefers-reduced-motion: reduce){
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation:none !important; }
+}
