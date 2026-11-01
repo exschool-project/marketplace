@@ -794,14 +794,16 @@ const ARROW_DOWN = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" str
 
 function showcaseGroupOrder() {
   const map = new Map();
-  (detailState?.showcase || []).forEach((s) => {
+  (detailState?.showcase || []).forEach((s, i) => {
     const k = (s.category || '').trim();
     if (!k) return;
     if (!map.has(k)) map.set(k, []);
-    map.get(k).push(s);
+    map.get(k).push({ s, i });
   });
+  // kategori yang baru dibuat tapi belum punya foto
+  (detailState?.extraCats || []).forEach((n) => { if (!map.has(n)) map.set(n, []); });
   return [...map.entries()]
-    .map(([name, items], order) => ({ name, items, hot: items.some((x) => x.hot), order }))
+    .map(([name, entries], order) => ({ name, entries, items: entries.map((e) => e.s), hot: entries.some((e) => e.s.hot), order }))
     .sort((x, y) => (Number(y.hot) - Number(x.hot)) || (x.order - y.order));
 }
 
@@ -814,56 +816,73 @@ function applyGroupOrder(names) {
   detailState.showcase = next.concat(rest);
 }
 
-function renderCatBar() {
-  const bar = document.getElementById('pde-cats');
-  if (!bar) return;
-  const groups = showcaseGroupOrder();
-  bar.innerHTML = groups.map((g, i) => {
-    const prev = groups[i - 1];
-    const next = groups[i + 1];
-    const canUp = prev && prev.hot === g.hot;
-    const canDown = next && next.hot === g.hot;
-    return `<div class="pde-cat-row ${g.hot ? 'is-hot' : ''}" data-cat="${escapeHtml(g.name)}">
-      <button type="button" class="pde-cat-pin" aria-pressed="${g.hot}" title="${g.hot ? 'Lepas pin' : 'Pin sebagai Hot'}">${PIN_SVG}</button>
-      <span class="pde-cat-name">${escapeHtml(g.name)}</span>
-      ${g.hot ? '<span class="pill pill-hot">Hot</span>' : ''}
-      <em>${g.items.length} foto</em>
-      <button type="button" class="pde-cat-move" data-dir="-1" ${canUp ? '' : 'disabled'} aria-label="Naikkan">${ARROW_UP}</button>
-      <button type="button" class="pde-cat-move" data-dir="1" ${canDown ? '' : 'disabled'} aria-label="Turunkan">${ARROW_DOWN}</button>
-    </div>`;
-  }).join('');
-}
+const PENCIL_SVG = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>';
 
-function fillCategoryList() {
-  renderCatBar();
-  let dl = document.getElementById('pde-cat-list');
-  if (!dl) { dl = document.createElement('datalist'); dl.id = 'pde-cat-list'; document.body.appendChild(dl); }
-  const cats = [...new Set((detailState?.showcase || []).map((s) => (s.category || '').trim()).filter(Boolean))];
-  dl.innerHTML = cats.map((c) => `<option value="${escapeHtml(c)}"></option>`).join('');
-}
-
-function renderDetailMedia() {
-  fillCategoryList();
-  document.getElementById('pde-gallery').innerHTML = detailState.gallery.map((u, i) => `
-    <div class="pde-thumb"><img src="${escapeHtml(u)}" alt=""><button type="button" class="pde-remove" data-kind="gallery" data-index="${i}" aria-label="Hapus">✕</button></div>
-  `).join('');
-  document.getElementById('pde-showcase').innerHTML = detailState.showcase.map((s, i) => `
+function showcaseRowHTML({ s, i }, names) {
+  const opts = ['<option value="">Tanpa kategori</option>']
+    .concat(names.map((n) => `<option value="${escapeHtml(n)}" ${n === (s.category || '').trim() ? 'selected' : ''}>${escapeHtml(n)}</option>`)).join('');
+  return `
     <div class="pde-showcase-row">
       <img src="${escapeHtml(s.url)}" alt="">
       <div class="pde-showcase-fields">
         <div class="pde-sc-pair">
-          <input type="text" class="pde-sc-cat" data-index="${i}" list="pde-cat-list" value="${escapeHtml(s.category || '')}" placeholder="Kategori (mis. Logo, Website, Poster)">
+          <select class="pde-sc-cat" data-index="${i}" aria-label="Kategori">${opts}</select>
           <input type="text" class="pde-sc-title" data-index="${i}" value="${escapeHtml(s.title || '')}" placeholder="Judul gambar">
         </div>
         <textarea class="pde-sc-desc" data-index="${i}" rows="3" placeholder="Deskripsi / keterangan gambar">${escapeHtml(s.description || '')}</textarea>
         <div class="pde-sc-pair">
-          <input type="url" class="pde-sc-src" data-index="${i}" value="${escapeHtml(s.source_url || '')}" placeholder="Link sumber / referensi (https://...)">
+          <input type="url" class="pde-sc-src" data-index="${i}" value="${escapeHtml(s.source_url || '')}" placeholder="Link sumber (https://...)">
           <input type="text" class="pde-sc-srclabel" data-index="${i}" value="${escapeHtml(s.source_label || '')}" placeholder="Nama sumber (opsional)">
         </div>
       </div>
       <button type="button" class="pde-remove" data-kind="showcase" data-index="${i}" aria-label="Hapus">✕</button>
-    </div>
+    </div>`;
+}
+
+// Contoh hasil kerja ditampilkan per kategori: kategori dibuat sekali, lalu foto
+// baru langsung masuk ke kategori yang dipilih di "Masuk ke kategori".
+function renderDetailMedia() {
+  const st = detailState;
+  document.getElementById('pde-gallery').innerHTML = st.gallery.map((u, i) => `
+    <div class="pde-thumb"><img src="${escapeHtml(u)}" alt=""><button type="button" class="pde-remove" data-kind="gallery" data-index="${i}" aria-label="Hapus">✕</button></div>
   `).join('');
+
+  const groups = showcaseGroupOrder();
+  const names = groups.map((g) => g.name);
+  if (st.target === undefined || (st.target && !names.includes(st.target))) st.target = names[0] || '';
+
+  const sel = document.getElementById('pde-sc-target');
+  sel.innerHTML = names.map((n) => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('') + '<option value="">Tanpa kategori</option>';
+  sel.value = st.target;
+
+  const groupHTML = groups.map((g, gi) => {
+    const prev = groups[gi - 1];
+    const next = groups[gi + 1];
+    const empty = g.entries.length === 0;
+    const canUp = !empty && prev && prev.hot === g.hot && prev.entries.length > 0;
+    const canDown = !empty && next && next.hot === g.hot && next.entries.length > 0;
+    return `<div class="pde-group">
+      <div class="pde-cat-row ${g.hot ? 'is-hot' : ''}" data-cat="${escapeHtml(g.name)}">
+        <button type="button" class="pde-cat-pin" aria-pressed="${g.hot}" ${empty ? 'disabled' : ''} title="${g.hot ? 'Lepas pin' : 'Pin sebagai Hot'}">${PIN_SVG}</button>
+        <span class="pde-cat-name">${escapeHtml(g.name)}</span>
+        ${g.hot ? '<span class="pill pill-hot">Hot</span>' : ''}
+        <em>${g.entries.length} foto</em>
+        <button type="button" class="pde-cat-rename" title="Ubah nama" aria-label="Ubah nama">${PENCIL_SVG}</button>
+        ${empty ? `<button type="button" class="pde-cat-drop" title="Hapus kategori" aria-label="Hapus kategori">${ICONS.trash}</button>` : ''}
+        <button type="button" class="pde-cat-move" data-dir="-1" ${canUp ? '' : 'disabled'} aria-label="Naikkan">${ARROW_UP}</button>
+        <button type="button" class="pde-cat-move" data-dir="1" ${canDown ? '' : 'disabled'} aria-label="Turunkan">${ARROW_DOWN}</button>
+      </div>
+      ${empty ? '<p class="pde-group-empty">Belum ada foto. Pilih kategori ini lalu tambah foto.</p>' : g.entries.map((e) => showcaseRowHTML(e, names)).join('')}
+    </div>`;
+  }).join('');
+
+  const loose = st.showcase.map((s, i) => ({ s, i })).filter((e) => !(e.s.category || '').trim());
+  const looseHTML = loose.length ? `<div class="pde-group">
+      <div class="pde-group-head plain"><span class="pde-cat-name">Tanpa kategori</span><em>${loose.length} foto</em></div>
+      ${loose.map((e) => showcaseRowHTML(e, names)).join('')}
+    </div>` : '';
+
+  document.getElementById('pde-showcase').innerHTML = groupHTML + looseHTML;
 }
 
 function openDetailEditor(id) {
@@ -871,6 +890,8 @@ function openDetailEditor(id) {
   if (!p) return;
   detailState = {
     id,
+    extraCats: [],
+    target: undefined,
     gallery: Array.isArray(p.gallery) ? [...p.gallery] : [],
     showcase: Array.isArray(p.showcase) ? p.showcase.map((s) => ({ url: s.url, title: s.title || '', description: s.description ?? s.caption ?? '', category: s.category || '', source_url: s.source_url || '', source_label: s.source_label || '', hot: !!s.hot })) : [],
   };
@@ -910,7 +931,7 @@ async function uploadMany(inputEl, target) {
       const url = await uploadImageToCloudinary(file, 'ex-school/products', null);
       if (!detailState) return; // editor ditutup selama upload
       if (target === 'gallery') detailState.gallery.push(url);
-      else detailState.showcase.push({ url, title: '', description: '', category: '', source_url: '', source_label: '', hot: false });
+      else detailState.showcase.push({ url, title: '', description: '', category: detailState.target || '', source_url: '', source_label: '', hot: !!(detailState.target && detailState.showcase.some((x) => (x.category || '').trim() === detailState.target && x.hot)) });
       done += 1;
       renderDetailMedia();
     } catch (err) {
@@ -918,6 +939,10 @@ async function uploadMany(inputEl, target) {
       inputEl.value = '';
       return;
     }
+  }
+  if (target === 'showcase' && detailState) {
+    applyGroupOrder(showcaseGroupOrder().map((g) => g.name)); // foto sekategori tetap berkumpul
+    renderDetailMedia();
   }
   statusEl.textContent = `${done} gambar terunggah. Klik Simpan untuk menyimpan.`;
   inputEl.value = '';
@@ -941,6 +966,21 @@ function initDetailEditor() {
   descEl.addEventListener('input', updateWc);
   form._updateWc = updateWc;
 
+  document.getElementById('pde-cat-new')?.addEventListener('click', () => {
+    if (!detailState) return;
+    openFormModal({
+      title: 'Kategori baru',
+      fields: [{ name: 'name', label: 'Nama kategori', placeholder: 'Logo, Website, Poster...', required: true, full: true }],
+      submitText: 'Buat',
+      onSubmit: (v) => {
+        const n = v.name.trim();
+        if (!n) throw new Error('Nama wajib diisi.');
+        if (!showcaseGroupOrder().some((g) => g.name === n)) detailState.extraCats.push(n);
+        detailState.target = n;
+        renderDetailMedia();
+      },
+    });
+  });
   document.getElementById('pde-gallery-input').addEventListener('change', (e) => uploadMany(e.target, 'gallery'));
   document.getElementById('pde-showcase-input').addEventListener('change', (e) => uploadMany(e.target, 'showcase'));
   document.getElementById('pde-cancel').addEventListener('click', closeDetailEditor);
@@ -951,7 +991,24 @@ function initDetailEditor() {
     const row = e.target.closest('.pde-cat-row');
     if (row && detailState) {
       const name = row.dataset.cat;
-      if (e.target.closest('.pde-cat-pin')) {
+      if (e.target.closest('.pde-cat-rename')) {
+        openFormModal({
+          title: 'Ubah nama kategori',
+          fields: [{ name: 'name', label: 'Nama kategori', value: name, required: true, full: true }],
+          onSubmit: (v) => {
+            const n = v.name.trim();
+            if (!n) throw new Error('Nama wajib diisi.');
+            if (n !== name && showcaseGroupOrder().some((g) => g.name === n)) throw new Error('Nama kategori sudah dipakai.');
+            detailState.showcase.forEach((x) => { if ((x.category || '').trim() === name) x.category = n; });
+            detailState.extraCats = detailState.extraCats.map((c) => (c === name ? n : c));
+            if (detailState.target === name) detailState.target = n;
+            renderDetailMedia();
+          },
+        });
+      } else if (e.target.closest('.pde-cat-drop')) {
+        detailState.extraCats = detailState.extraCats.filter((c) => c !== name);
+        renderDetailMedia();
+      } else if (e.target.closest('.pde-cat-pin')) {
         const items = detailState.showcase.filter((x) => (x.category || '').trim() === name);
         const makeHot = !items.some((x) => x.hot);
         items.forEach((x) => { x.hot = makeHot; });
@@ -979,7 +1036,12 @@ function initDetailEditor() {
     if (!detailState) return;
     const i = Number(e.target.dataset.index);
     if (e.target.classList.contains('pde-sc-title')) detailState.showcase[i].title = e.target.value;
-    if (e.target.classList.contains('pde-sc-cat')) { detailState.showcase[i].category = e.target.value; fillCategoryList(); }
+    if (e.target.classList.contains('pde-sc-cat')) {
+      detailState.showcase[i].category = e.target.value;
+      applyGroupOrder(showcaseGroupOrder().map((g) => g.name));
+      renderDetailMedia();
+    }
+    if (e.target.id === 'pde-sc-target') detailState.target = e.target.value;
     if (e.target.classList.contains('pde-sc-src')) detailState.showcase[i].source_url = e.target.value;
     if (e.target.classList.contains('pde-sc-srclabel')) detailState.showcase[i].source_label = e.target.value;
     if (e.target.classList.contains('pde-sc-desc')) detailState.showcase[i].description = e.target.value;

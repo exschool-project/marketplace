@@ -1189,3 +1189,26 @@ body[data-role="admin"] .quick-links{ grid-template-columns:repeat(4, 1fr); }
 .pill-hot{ background:#FFE8D9; color:#B5420A; }
 .row-order{ width:24px; height:24px; border-radius:50%; background:var(--surface); color:var(--muted); font-size:.76rem; font-weight:600; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .icon-btn:disabled{ opacity:.35; cursor:default; pointer-events:none; }
+
+/* ---------- contoh hasil kerja: pilih kategori, foto dikelompokkan ---------- */
+.am-overlay:not(#product-modal):not(#drawer-backdrop){ z-index:300; }
+.pde-target{ display:flex; align-items:center; gap:8px; margin:8px 0 10px; flex-wrap:wrap; }
+.pde-target label{ font-size:.82rem; font-weight:500; color:var(--muted); }
+.pde-target select{ flex:1; min-width:140px; border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-family:inherit; font-size:.88rem; background:#fff; }
+.pde-group{ margin-top:14px; border:1px solid var(--line); border-radius:12px; padding:8px; background:#fff; display:flex; flex-direction:column; gap:8px; }
+.pde-group .pde-cat-row{ border:0; background:transparent; padding:2px 2px 2px 0; }
+.pde-group .pde-cat-row.is-hot{ background:#FFF8F1; border-radius:8px; }
+.pde-group-head.plain{ display:flex; align-items:center; gap:10px; padding:4px 8px; }
+.pde-group-head.plain em{ margin-left:auto; font-style:normal; font-size:.78rem; color:var(--muted); }
+.pde-group-empty{ margin:0; padding:10px 12px; font-size:.84rem; color:var(--muted); background:var(--surface); border-radius:8px; }
+.pde-group .pde-showcase-row{ margin:0; }
+.pde-cat-rename, .pde-cat-drop{
+  width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  border:0; border-radius:8px; background:transparent; color:#8C99A8; cursor:pointer;
+}
+.pde-cat-rename svg, .pde-cat-drop svg{ width:15px; height:15px; }
+.pde-cat-rename:hover{ background:var(--surface); color:var(--ink); }
+.pde-cat-drop:hover{ background:#FDECEC; color:#C62828; }
+.pde-cat-pin:disabled{ opacity:.35; cursor:default; }
+.pde-sc-cat{ border:1px solid var(--line); border-radius:8px; padding:9px 10px; font-family:inherit; font-size:.88rem; background:#fff; min-width:0; }
+.pde-sc-cat:focus{ outline:none; border-color:var(--blue); box-shadow:0 0 0 3px rgba(61,110,150,.15); }
