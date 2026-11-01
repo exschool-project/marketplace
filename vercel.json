@@ -58,6 +58,23 @@
   ],
   "redirects": [
     {
+      "source": "/produk",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(WhatsApp|facebookexternalhit|Facebot|TelegramBot|Twitterbot|Slackbot|Discordbot|LinkedInBot|Pinterest|SkypeUriPreview|Viber|Line/).*"
+        },
+        {
+          "type": "query",
+          "key": "id",
+          "value": "(?<pid>[0-9a-fA-F-]{8,36})"
+        }
+      ],
+      "destination": "/api/products?view=page&id=:pid",
+      "permanent": false
+    },
+    {
       "source": "/produk.html",
       "destination": "/produk",
       "permanent": true

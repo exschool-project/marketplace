@@ -264,3 +264,15 @@ Varian produk sekarang diatur di halaman sendiri (menu **Pilihan & Harga**, atau
 di baris produk), tanpa format `|`: tiap pilihan = satu baris form berisi nama pilihan,
 jenis harga (*Sama dengan harga produk* / *Harga sendiri* / *Tambahan harga*), nominal,
 dan centang *Habis*. Pratinjau "Pembeli bayar Rp…" muncul di tiap baris.
+
+
+---
+## Link pendek & preview link (WhatsApp/Telegram)
+
+- Link produk: `/produk?id=` + 8 karakter pertama id produk (link panjang lama tetap jalan).
+- Halaman `/produk` dilayani `api/products.js` (lihat `vercel.json`) memakai template `produk-page.html`
+  supaya tag Open Graph (judul, deskripsi, harga, foto) terisi per produk.
+- **PENTING:** hapus file lama `produk.html` dari repo/project. Di Vercel file statis selalu menang
+  atas rewrite, jadi kalau `produk.html` masih ada, preview akan tetap generik.
+  (`.vercelignore` dan redirect khusus bot sudah disiapkan sebagai pengaman tambahan.)
+- WhatsApp menyimpan preview lama beberapa jam; uji dengan link baru atau Facebook Sharing Debugger.

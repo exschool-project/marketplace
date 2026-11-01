@@ -127,7 +127,7 @@ h1, h2, h3, .display{
   letter-spacing:-0.02em;
 }
 
-.mono{ font-family:'JetBrains Mono', monospace; }
+.mono{ font-family:'Inter', system-ui, sans-serif; }
 a{ color:inherit; text-decoration:none; }
 img{ max-width:100%; display:block; }
 
@@ -177,7 +177,7 @@ img{ max-width:100%; display:block; }
   animation: marquee 22s linear infinite;
 }
 .banner-track span{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-weight:700;
   font-size:.82rem;
   letter-spacing:.06em;
@@ -269,7 +269,7 @@ header.site{
   flex-shrink:0;
 }
 .lang-switch button{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-weight:700;
   font-size:.72rem;
   letter-spacing:.03em;
@@ -475,7 +475,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
   display:inline-flex;
   align-items:center;
   gap:8px;
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.78rem;
   font-weight:700;
   text-transform:uppercase;
@@ -489,7 +489,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
 .hero-org{
   display:inline-flex;
   align-items:center;
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.78rem;
   font-weight:700;
   letter-spacing:.06em;
@@ -528,7 +528,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
   display:block;
 }
 .hero-stats .stat span{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.72rem;
   text-transform:uppercase;
   letter-spacing:.05em;
@@ -578,7 +578,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
 /* ---------- STATE: loading / kosong / error ---------- */
 .grid-msg{
   grid-column: 1 / -1;
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.85rem;
   color:#3E6B85;
   padding:24px 0;
@@ -601,7 +601,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
   padding:38px 24px 34px;
 }
 .shop-breadcrumb{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.74rem;
   letter-spacing:.03em;
   text-transform:uppercase;
@@ -616,7 +616,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
 
 .shop-section{ padding-top:36px; }
 .shop-result-count{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.76rem;
   text-transform:uppercase;
   letter-spacing:.03em;
@@ -634,7 +634,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
 .section-head h2{ font-size:clamp(1.6rem,3vw,2.2rem); }
 .section-head p{ margin:6px 0 0; color:#3E6B85; font-size:.92rem; }
 .section-head .see-all{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-weight:700;
   font-size:.82rem;
   text-transform:uppercase;
@@ -678,18 +678,18 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
 .pcard .badge{
   position:absolute; top:10px; right:10px;
   background:var(--green); color:#fff;
-  font-family:'JetBrains Mono', monospace; font-size:.65rem; font-weight:700;
+  font-family:'Inter', system-ui, sans-serif; font-size:.65rem; font-weight:700;
   padding:3px 8px; border-radius: 999px; text-transform:uppercase; letter-spacing:.04em;
 }
 .pcard .body{ padding:14px 16px 18px; }
 .pcard .shop{
-  font-family:'JetBrains Mono', monospace; font-size:.68rem; color:#3E6B85;
+  font-family:'Inter', system-ui, sans-serif; font-size:.68rem; color:#3E6B85;
   text-transform:uppercase; letter-spacing:.04em; margin-bottom:5px;
 }
 .pcard .name{ font-weight:700; font-size:.95rem; margin-bottom:10px; }
 .pcard .price-row{ display:flex; align-items:baseline; gap:8px; }
-.pcard .price{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:1.15rem; }
-.pcard .old{ font-family:'JetBrains Mono', monospace; font-size:.78rem; color:#7FA8BD; text-decoration:line-through; }
+.pcard .price{ font-family:'Inter', system-ui, sans-serif; font-weight:700; font-size:1.15rem; }
+.pcard .old{ font-family:'Inter', system-ui, sans-serif; font-size:.78rem; color:#7FA8BD; text-decoration:line-through; }
 .pcard .addbtn{
   margin-top:12px; width:100%;
   border:1px solid var(--border);
@@ -783,7 +783,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
 .intro-point{ display:flex; gap:16px; align-items:flex-start; }
 .intro-point-num{
   flex-shrink:0;
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-weight:700;
   font-size:.82rem;
   color:var(--blue-deep);
@@ -846,7 +846,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
   padding:24px 20px;
 }
 .why-card .num{
-  font-family:'JetBrains Mono', monospace; font-weight:700; color:#BFE3F2;
+  font-family:'Inter', system-ui, sans-serif; font-weight:700; color:#BFE3F2;
   font-size:.8rem; margin-bottom:14px; display:block;
 }
 .why-card h3{ font-size:1.1rem; margin-bottom:8px; }
@@ -920,7 +920,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
 .order-modal-close:hover{ background:var(--blue); color:var(--paper); }
 .order-modal h2{ font-size:1.25rem; margin:10px 0 4px; }
 .order-product-price{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-weight:700; font-size:1.1rem;
   color:var(--green-deep);
   margin:0 0 20px;
@@ -951,7 +951,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
   margin:0 auto;
 }
 .order-status-badge{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.72rem; font-weight:700;
   text-transform:uppercase;
   letter-spacing:.03em;
@@ -972,13 +972,13 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
   padding:18px 20px;
 }
 .order-summary-code{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-weight:700; font-size:1rem;
   letter-spacing:.03em;
 }
 .order-summary-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:8px; }
 .order-summary-product{ font-weight:700; font-size:.95rem; }
-.order-summary-price{ font-family:'JetBrains Mono', monospace; color:var(--green-deep); font-size:.9rem; }
+.order-summary-price{ font-family:'Inter', system-ui, sans-serif; color:var(--green-deep); font-size:.9rem; }
 
 .chat-wrap{
   display:flex; flex-direction:column;
@@ -1000,7 +1000,7 @@ header.site.is-scrolled{ box-shadow: var(--shadow-sm); }
 }
 .chat-bubble .chat-meta{
   display:block;
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.65rem;
   text-transform:uppercase;
   opacity:.65;
@@ -1066,7 +1066,7 @@ footer{
 .foot-desc{ font-size:.85rem; max-width:32ch; margin:0; color:var(--green-deep); }
 .social-links{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
 .social-links a{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.72rem;
   font-weight:700;
   text-transform:uppercase;
@@ -1082,7 +1082,7 @@ footer{
   border-top:1px solid var(--border);
   padding-top:16px;
   display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
-  font-family:'JetBrains Mono', monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em;
+  font-family:'Inter', system-ui, sans-serif; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em;
   color:var(--green-deep);
 }
 
@@ -1175,7 +1175,7 @@ footer{
 
 .pd-info{ display:flex; flex-direction:column; gap:14px; min-width:0; }
 .pd-shop{
-  margin:0; font-family:'JetBrains Mono', monospace; font-size:.74rem; color:#3E6B85;
+  margin:0; font-family:'Inter', system-ui, sans-serif; font-size:.74rem; color:#3E6B85;
   text-transform:uppercase; letter-spacing:.05em;
 }
 .pd-shop a{ color:inherit; }
@@ -1185,7 +1185,7 @@ footer{
 }
 .pd-badge{
   display:inline-block; vertical-align:middle; margin-left:6px;
-  background:var(--green); color:#fff; font-family:'JetBrains Mono', monospace;
+  background:var(--green); color:#fff; font-family:'Inter', system-ui, sans-serif;
   font-size:.65rem; font-weight:700; padding:3px 9px; border-radius:999px;
   text-transform:uppercase; letter-spacing:.04em;
 }
@@ -1193,8 +1193,8 @@ footer{
 .pd-rating:hover span:last-child{ text-decoration:underline; }
 .pd-stars{ color:var(--gold-deep); letter-spacing:2px; }
 .pd-price-row{ display:flex; align-items:baseline; flex-wrap:wrap; gap:12px; margin-top:2px; }
-.pd-price{ font-family:'JetBrains Mono', monospace; font-weight:700; font-size:clamp(1.6rem, 3.4vw, 2.1rem); }
-.pd-old{ font-family:'JetBrains Mono', monospace; font-size:1rem; color:#7FA8BD; text-decoration:line-through; }
+.pd-price{ font-family:'Inter', system-ui, sans-serif; font-weight:700; font-size:clamp(1.6rem, 3.4vw, 2.1rem); }
+.pd-old{ font-family:'Inter', system-ui, sans-serif; font-size:1rem; color:#7FA8BD; text-decoration:line-through; }
 .pd-save{
   background:#FFF4D6; color:var(--gold-deep); border:1px solid #E8D49A;
   font-size:.74rem; font-weight:700; padding:3px 9px; border-radius:999px;
@@ -1321,8 +1321,8 @@ footer{
     padding:10px 16px calc(10px + env(safe-area-inset-bottom));
     background:#fff; border-top:1px solid var(--border); box-shadow:0 -6px 18px rgba(15,35,60,.1);
   }
-  .pd-sticky-buy strong{ font-family:'JetBrains Mono', monospace; font-size:1.1rem; display:block; }
-  .pd-sticky-buy small{ color:#7FA8BD; text-decoration:line-through; font-family:'JetBrains Mono', monospace; }
+  .pd-sticky-buy strong{ font-family:'Inter', system-ui, sans-serif; font-size:1.1rem; display:block; }
+  .pd-sticky-buy small{ color:#7FA8BD; text-decoration:line-through; font-family:'Inter', system-ui, sans-serif; }
   .pd-sticky-buy .btn{ flex:1; max-width:220px; }
   .pd-body{ padding-bottom:110px; }
 }
@@ -1428,7 +1428,7 @@ footer{
 .pd-sc-chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
 .pd-sc-chip:focus-visible{ outline:2px solid var(--blue-deep); outline-offset:2px; }
 .pd-showcase-cat{
-  font-family:'JetBrains Mono', monospace; font-size:.66rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  font-family:'Inter', system-ui, sans-serif; font-size:.66rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
   background:#EAF1F7; color:var(--blue-deep); padding:3px 9px; border-radius:999px;
 }
 .pd-showcase-source, .pd-lb-source{
@@ -1436,7 +1436,7 @@ footer{
 }
 .pd-showcase-source:hover{ color:var(--ink); }
 .pd-lb-source{ color:#BFE3F2; }
-.pd-lb-cat{ align-self:flex-start; font-family:'JetBrains Mono', monospace; font-size:.66rem; text-transform:uppercase; letter-spacing:.05em; background:rgba(255,255,255,.18); padding:3px 9px; border-radius:999px; }
+.pd-lb-cat{ align-self:flex-start; font-family:'Inter', system-ui, sans-serif; font-size:.66rem; text-transform:uppercase; letter-spacing:.05em; background:rgba(255,255,255,.18); padding:3px 9px; border-radius:999px; }
 .pd-lb-cat:empty{ display:none; }
 
 /* =====================================================================
@@ -1456,9 +1456,9 @@ footer{
 }
 .buy-thumb img{ width:100%; height:auto; display:block; object-fit:contain; }
 .buy-product-info{ min-width:0; }
-.buy-shop{ margin:0 0 4px; font-family:'JetBrains Mono', monospace; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:#3E6B85; }
+.buy-shop{ margin:0 0 4px; font-family:'Inter', system-ui, sans-serif; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:#3E6B85; }
 .buy-product h1{ margin:0 0 8px; font-family:'Space Grotesk', sans-serif; font-size:1.25rem; line-height:1.3; overflow-wrap:anywhere; }
-.buy-price{ margin:0; font-family:'JetBrains Mono', monospace; display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
+.buy-price{ margin:0; font-family:'Inter', system-ui, sans-serif; display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
 .buy-price strong{ font-size:1.5rem; color:#B00020; }
 .buy-price s{ font-size:.85rem; color:#7FA8BD; }
 .buy-delivery{ margin:8px 0 0; font-size:.86rem; color:#1C7A5C; display:flex; align-items:center; gap:6px; }
@@ -1481,7 +1481,7 @@ footer{
 .buy-qty{ display:flex; border:1px solid var(--border-strong); border-radius:var(--radius-sm); overflow:hidden; }
 .buy-qty button{ width:42px; height:42px; border:0; background:var(--surface); font-size:1.2rem; cursor:pointer; color:var(--ink); }
 .buy-qty button:hover{ background:var(--border); }
-.buy-qty input{ width:64px; height:42px; border:0; border-left:1px solid var(--border-strong); border-right:1px solid var(--border-strong); text-align:center; font-family:'JetBrains Mono', monospace; font-size:1rem; -moz-appearance:textfield; }
+.buy-qty input{ width:64px; height:42px; border:0; border-left:1px solid var(--border-strong); border-right:1px solid var(--border-strong); text-align:center; font-family:'Inter', system-ui, sans-serif; font-size:1rem; -moz-appearance:textfield; }
 .buy-qty input::-webkit-outer-spin-button, .buy-qty input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
 .buy-card .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:.85rem; }
 .buy-card .field:last-child{ margin-bottom:0; }
@@ -1496,7 +1496,7 @@ footer{
 .buy-summary dd{ margin:0; font-weight:600; text-align:right; overflow-wrap:anywhere; }
 .buy-summary .buy-total{ padding-top:12px; border-top:1px solid var(--border); font-size:1.05rem; }
 .buy-summary .buy-total dt{ color:var(--ink); font-weight:700; }
-.buy-summary .buy-total dd{ font-family:'JetBrains Mono', monospace; color:#B00020; font-size:1.2rem; }
+.buy-summary .buy-total dd{ font-family:'Inter', system-ui, sans-serif; color:#B00020; font-size:1.2rem; }
 .buy-submit{ width:100%; padding:14px; font-size:1rem; }
 .buy-submit:disabled{ opacity:.6; cursor:wait; }
 .buy-note{ margin:12px 0 0; font-size:.78rem; color:#3E6B85; line-height:1.5; }
@@ -1890,3 +1890,19 @@ footer{ background:#fff; border-top:1px solid var(--line); padding:28px 24px 24p
   box-shadow:0 10px 28px rgba(15,27,45,.28); transition:opacity .25s ease, transform .3s cubic-bezier(.22,.8,.3,1);
 }
 .pd-toast.show{ opacity:1; transform:translate(-50%, 0); }
+
+
+/* =====================================================================
+   PERBAIKAN v14 — halaman produk & beli lebih rapi
+   ===================================================================== */
+/* label kecil bergaya kode (huruf kapital + jarak huruf) -> kalimat biasa */
+.pd-shop, .buy-shop{ font-size:.86rem; font-weight:500; color:var(--muted); text-transform:none; letter-spacing:0; }
+.pd-shop a{ color:var(--green); }
+.pd-badge{ text-transform:none; letter-spacing:0; font-size:.72rem; font-weight:600; padding:3px 10px; }
+.pd-lb-cat, .buy-total dt{ text-transform:none; letter-spacing:0; }
+.pd-price, .buy-price, .pcard .price, .pd-sticky-buy strong{ font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+
+/* grid testimoni: kartu mengikuti jumlahnya (satu kartu tidak lagi menyempit 1/3 lebar) */
+.testi-grid{ grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); }
+.testi-grid:has(> :only-child) > .testi-card{ max-width:560px; }
+@media (max-width:560px){ .testi-grid{ grid-template-columns:1fr; } }

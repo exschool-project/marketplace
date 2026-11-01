@@ -197,7 +197,7 @@ async function serveProductPage(req, res, supabase) {
   try {
     const id = String(req.query.id || '');
     if (id && isValidProductId(id)) {
-      let query = supabase.from('products').select('id, name, price, description, image_url, gallery').eq('is_active', true);
+      let query = supabase.from('products').select('*').eq('is_active', true);
       query = applyIdFilter(query, id);
       const { data } = await query.limit(1);
       const product = data && data[0];

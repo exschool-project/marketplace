@@ -15,7 +15,7 @@
   background:#E53935;
   color:#fff;
   border:1px solid var(--border);
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.65rem;
   font-weight:700;
   line-height:15px;
@@ -117,7 +117,7 @@
 }
 .profile-info-list > div:last-child{ border-bottom:none; padding-bottom:0; }
 .profile-info-list dt{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.68rem;
   text-transform:uppercase;
   letter-spacing:.03em;
@@ -199,7 +199,7 @@
    OWNER = emas (paling menonjol), ADMIN = biru sedang, CS = biru tua
    (biar beda level kelihatan jelas), MEMBER polos putih. */
 .role-badge{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.68rem;
   font-weight:700;
   text-transform:uppercase;
@@ -241,7 +241,7 @@
   display:block;
   text-align:center;
   margin-top:16px;
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.75rem;
   text-transform:uppercase;
 }
@@ -333,7 +333,7 @@
 .admin-nav-link.active{ background: var(--green); color:#fff; }
 .admin-nav-link.active .icon-inline{ color:#fff; }
 .admin-nav-group-label{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.66rem;
   font-weight:700;
   text-transform:uppercase;
@@ -388,7 +388,7 @@
   line-height:1;
 }
 .stat-label{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.7rem;
   text-transform:uppercase;
   color:#3E6B85;
@@ -501,7 +501,7 @@
 .admin-row-text{ flex:1; font-size:.88rem; font-weight:500; min-width:160px; }
 .admin-row-sub{ color:#3E6B85; font-size:.78rem; }
 .admin-row-tag{
-  font-family:'JetBrains Mono', monospace;
+  font-family:'Inter', system-ui, sans-serif;
   font-size:.68rem;
   text-transform:uppercase;
   padding:3px 8px;
@@ -597,7 +597,7 @@
   display:flex; align-items:center; justify-content:space-between; gap:8px;
   white-space:nowrap; overflow:hidden;
 }
-.cs-order-row-time{ font-family:'JetBrains Mono', monospace; font-size:.66rem; color:#7FA8BD; flex-shrink:0; }
+.cs-order-row-time{ font-family:'Inter', system-ui, sans-serif; font-size:.66rem; color:#7FA8BD; flex-shrink:0; }
 
 .cs-chat-panel{ flex:1; display:flex; flex-direction:column; min-width:0; min-height:0; }
 .cs-empty-state{
@@ -765,7 +765,7 @@ a.stat-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
 .pde-option-head{ display:flex; gap:8px; align-items:center; }
 .pde-option-head input{ flex:1; min-width:0; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; font-weight:700; }
 .pde-option-head .pde-remove{ position:static; flex-shrink:0; }
-.pde-option-group textarea{ width:100%; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; font-family:'JetBrains Mono', monospace; font-size:.84rem; }
+.pde-option-group textarea{ width:100%; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 10px; font-family:'Inter', system-ui, sans-serif; font-size:.84rem; }
 
 /* ---------- Pilihan & Harga ---------- */
 .opt-base{ margin:0 0 14px; font-size:.9rem; color:#3E6B85; }
@@ -773,13 +773,13 @@ a.stat-card:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); }
 .opt-group-head{ display:flex; gap:10px; align-items:center; }
 .opt-group-head input{ flex:1; min-width:0; border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1rem; background:#fff; }
 .opt-cols, .opt-row{ display:grid; grid-template-columns:minmax(120px,1.1fr) minmax(210px,1.4fr) minmax(110px,.9fr) 78px 34px; gap:8px; align-items:center; }
-.opt-cols{ font-family:'JetBrains Mono', monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:#6B8CA3; padding:0 2px; }
+.opt-cols{ font-family:'Inter', system-ui, sans-serif; font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:#6B8CA3; padding:0 2px; }
 .opt-row{ background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px; }
 .opt-row input[type=text], .opt-row input[type=number], .opt-row select{ width:100%; min-width:0; border:1px solid var(--border); border-radius:6px; padding:8px 10px; font-size:.88rem; background:#fff; }
 .opt-row input:disabled{ background:var(--surface); color:#9AAEBD; }
 .opt-soldout{ display:flex; align-items:center; gap:6px; font-size:.82rem; cursor:pointer; }
 .opt-row .pde-remove{ position:static; }
-.opt-preview-text{ grid-column:1 / -1; font-size:.78rem; color:#1C7A5C; font-family:'JetBrains Mono', monospace; padding:0 2px; }
+.opt-preview-text{ grid-column:1 / -1; font-size:.78rem; color:#1C7A5C; font-family:'Inter', system-ui, sans-serif; padding:0 2px; }
 @media (max-width:760px){
   .opt-cols{ display:none; }
   .opt-row{ grid-template-columns:1fr 1fr; }

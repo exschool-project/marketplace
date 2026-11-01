@@ -249,7 +249,7 @@ function renderProduct() {
       </div>
     </section>
 
-    ${tabs.length ? `<nav class="pd-tabs" id="pd-tabs" aria-label="Bagian halaman"><div class="pd-tabs-inner">${tabs.map(([id, label]) => `<a href="#${id}" data-target="${id}">${escapeHtml(label)}</a>`).join('')}</div></nav>` : ''}
+    ${tabs.length > 1 ? `<nav class="pd-tabs" id="pd-tabs" aria-label="Bagian halaman"><div class="pd-tabs-inner">${tabs.map(([id, label]) => `<a href="#${id}" data-target="${id}">${escapeHtml(label)}</a>`).join('')}</div></nav>` : ''}
 
     <div class="pd-body">
       ${(hasDesc || features.length) ? `
