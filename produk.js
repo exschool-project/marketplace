@@ -46,6 +46,8 @@ const PD_TEXT = {
     all: 'Semua',
     hot: 'Hot',
     other: 'Lainnya',
+    share: 'Bagikan',
+    copied: 'Link disalin',
     source: 'Sumber',
     category: 'Kategori',
   },
@@ -82,6 +84,8 @@ const PD_TEXT = {
     all: 'All',
     hot: 'Hot',
     other: 'Other',
+    share: 'Share',
+    copied: 'Link copied',
     source: 'Source',
     category: 'Category',
   },
@@ -223,6 +227,8 @@ function renderProduct() {
         <h1 class="pd-title">${escapeHtml(p.name)}${p.badge ? ` <span class="pd-badge">${escapeHtml(p.badge)}</span>` : ''}</h1>
         ${ownReviews.length ? `<a class="pd-rating" href="#pd-reviews"><span class="pd-stars">${starsHTML(avg)}</span> <strong>${avg.toFixed(1)}</strong> <span>(${escapeHtml(pt('reviewCount')(ownReviews.length))})</span></a>` : ''}
 
+        <div class="pd-share-row"><button type="button" class="pd-share" id="pd-share">${ICONS.share}<span>${escapeHtml(pt('share'))}</span></button></div>
+
         <div class="pd-price-row">
           <span class="pd-price">${pdRupiah(range.min)}${ranged ? `<span class="pd-range-sep">–</span>${pdRupiah(range.max)}` : ''}</span>
           ${p.old_price && !ranged ? `<span class="pd-old">${pdRupiah(p.old_price)}</span>` : ''}
@@ -295,6 +301,9 @@ function renderProduct() {
 
   bindGallery(images);
   bindShowcase(scGroups);
+  document.getElementById('pd-share')?.addEventListener('click', () => shareProduct(p));
+  // samakan alamat di address bar dengan link pendek, supaya yang disalin dari sana juga rapi
+  try { history.replaceState(null, '', `${location.pathname}?id=${shortProductId(p.id)}${location.hash}`); } catch (e) { /* abaikan */ }
   bindTabs();
 }
 
@@ -345,6 +354,36 @@ function bindGallery(images) {
     thumbs.querySelectorAll('.pd-thumb').forEach((b) => b.classList.toggle('active', b === btn));
   });
   mainBtn?.addEventListener('click', () => openLightbox(images.map((u) => ({ url: u, title: '', description: '' })), current));
+}
+
+// Toast kecil di bawah layar (halaman publik tidak memuat komponen admin)
+function pdToast(msg) {
+  let el = document.getElementById('pd-toast');
+  if (!el) { el = document.createElement('div'); el.id = 'pd-toast'; el.className = 'pd-toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// Bagikan: lembar bagikan bawaan HP kalau ada, kalau tidak salin link pendek.
+async function shareProduct(p) {
+  const url = productShareURL(p.id);
+  const data = { title: p.name, text: `${p.name} — ${pdRupiah(p.price)}`, url };
+  if (navigator.share) {
+    try { await navigator.share(data); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (err) { /* abaikan */ }
+    ta.remove();
+  }
+  pdToast(pt('copied'));
 }
 
 function bindShowcase(groups) {

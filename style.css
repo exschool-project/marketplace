@@ -1872,3 +1872,21 @@ footer{ background:#fff; border-top:1px solid var(--line); padding:28px 24px 24p
 @media (prefers-reduced-motion: reduce){
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation:none !important; }
 }
+
+
+/* ---------- tombol bagikan & toast halaman produk ---------- */
+.pd-share-row{ display:flex; margin:2px 0 12px; }
+.pd-share{
+  display:inline-flex; align-items:center; gap:7px; padding:7px 14px; border:1px solid var(--line); border-radius:999px;
+  background:#fff; color:var(--ink); font-family:'Inter', sans-serif; font-size:.84rem; font-weight:500; cursor:pointer;
+  transition:background-color .2s ease, border-color .2s ease, transform .15s ease;
+}
+.pd-share:hover{ background:var(--surface); border-color:var(--border-strong); }
+.pd-share:active{ transform:scale(.96); }
+.pd-share svg{ width:16px; height:16px; }
+.pd-toast{
+  position:fixed; left:50%; bottom:92px; z-index:500; transform:translate(-50%, 12px); opacity:0; pointer-events:none;
+  padding:10px 18px; border-radius:999px; background:var(--ink); color:#fff; font-size:.88rem; font-weight:500;
+  box-shadow:0 10px 28px rgba(15,27,45,.28); transition:opacity .25s ease, transform .3s cubic-bezier(.22,.8,.3,1);
+}
+.pd-toast.show{ opacity:1; transform:translate(-50%, 0); }

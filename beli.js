@@ -18,14 +18,14 @@ function renderBuy() {
   document.title = `Beli ${p.name} — EX-SCHOOL`;
   const crumb = document.getElementById('buy-crumb-product');
   crumb.textContent = p.name;
-  crumb.href = `produk.html?id=${encodeURIComponent(p.id)}`;
+  crumb.href = productPath(p.id);
 
   const groups = optGroups();
   const saved = loadBuyer();
 
   document.getElementById('buy-root').innerHTML = `
     <div class="buy-wrap">
-      <a class="buy-back" href="produk.html?id=${encodeURIComponent(p.id)}">← Kembali ke detail produk</a>
+      <a class="buy-back" href="${productPath(p.id)}">← Kembali ke detail produk</a>
 
       <form id="buy-form" class="buy-grid" novalidate>
         <div class="buy-main">

@@ -242,10 +242,10 @@ function productCardHTML(p) {
     <div class="pcard">
       <div class="hole"></div>
       ${p.badge ? `<span class="badge">${escapeHtml(p.badge)}</span>` : ''}
-      <a class="thumb" href="produk.html?id=${encodeURIComponent(p.id)}" aria-label="${escapeHtml(p.name)}">${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy">` : (p.icon ? escapeHtml(p.icon) : ICONS.box)}</a>
+      <a class="thumb" href="${productPath(p.id)}" aria-label="${escapeHtml(p.name)}">${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy">` : (p.icon ? escapeHtml(p.icon) : ICONS.box)}</a>
       <div class="body">
         <div class="shop">${escapeHtml(p.shop_name)}</div>
-        <a class="name" href="produk.html?id=${encodeURIComponent(p.id)}">${escapeHtml(p.name)}</a>
+        <a class="name" href="${productPath(p.id)}">${escapeHtml(p.name)}</a>
         <div class="price-row">
           ${ranged ? '<span class="from">dari</span>' : ''}<span class="price">${rupiah(range.min)}</span>
           ${p.old_price && !ranged ? `<span class="old">${rupiah(p.old_price)}</span>` : ''}
@@ -479,6 +479,12 @@ async function initNavAccountButton() {
 // ---------- Animasi: scroll-reveal, shadow nav, count-up angka ----------
 // Semua "no-op" dengan aman kalau elemennya nggak ada di halaman ini
 // (mis. belanja.html nggak punya .reveal/.stat-item sama sekali).
+// Link produk pendek: 8 karakter pertama id (mis. /produk?id=c78e415f).
+// API menerima id pendek maupun id penuh.
+const shortProductId = (id) => String(id || '').slice(0, 8);
+const productPath = (id) => `produk?id=${encodeURIComponent(shortProductId(id))}`;
+const productShareURL = (id) => `${location.origin}/${productPath(id)}`;
+
 function initScrollReveal() {
   const targets = document.querySelectorAll('.reveal, .reveal-stagger');
   if (!targets.length) return;

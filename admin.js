@@ -527,6 +527,7 @@ async function loadProductsAdmin() {
         <button type="button" class="btn btn-sm edit-product">Edit</button>
         <button type="button" class="btn btn-sm edit-detail">Detail</button>
         <button type="button" class="btn btn-sm edit-options">Harga</button>
+        ${iconBtn(ICONS.link, 'Salin link produk', 'copy-link')}
         ${iconBtn(STAR_SVG, p.is_featured ? 'Lepas dari unggulan' : 'Jadikan unggulan', `toggle-featured ${p.is_featured ? 'is-on' : ''}`)}
         ${switchHTML(p.is_active, 'toggle-product')}
         ${iconBtn(ICONS.trash, 'Hapus', 'delete-product danger')}
@@ -645,6 +646,12 @@ document.getElementById('product-list')?.addEventListener('click', async (e) => 
   const id = row.dataset.id;
   const product = productsCache.find((x) => String(x.id) === String(id));
 
+  if (e.target.closest('.copy-link')) {
+    const url = `${location.origin}/produk?id=${String(id).slice(0, 8)}`;
+    try { await navigator.clipboard.writeText(url); notify('Link produk disalin.', 'success'); }
+    catch (err) { window.prompt && notify(url, 'info'); }
+    return;
+  }
   if (e.target.closest('.edit-product')) { openProductModal(product); return; }
   if (e.target.closest('.edit-detail')) { openDetailEditor(id); return; }
   if (e.target.closest('.edit-options')) {
@@ -902,7 +909,7 @@ function openDetailEditor(id) {
   document.getElementById('product-detail-form')._updateWc?.();
   document.getElementById('pde-faq').value = (Array.isArray(p.faq) ? p.faq : []).map((f) => `${f.q} | ${f.a}`).join('\n');
   document.getElementById('pde-status').textContent = '';
-  document.getElementById('pde-preview').href = `produk.html?id=${encodeURIComponent(id)}`;
+  document.getElementById('pde-preview').href = `produk?id=${encodeURIComponent(String(id).slice(0, 8))}`;
   document.getElementById('pde-gallery-input').value = '';
   document.getElementById('pde-showcase-input').value = '';
   renderDetailMedia();

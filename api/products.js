@@ -1,6 +1,8 @@
 const { getSupabaseAdmin } = require('./_lib/supabaseAdmin');
 const { getUserFromRequest, requireAdmin, roleLevel } = require('./_lib/auth');
 const { withErrorHandling } = require('./_lib/http');
+const fs = require('fs');
+const path = require('path');
 
 const EDITABLE_FIELDS = [
   'name', 'shop_name', 'price', 'old_price',
@@ -87,6 +89,134 @@ function cleanDetailField(key, value) {
 }
 const DETAIL_FIELDS = ['description', 'features', 'gallery', 'showcase', 'faq', 'delivery_time', 'options'];
 
+
+// ---------------------------------------------------------------------
+// Link pendek & preview link (Open Graph)
+// - Produk bisa dibuka lewat 8 karakter pertama id: /produk?id=c78e415f
+// - /produk dilayani fungsi ini (lihat vercel.json) supaya WhatsApp,
+//   Telegram, Facebook, dll. — yang tidak menjalankan JavaScript —
+//   mendapat judul, deskripsi, harga, dan foto produk di tag <meta>.
+// ---------------------------------------------------------------------
+const FULL_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const SHORT_ID = /^[0-9a-f]{8}$/i;
+const SITE_NAME = 'EX-SCHOOL';
+
+function isValidProductId(id) {
+  return FULL_UUID.test(id) || SHORT_ID.test(id);
+}
+
+// id penuh -> cocok persis; id pendek -> cocok semua uuid berawalan itu
+function applyIdFilter(query, id) {
+  if (SHORT_ID.test(id)) {
+    const p = id.toLowerCase();
+    return query.gte('id', `${p}-0000-0000-0000-000000000000`).lte('id', `${p}-ffff-ffff-ffff-ffffffffffff`);
+  }
+  return query.eq('id', id);
+}
+
+const escAttr = (v) => String(v == null ? '' : v)
+  .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const idr = (n) => 'Rp' + String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+// Foto Cloudinary dijadikan JPG ringan (lebar 1200) supaya cepat & pasti muncul di preview.
+function ogImage(url) {
+  const u = String(url || '');
+  if (!/^https?:\/\//i.test(u)) return '';
+  if (/^https?:\/\/res\.cloudinary\.com\/.+\/image\/upload\//.test(u) && !/\/image\/upload\/[^/]*(f_|w_|c_)/.test(u)) {
+    return u.replace('/image/upload/', '/image/upload/f_jpg,q_auto,c_limit,w_1200/');
+  }
+  return u;
+}
+
+function buildProductMeta(p, origin) {
+  const plain = String(p.description || '').replace(/\s+/g, ' ').trim();
+  const snippet = plain.length > 110 ? `${plain.slice(0, 110).trimEnd()}…` : plain;
+  const price = idr(p.price);
+  const description = `${snippet || `${p.name} di ${SITE_NAME}`} • ${price}`;
+  const firstGallery = Array.isArray(p.gallery) && p.gallery.length ? p.gallery[0] : '';
+  return {
+    title: `${p.name} — ${SITE_NAME}`,
+    description,
+    url: `${origin}/produk?id=${String(p.id).slice(0, 8)}`,
+    image: ogImage(p.image_url || firstGallery),
+    price: Math.round(Number(p.price) || 0),
+    name: p.name,
+  };
+}
+
+function injectProductMeta(template, m) {
+  const tags = [
+    `<meta name="description" content="${escAttr(m.description)}">`,
+    `<link rel="canonical" href="${escAttr(m.url)}">`,
+    `<meta property="og:type" content="product">`,
+    `<meta property="og:site_name" content="${SITE_NAME}">`,
+    `<meta property="og:locale" content="id_ID">`,
+    `<meta property="og:title" content="${escAttr(m.title)}">`,
+    `<meta property="og:description" content="${escAttr(m.description)}">`,
+    `<meta property="og:url" content="${escAttr(m.url)}">`,
+    m.image ? `<meta property="og:image" content="${escAttr(m.image)}">` : '',
+    m.image ? `<meta property="og:image:alt" content="${escAttr(m.name)}">` : '',
+    `<meta property="product:price:amount" content="${m.price}">`,
+    `<meta property="product:price:currency" content="IDR">`,
+    `<meta name="twitter:card" content="${m.image ? 'summary_large_image' : 'summary'}">`,
+    `<meta name="twitter:title" content="${escAttr(m.title)}">`,
+    `<meta name="twitter:description" content="${escAttr(m.description)}">`,
+    m.image ? `<meta name="twitter:image" content="${escAttr(m.image)}">` : '',
+  ].filter(Boolean).join('\n');
+
+  let html = template
+    .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escAttr(m.title)}</title>`)
+    .replace(/<meta name="description"[^>]*>\s*/i, '');
+  return html.replace('</head>', `${tags}\n</head>`);
+}
+
+function readProductTemplate() {
+  const candidates = [
+    path.join(process.cwd(), 'produk-page.html'),
+    path.join(__dirname, '..', 'produk-page.html'),
+  ];
+  for (const f of candidates) {
+    try { return fs.readFileSync(f, 'utf8'); } catch (e) { /* coba lokasi lain */ }
+  }
+  return null;
+}
+
+// Melayani halaman /produk: template HTML yang sama + tag preview sesuai produk.
+async function serveProductPage(req, res, supabase) {
+  const template = readProductTemplate();
+  if (!template) {
+    // template tak ikut ter-deploy -> arahkan ke file statis (halaman tetap jalan)
+    const qs = req.url && req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    res.statusCode = 307;
+    res.setHeader('Location', `/produk-page${qs.replace(/([?&])view=page&?/, '$1').replace(/[?&]$/, '')}`);
+    res.end();
+    return;
+  }
+
+  let html = template;
+  try {
+    const id = String(req.query.id || '');
+    if (id && isValidProductId(id)) {
+      let query = supabase.from('products').select('id, name, price, description, image_url, gallery').eq('is_active', true);
+      query = applyIdFilter(query, id);
+      const { data } = await query.limit(1);
+      const product = data && data[0];
+      if (product) {
+        const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
+        const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0];
+        html = injectProductMeta(template, buildProductMeta(product, `${proto}://${host}`));
+      }
+    }
+  } catch (err) {
+    console.error('[produk page meta]', err); // gagal ambil meta -> tetap sajikan halaman biasa
+  }
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  // di-cache singkat di CDN; bot preview tidak membebani database
+  res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
+  res.status(200).send(html);
+}
+
 // Satu file menangani /api/products (list & create) DAN /api/products?id=xxx
 // (ambil satu, update, hapus) — digabung supaya jumlah Vercel Functions
 // tetap di bawah batas 12 pada paket Hobby.
@@ -94,19 +224,30 @@ module.exports = withErrorHandling(async (req, res) => {
   const supabase = getSupabaseAdmin();
   const { id } = req.query;
 
-  // ---------- GET satu produk (?id=xxx) ----------
+  // ---------- Halaman /produk (di-rewrite dari vercel.json) ----------
+  if (req.method === 'GET' && req.query.view === 'page') {
+    await serveProductPage(req, res, supabase);
+    return;
+  }
+
+  // ---------- GET satu produk (?id=xxx — id penuh atau 8 karakter pertama) ----------
   if (req.method === 'GET' && id) {
+    if (!isValidProductId(String(id))) {
+      res.status(404).json({ error: 'Produk tidak ditemukan.' });
+      return;
+    }
     const ctx = await getUserFromRequest(req);
     const isAdmin = roleLevel(ctx?.profile?.role) >= roleLevel('admin');
 
     let query = supabase
       .from('products')
-      .select('*, category:categories(id, name, slug)')
-      .eq('id', id);
+      .select('*, category:categories(id, name, slug)');
+    query = applyIdFilter(query, String(id));
 
     if (!isAdmin) query = query.eq('is_active', true);
 
-    const { data, error } = await query.maybeSingle();
+    const { data: rows, error } = await query.limit(1);
+    const data = rows && rows[0];
     if (error) {
       res.status(500).json({ error: error.message });
       return;
@@ -256,3 +397,6 @@ module.exports = withErrorHandling(async (req, res) => {
   res.setHeader('Allow', 'GET, POST, PUT, DELETE');
   res.status(405).json({ error: 'Method not allowed' });
 });
+
+// dipakai untuk pengujian lokal
+module.exports._test = { buildProductMeta, injectProductMeta, applyIdFilter, isValidProductId, ogImage };
