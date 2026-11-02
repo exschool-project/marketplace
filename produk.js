@@ -514,24 +514,30 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ---------- load ----------
-function showError(message) {
+function showError(err) {
   const root = document.getElementById('pd-root');
-  root.innerHTML = `
-    <div class="pd-error">
-      <p>${escapeHtml(message)}</p>
-      <a class="btn btn-green brutal-sm" href="belanja.html">${escapeHtml(pt('backShop'))}</a>
-    </div>`;
+  const e = typeof err === 'string' ? new Error(err) : err;
+  const notFound = e && (e.status === 404 || /tidak ditemukan|not found/i.test(e.message));
+  const back = [{ label: pt('backShop'), href: 'belanja', primary: true }];
+  // pesan lama (pt('notFound')) tetap dipakai untuk 404 supaya terjemahan ID/EN jalan
+  ExState.mountHero(root, ExState.heroFromError(e, {
+    embed: true,
+    onRetry: () => { root.innerHTML = ExState.loading(); loadProductPage(); },
+    actions: back,
+    title: notFound ? 'Produk tidak tersedia' : undefined,
+    notFoundMessage: notFound ? 'Produk yang kamu cari sudah tidak tersedia atau tautannya keliru. Jelajahi produk lain di katalog kami.' : undefined,
+  }));
 }
 
 async function loadProductPage() {
   const id = new URLSearchParams(window.location.search).get('id');
-  if (!id) { showError(pt('notFound')); return; }
+  if (!id) { showError(Object.assign(new Error(pt('notFound')), { status: 404 })); return; }
 
   try {
     const { data } = await fetchJSON(`${API_BASE}/products?id=${encodeURIComponent(id)}`);
     pdProduct = data;
   } catch (err) {
-    showError(/tidak ditemukan/i.test(err.message) ? pt('notFound') : `${pt('loadFail')} ${err.message}`);
+    showError(err);
     return;
   }
 

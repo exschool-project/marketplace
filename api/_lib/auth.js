@@ -21,7 +21,7 @@ async function getUserFromRequest(req) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) {
-    console.log('[auth] tidak ada Bearer token di header Authorization');
+    // pengunjung publik memang tidak login — bukan error, jadi tidak dilog
     return { reason: 'no_token' };
   }
 

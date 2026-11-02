@@ -6,31 +6,74 @@
 <meta name="robots" content="noindex">
 <title>Halaman tidak ditemukan — EX-SCHOOL</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=12">
-<style>
-  .nf{ min-height:100vh; display:flex; flex-direction:column; }
-  .nf main{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:48px 24px; gap:10px; }
-  .nf .nf-code{ font-size:5.5rem; font-weight:700; letter-spacing:-.04em; color:var(--green); line-height:1; margin:0; }
-  .nf h1{ font-size:1.4rem; margin:4px 0 0; }
-  .nf p{ color:var(--muted); margin:0 0 18px; max-width:340px; }
-  .nf-actions{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=13">
+<link rel="stylesheet" href="/states.css?v=2">
+<script src="/states.js?v=2"></script>
 </head>
-<body class="nf">
+<body class="xs-page">
   <header class="site">
     <div class="nav-wrap simple">
       <a class="logo" href="/">EX-SCHOOL</a>
     </div>
   </header>
   <main>
-    <p class="nf-code">404</p>
-    <h1>Halaman tidak ditemukan</h1>
-    <p>Link yang kamu buka mungkin salah, atau produknya sudah tidak tersedia.</p>
-    <div class="nf-actions">
-      <a class="btn btn-green btn-lg" href="/belanja">Lihat produk</a>
-      <a class="btn btn-lg" href="/">Ke beranda</a>
-    </div>
+    <div id="root" style="display:flex;flex:1"><noscript><p style="margin:auto;text-align:center">Halaman tidak ditemukan. <a href="/">Ke beranda</a></p></noscript></div>
   </main>
+<script>
+(function () {
+  var root = document.getElementById('root');
+  root.firstElementChild && root.removeChild(root.firstElementChild);
+  var T = ExState.t();
+  var go = [
+    { label: T.shop, href: '/belanja', primary: true },
+    { label: T.home, href: '/' }
+  ];
+  function plain() { ExState.mountHero(root, { code: 404, actions: go }); }
+
+  // Link produk (/produk?id=...) yang 404: cek ke database dulu supaya pesannya tepat.
+  var isProduct = /^\/produk(\.html)?\/?$/.test(location.pathname);
+  var id = new URLSearchParams(location.search).get('id');
+  if (!isProduct || !id) { plain(); return; }
+
+  root.innerHTML = ExState.loading('Memeriksa produk…');
+  fetch('/api/products?id=' + encodeURIComponent(id))
+    .then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (b) { return { ok: res.ok, status: res.status, body: b }; });
+    })
+    .then(function (r) {
+      if (r.ok && r.body && r.body.data) {
+        var p = r.body.data;
+        ExState.mountHero(root, {
+          code: 404, kind: 'warn', pill: 'Halaman produk',
+          title: 'Halaman produk belum bisa dibuka',
+          message: 'Produk ini masih tersedia. Kamu tetap bisa memesannya langsung lewat tombol di bawah.',
+          actions: [
+            { label: 'Pesan sekarang', href: '/beli?id=' + encodeURIComponent(String(p.id).slice(0, 8)), primary: true },
+            { label: 'Muat ulang', onClick: function () { location.reload(); } }
+          ]
+        });
+        var found = document.createElement('div');
+        found.className = 'xh-found';
+        found.textContent = p.name;
+        root.querySelector('.xh-actions').insertAdjacentElement('beforebegin', found);
+      } else if (r.status === 404) {
+        ExState.mountHero(root, {
+          code: 404, pill: 'Produk tidak tersedia',
+          title: 'Produk tidak tersedia',
+          message: 'Produk yang kamu cari sudah tidak tersedia atau tautannya keliru. Jelajahi produk lain di katalog kami.',
+          actions: go
+        });
+      } else {
+        ExState.mountHero(root, ExState.heroFromError(Object.assign(new Error((r.body && r.body.error) || 'Gagal memuat'), { status: r.status }), {
+          onRetry: function () { location.reload(); }, actions: go
+        }));
+      }
+    })
+    .catch(function (err) {
+      ExState.mountHero(root, ExState.heroFromError(err, { onRetry: function () { location.reload(); }, actions: go }));
+    });
+})();
+</script>
 </body>
 </html>

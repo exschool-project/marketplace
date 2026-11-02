@@ -278,7 +278,31 @@ dan centang *Habis*. Pratinjau "Pembeli bayar Rp…" muncul di tiap baris.
 - WhatsApp menyimpan preview lama beberapa jam; uji dengan produk/link yang belum pernah dikirim,
   atau cek di Facebook Sharing Debugger.
 
-- `produk.html` dan `produk-page.html` isinya identik. Cukup salah satu yang ada di deployment:
-  kalau `produk.html` hilang, `/produk` otomatis dilayani `produk-page.html` (rewrite di `vercel.json`).
-  Kalau mengedit tampilan HTML halaman produk, ubah keduanya (atau hapus salah satu).
+- Halaman produk HANYA `produk.html` (dilayani Vercel lewat cleanUrls di `/produk`, sama seperti `belanja.html`).
+  Rewrite `/produk` -> `produk-page.html` dan file `produk-page.html` sudah DIHAPUS: rewrite itu bisa menimpa file asli
+  dan menghasilkan 404 kalau `produk-page.html` tidak ikut ter-deploy.
 - `404.html`: halaman "tidak ditemukan" bermerek EX-SCHOOL (menggantikan halaman 404 bawaan Vercel).
+
+
+---
+## Sistem animasi error / state (BARU)
+
+- `states.css` + `states.js` = satu komponen untuk semua kondisi non-normal, semuanya beranimasi:
+  **404** (radar mencari), **error server** (colokan putus + percikan), **offline** (sinyal wifi dicoret),
+  **kosong** (kotak terbuka), **akses ditolak** (gembok bergetar), **sukses** (centang + konfeti),
+  **loading** (titik mengorbit), **toast**, dan **banner offline/online** otomatis.
+- Pakai di kode: `ExState.mount(el, ExState.fromError(err, { onRetry }))`, `ExState.loading('Memuat…')`,
+  `ExState.toast('Gagal', { type:'error' })`.
+- `404.html` dibuat ulang. Kalau yang 404 adalah link `/produk?id=...`, halaman ini mengecek ke database:
+  produk tidak ada -> pesan "tidak tersedia"; produk ADA tapi halaman detail gagal dibuka -> ditawarkan tombol
+  "Beli sekarang" (`/beli?id=...`) supaya pembeli tidak buntu.
+- `fetchJSON` (script.js) kini membedakan: offline, 404, 5xx, dan respons non-JSON.
+- Semua halaman memuat `states.css` + `states.js`; versi aset dinaikkan (`style.css?v=13`).
+- Animasi otomatis mati untuk pengguna dengan "kurangi gerakan".
+
+### Halaman error layar penuh (modern & profesional)
+- `404.html` (otomatis oleh Vercel), plus `500.html`, `403.html`, `503.html`, dan `error.html?code=429` (kode apa pun: 400/401/403/404/408/429/500/502/503/504).
+- Angka 0 menjadi cincin orbit (radar di 404, berdenyut merah di 5xx), latar grid + cahaya bergerak, kode REF + tombol Salin untuk laporan ke admin.
+- Error 5xx punya tombol "Coba lagi" dengan hitung mundur otomatis; saat offline, halaman lanjut sendiri begitu internet kembali.
+- Halaman produk & beli memakai tampilan yang sama (`ExState.mountHero(el, ExState.heroFromError(err, {...}))`).
+- Catatan: Vercel hanya otomatis memakai `404.html`. 500/503 dipakai lewat tautan `/500`, `/503`, atau dipanggil dari kode.

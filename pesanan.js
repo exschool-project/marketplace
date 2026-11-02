@@ -259,8 +259,10 @@ async function openOrder(code, token) {
     url.searchParams.set('token', token);
     window.history.replaceState({}, '', url);
   } catch (err) {
-    errEl.textContent = err.message;
+    errEl.textContent = ExState.isNetworkError(err) ? 'Koneksi terputus. Cek internetmu lalu coba lagi.' : err.message;
     errEl.classList.remove('hidden');
+    errEl.style.animation = 'none'; void errEl.offsetWidth; errEl.style.animation = '';
+    if (ExState.isNetworkError(err)) ExState.toast('Kamu sedang offline', { type: 'error' });
   }
 }
 

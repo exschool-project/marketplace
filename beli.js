@@ -183,8 +183,10 @@ async function submitBuy(e) {
     saveOrderToLocal(body.data);
     showBuySuccess(body.data);
   } catch (err) {
-    errEl.textContent = err.message;
+    const offline = ExState.isNetworkError(err);
+    errEl.textContent = offline ? 'Koneksi terputus. Pesananmu belum dibuat — coba lagi setelah internet nyambung.' : err.message;
     errEl.classList.remove('hidden');
+    ExState.toast(offline ? 'Kamu sedang offline' : 'Pesanan gagal dibuat', { type: 'error' });
     btn.disabled = false;
     updateSummary();
   }
@@ -196,7 +198,8 @@ function showBuySuccess(order) {
     <div class="buy-wrap buy-done">
       <div class="buy-card buy-done-card">
         <span class="eyebrow">◆ Pesanan Dibuat</span>
-        <h1>${ICONS.checkCircle} Pesanan kamu berhasil dibuat</h1>
+        <div class="xs xs-ok xs-compact" style="padding:0"><div class="xs-art">${ExState.art('success')}</div></div>
+        <h1>Pesanan kamu berhasil dibuat</h1>
         <p class="order-code-label">Kode pesanan kamu:</p>
         <p class="order-code-value mono">${escapeHtml(order.order_code)}</p>
         <p class="buy-done-item">${escapeHtml(order.product_name)} — <strong>${idr(order.product_price)}</strong></p>
@@ -211,15 +214,21 @@ function showBuySuccess(order) {
 async function loadBuyPage() {
   const root = document.getElementById('buy-root');
   const id = new URLSearchParams(location.search).get('id');
-  const fail = (msg) => {
-    root.innerHTML = `<div class="pd-error"><p>${escapeHtml(msg)}</p><a class="btn btn-green brutal-sm" href="belanja.html">← Kembali ke Belanja</a></div>`;
+  const fail = (err) => {
+    ExState.mountHero(root, ExState.heroFromError(err, {
+      embed: true,
+      title: (err.status === 404 || /tidak ditemukan/i.test(err.message)) ? 'Produk tidak tersedia' : undefined,
+      notFoundMessage: 'Produk yang kamu cari sudah tidak tersedia atau tautannya keliru. Jelajahi produk lain di katalog kami.',
+      onRetry: () => { root.innerHTML = ExState.loading(); loadBuyPage(); },
+      actions: [{ label: '← Kembali ke Belanja', href: 'belanja', primary: true }],
+    }));
   };
-  if (!id) return fail('Produk tidak ditemukan.');
+  if (!id) return fail(Object.assign(new Error('Produk tidak ditemukan.'), { status: 404 }));
   try {
     const { data } = await fetchJSON(`${API_BASE}/products?id=${encodeURIComponent(id)}`);
     buyProduct = data;
   } catch (err) {
-    return fail(/tidak ditemukan/i.test(err.message) ? 'Produk tidak ditemukan atau sudah tidak tersedia.' : `Gagal memuat produk: ${err.message}`);
+    return fail(err);
   }
   // pra-pilih opsi pertama yang tersedia di tiap grup (seperti marketplace pada umumnya)
   optGroups().forEach((g) => {

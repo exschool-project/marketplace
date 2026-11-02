@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Layanan sedang tidak tersedia — EX-SCHOOL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=13">
+<link rel="stylesheet" href="/states.css?v=2">
+<script src="/states.js?v=2"></script>
+</head>
+<body class="xs-page" data-code="503">
+  <header class="site">
+    <div class="nav-wrap simple">
+      <a class="logo" href="/">EX-SCHOOL</a>
+    </div>
+  </header>
+  <main>
+    <div id="root" style="display:flex;flex:1"><noscript><p style="margin:auto;text-align:center">Layanan sedang tidak tersedia. <a href="/">Ke beranda</a></p></noscript></div>
+  </main>
+<script>
+(function () {
+  var root = document.getElementById('root');
+  root.firstElementChild && root.removeChild(root.firstElementChild);
+  var T = ExState.t();
+  var code = (document.body.getAttribute('data-code') || new URLSearchParams(location.search).get('code') || '500').replace(/[^0-9]/g, '').slice(0, 3) || '500';
+  var five = Number(code) >= 500;
+  var actions = [];
+  if (five) actions.push({ label: T.retry, primary: true, retry: true, onClick: function () {} });
+  actions.push({ label: T.home, href: '/', primary: !five });
+  if (code === '401' || code === '403') actions = [{ label: T.login, href: '/akun', primary: true }, { label: T.home, href: '/' }];
+  // 'Coba lagi' = muat ulang halaman sebelumnya (kalau ada), selain itu ke beranda
+  if (five) actions[0].onClick = function () {
+    var back = document.referrer;
+    try { if (back && new URL(back).origin === location.origin && new URL(back).pathname !== location.pathname) { location.href = back; return; } } catch (e) {}
+    location.href = '/';
+  };
+  ExState.mountHero(root, { code: code, actions: actions, retry: five ? 15 : 0 });
+})();
+</script>
+</body>
+</html>

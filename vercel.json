@@ -74,11 +74,5 @@
       "destination": "/api/products?view=page&id=:pid",
       "permanent": false
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/produk",
-      "destination": "/produk-page.html"
-    }
   ]
 }

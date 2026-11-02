@@ -17,9 +17,25 @@ function escapeHtml(str) {
 }
 
 async function fetchJSON(url) {
-  const res = await fetch(url);
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (e) {
+    // fetch gagal total = tidak ada koneksi / server tak terjangkau
+    const err = new Error('Koneksi terputus. Cek internetmu lalu coba lagi.');
+    err.network = true;
+    throw err;
+  }
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || 'Terjadi kesalahan saat memuat data.');
+  if (!res.ok) {
+    // body bukan JSON (mis. halaman error Vercel) -> pesan sesuai status
+    const fallback = res.status === 404 ? 'Data tidak ditemukan.'
+      : res.status >= 500 ? 'Server sedang bermasalah. Coba lagi sebentar.'
+      : 'Terjadi kesalahan saat memuat data.';
+    const err = new Error(body.error || fallback);
+    err.status = res.status;
+    throw err;
+  }
   return body;
 }
 
@@ -299,9 +315,13 @@ async function loadProducts(categorySlug = currentCategory) {
     }
 
     if (filtered.length === 0) {
-      grid.innerHTML = currentSearch
-        ? `<p class="grid-msg">Tidak ada produk yang cocok dengan "${escapeHtml(currentSearch)}".</p>`
-        : `<p class="grid-msg">Belum ada produk di kategori ini.</p>`;
+      grid.innerHTML = ExState.html({
+        type: 'empty', compact: true, wide: true,
+        title: currentSearch ? 'Produk tidak ketemu' : 'Belum ada produk',
+        message: currentSearch
+          ? `Tidak ada produk yang cocok dengan "${currentSearch}". Coba kata kunci lain.`
+          : 'Belum ada produk di kategori ini.',
+      });
       if (countEl) countEl.textContent = currentSearch ? `0 hasil untuk "${currentSearch}"` : '';
       return;
     }
@@ -313,7 +333,11 @@ async function loadProducts(categorySlug = currentCategory) {
         : `${filtered.length} produk`;
     }
   } catch (err) {
-    grid.innerHTML = `<p class="grid-msg">Gagal memuat produk: ${escapeHtml(err.message)}</p>`;
+    ExState.mount(grid, ExState.fromError(err, {
+      compact: true, wide: true,
+      onRetry: () => loadProducts(categorySlug),
+      actions: [],
+    }));
   }
 }
 
