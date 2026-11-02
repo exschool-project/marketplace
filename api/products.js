@@ -1,8 +1,6 @@
 const { getSupabaseAdmin } = require('./_lib/supabaseAdmin');
 const { getUserFromRequest, requireAdmin, roleLevel } = require('./_lib/auth');
 const { withErrorHandling } = require('./_lib/http');
-const fs = require('fs');
-const path = require('path');
 
 const EDITABLE_FIELDS = [
   'name', 'shop_name', 'price', 'old_price',
@@ -144,8 +142,8 @@ function buildProductMeta(p, origin) {
   };
 }
 
-function injectProductMeta(template, m) {
-  const tags = [
+function productMetaTags(m) {
+  return [
     `<meta name="description" content="${escAttr(m.description)}">`,
     `<link rel="canonical" href="${escAttr(m.url)}">`,
     `<meta property="og:type" content="product">`,
@@ -156,65 +154,83 @@ function injectProductMeta(template, m) {
     `<meta property="og:url" content="${escAttr(m.url)}">`,
     m.image ? `<meta property="og:image" content="${escAttr(m.image)}">` : '',
     m.image ? `<meta property="og:image:alt" content="${escAttr(m.name)}">` : '',
-    `<meta property="product:price:amount" content="${m.price}">`,
-    `<meta property="product:price:currency" content="IDR">`,
+    m.price != null ? `<meta property="product:price:amount" content="${m.price}">` : '',
+    m.price != null ? `<meta property="product:price:currency" content="IDR">` : '',
     `<meta name="twitter:card" content="${m.image ? 'summary_large_image' : 'summary'}">`,
     `<meta name="twitter:title" content="${escAttr(m.title)}">`,
     `<meta name="twitter:description" content="${escAttr(m.description)}">`,
     m.image ? `<meta name="twitter:image" content="${escAttr(m.image)}">` : '',
   ].filter(Boolean).join('\n');
-
-  let html = template
-    .replace(/<title>[\s\S]*?<\/title>/i, `<title>${escAttr(m.title)}</title>`)
-    .replace(/<meta name="description"[^>]*>\s*/i, '');
-  return html.replace('</head>', `${tags}\n</head>`);
 }
 
-function readProductTemplate() {
-  const candidates = [
-    path.join(process.cwd(), 'produk-page.html'),
-    path.join(__dirname, '..', 'produk-page.html'),
-  ];
-  for (const f of candidates) {
-    try { return fs.readFileSync(f, 'utf8'); } catch (e) { /* coba lokasi lain */ }
-  }
-  return null;
+// Halaman mungil khusus bot pembuat preview (WhatsApp, Telegram, Facebook, dll.).
+// Tidak membaca file apa pun: cukup tag <meta> + sedikit teks. Orang biasa yang
+// kebetulan mampir langsung diarahkan ke halaman produk lewat JavaScript.
+function buildSharePage(m, humanPath) {
+  const body = m.found
+    ? `<h1>${escAttr(m.name)}</h1><p>${escAttr(m.description)}</p><p><a href="${escAttr(humanPath)}">Buka produk</a></p>`
+    : `<h1>${escAttr(m.title)}</h1><p><a href="/">Ke beranda</a></p>`;
+  const redirect = m.found
+    ? `<script>if(!/bot|crawl|spider|facebook|whatsapp|telegram|twitter|slack|discord|preview|embed/i.test(navigator.userAgent)){location.replace(${JSON.stringify(humanPath)});}</script>`
+    : '';
+  return `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escAttr(m.title)}</title>
+${productMetaTags(m)}
+</head>
+<body style="font-family:system-ui,sans-serif;padding:24px;max-width:560px;margin:0 auto">
+${body}
+${redirect}
+</body>
+</html>`;
 }
 
-// Melayani halaman /produk: template HTML yang sama + tag preview sesuai produk.
+// Dilayani untuk bot lewat redirect di vercel.json (/produk -> /api/products?view=page&id=...)
+// Tambahkan &debug=1 untuk melihat JSON diagnosa (apakah produk ditemukan, tag apa yang dibuat).
 async function serveProductPage(req, res, supabase) {
-  const template = readProductTemplate();
-  if (!template) {
-    // template tak ikut ter-deploy -> arahkan ke file statis (halaman tetap jalan)
-    const qs = req.url && req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
-    res.statusCode = 307;
-    res.setHeader('Location', `/produk-page${qs.replace(/([?&])view=page&?/, '$1').replace(/[?&]$/, '')}`);
-    res.end();
-    return;
-  }
+  const id = String(req.query.id || '');
+  const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
+  const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0];
+  const origin = `${proto}://${host}`;
+  const diag = { idValid: isValidProductId(id), productFound: false, error: null };
 
-  let html = template;
+  let meta = {
+    found: false,
+    title: `Produk tidak ditemukan — ${SITE_NAME}`,
+    description: `Produk ini tidak tersedia di ${SITE_NAME}.`,
+    url: `${origin}/produk${id ? `?id=${encodeURIComponent(id)}` : ''}`,
+    image: '', price: null, name: SITE_NAME,
+  };
+
   try {
-    const id = String(req.query.id || '');
-    if (id && isValidProductId(id)) {
+    if (diag.idValid) {
       let query = supabase.from('products').select('*').eq('is_active', true);
       query = applyIdFilter(query, id);
-      const { data } = await query.limit(1);
+      const { data, error } = await query.limit(1);
+      if (error) diag.error = error.message;
       const product = data && data[0];
       if (product) {
-        const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
-        const host = String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0];
-        html = injectProductMeta(template, buildProductMeta(product, `${proto}://${host}`));
+        diag.productFound = true;
+        meta = { ...buildProductMeta(product, origin), found: true };
       }
     }
   } catch (err) {
-    console.error('[produk page meta]', err); // gagal ambil meta -> tetap sajikan halaman biasa
+    diag.error = String(err && err.message || err);
+    console.error('[produk page meta]', err);
+  }
+
+  if (req.query.debug === '1') {
+    res.status(200).json({ ...diag, title: meta.title, description: meta.description, image: meta.image, url: meta.url });
+    return;
   }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  // di-cache singkat di CDN; bot preview tidak membebani database
+  // cache singkat di CDN: bot preview tidak membebani database
   res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=600');
-  res.status(200).send(html);
+  res.status(200).send(buildSharePage(meta, `/produk?id=${String(id).slice(0, 8)}`));
 }
 
 // Satu file menangani /api/products (list & create) DAN /api/products?id=xxx
@@ -399,4 +415,4 @@ module.exports = withErrorHandling(async (req, res) => {
 });
 
 // dipakai untuk pengujian lokal
-module.exports._test = { buildProductMeta, injectProductMeta, applyIdFilter, isValidProductId, ogImage };
+module.exports._test = { buildProductMeta, buildSharePage, applyIdFilter, isValidProductId, ogImage };

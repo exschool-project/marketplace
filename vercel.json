@@ -63,7 +63,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i).*(WhatsApp|facebookexternalhit|Facebot|TelegramBot|Twitterbot|Slackbot|Discordbot|LinkedInBot|Pinterest|SkypeUriPreview|Viber|Line/).*"
+          "value": ".*(WhatsApp|facebookexternalhit|Facebot|TelegramBot|Twitterbot|Slackbot|Discordbot|LinkedInBot|Pinterest|SkypeUriPreview|Viber|Applebot|Googlebot|bingbot|Mastodon|redditbot|MicrosoftPreview|vkShare|Embedly|Iframely|Line/|KAKAOTALK|Signal).*"
         },
         {
           "type": "query",
@@ -73,22 +73,6 @@
       ],
       "destination": "/api/products?view=page&id=:pid",
       "permanent": false
-    },
-    {
-      "source": "/produk.html",
-      "destination": "/produk",
-      "permanent": true
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/produk",
-      "destination": "/api/products?view=page"
-    }
-  ],
-  "functions": {
-    "api/products.js": {
-      "includeFiles": "produk-page.html"
-    }
-  }
+  ]
 }

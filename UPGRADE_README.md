@@ -270,9 +270,10 @@ dan centang *Habis*. Pratinjau "Pembeli bayar Rp…" muncul di tiap baris.
 ## Link pendek & preview link (WhatsApp/Telegram)
 
 - Link produk: `/produk?id=` + 8 karakter pertama id produk (link panjang lama tetap jalan).
-- Halaman `/produk` dilayani `api/products.js` (lihat `vercel.json`) memakai template `produk-page.html`
-  supaya tag Open Graph (judul, deskripsi, harga, foto) terisi per produk.
-- **PENTING:** hapus file lama `produk.html` dari repo/project. Di Vercel file statis selalu menang
-  atas rewrite, jadi kalau `produk.html` masih ada, preview akan tetap generik.
-  (`.vercelignore` dan redirect khusus bot sudah disiapkan sebagai pengaman tambahan.)
-- WhatsApp menyimpan preview lama beberapa jam; uji dengan link baru atau Facebook Sharing Debugger.
+- Orang biasa tetap membuka `produk.html` (statis, cepat). Bot pembuat preview (WhatsApp, Telegram,
+  Facebook, dll.) dialihkan oleh `vercel.json` ke `/api/products?view=page`, yang mengembalikan
+  halaman mungil berisi tag Open Graph (judul, deskripsi, harga, foto) milik produk itu.
+- Diagnosa: buka `https://DOMAIN-KAMU/api/products?view=page&id=ID8&debug=1` di browser.
+  Hasilnya JSON: `productFound: true` artinya data produk terbaca.
+- WhatsApp menyimpan preview lama beberapa jam; uji dengan produk/link yang belum pernah dikirim,
+  atau cek di Facebook Sharing Debugger.
