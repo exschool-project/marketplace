@@ -277,3 +277,8 @@ dan centang *Habis*. Pratinjau "Pembeli bayar Rp…" muncul di tiap baris.
   Hasilnya JSON: `productFound: true` artinya data produk terbaca.
 - WhatsApp menyimpan preview lama beberapa jam; uji dengan produk/link yang belum pernah dikirim,
   atau cek di Facebook Sharing Debugger.
+
+- `produk.html` dan `produk-page.html` isinya identik. Cukup salah satu yang ada di deployment:
+  kalau `produk.html` hilang, `/produk` otomatis dilayani `produk-page.html` (rewrite di `vercel.json`).
+  Kalau mengedit tampilan HTML halaman produk, ubah keduanya (atau hapus salah satu).
+- `404.html`: halaman "tidak ditemukan" bermerek EX-SCHOOL (menggantikan halaman 404 bawaan Vercel).
