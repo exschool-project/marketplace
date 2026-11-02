@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riwayat Pesanan — EX-SCHOOL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=11">
+</head>
+<body>
+
+  <!-- NAV (ringkas, sama seperti beranda) -->
+  <header class="site">
+    <div class="nav-wrap">
+      <a class="logo" href="index.html" style="text-decoration:none;">EX-SCHOOL</a>
+      <div class="nav-actions" style="margin-left:auto;">
+        <a class="btn btn-ink hover-lift-sm brutal-sm" href="index.html">← Beranda</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width:640px; margin:0 auto; padding:32px 20px 60px;">
+
+    <!-- STEP 0: kalau lagi login, tampilkan riwayat pesanan OTOMATIS -->
+    <section id="my-orders-view" class="hidden">
+      <div class="order-lookup-card brutal">
+        <span class="eyebrow">◆ Riwayat Pesanan</span>
+        <h1 style="font-size:1.4rem; margin:10px 0 6px;">Pesanan kamu</h1>
+        <p style="font-size:.85rem; color:#3E6B85; margin:0 0 20px;" id="my-orders-sub">Memuat riwayat pesanan...</p>
+
+        <div id="my-orders-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+
+        <button type="button" id="lookup-other-btn" class="mini-btn" style="margin-top:18px; width:100%; text-align:center;">Cari pesanan pakai kode lain →</button>
+      </div>
+    </section>
+
+    <!-- STEP 1: cari pesanan (kode + token manual, atau otomatis dari link) -->
+    <section id="lookup-view">
+      <div class="order-lookup-card brutal">
+        <span class="eyebrow">◆ Riwayat Pesanan</span>
+        <h1 style="font-size:1.4rem; margin:10px 0 6px;">Masuk ke ruang chat pesananmu</h1>
+        <p style="font-size:.85rem; color:#3E6B85; margin:0 0 20px;">Masukkan kode pesanan &amp; token akses yang kamu dapat waktu checkout. Kalau kamu baru saja pesan di perangkat ini, biasanya sudah otomatis terisi.</p>
+
+        <form id="lookup-form">
+          <label class="field">
+            <span>Kode pesanan</span>
+            <input type="text" id="lookup-code" placeholder="EXS-XXXXXX" required autocapitalize="characters">
+          </label>
+          <label class="field">
+            <span>Token akses</span>
+            <input type="text" id="lookup-token" placeholder="Ditampilkan saat checkout" required>
+          </label>
+          <p id="lookup-error" class="order-form-error hidden"></p>
+          <button type="submit" class="btn btn-green brutal-sm hover-lift-sm" style="width:100%;">Buka Pesanan</button>
+        </form>
+
+        <div id="recent-orders" class="hidden" style="margin-top:24px;">
+          <p style="font-family:'Inter', system-ui, sans-serif; font-size:.7rem; text-transform:uppercase; color:#3E6B85; margin-bottom:10px;">Pesanan terakhir di perangkat ini</p>
+          <div id="recent-orders-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <p id="lookup-login-hint" class="login-sub" style="margin:20px 0 0; text-align:center;">
+          Sudah pernah pesan sambil login? <a href="akun.html">Masuk</a> biar riwayat pesananmu otomatis muncul di sini.
+        </p>
+      </div>
+    </section>
+
+    <!-- STEP 2: detail pesanan + chat -->
+    <section id="order-view" class="hidden">
+      <div class="order-summary brutal">
+        <div class="order-summary-code" id="ov-code"></div>
+        <div class="order-summary-row">
+          <span class="order-summary-product" id="ov-product"></span>
+          <span class="order-summary-price" id="ov-price"></span>
+        </div>
+        <div class="order-summary-row">
+          <span id="ov-status" class="order-status-badge"></span>
+          <span style="font-size:.78rem; color:#3E6B85;" id="ov-buyer"></span>
+        </div>
+      </div>
+
+      <div class="chat-wrap" style="margin-top:20px;">
+        <div id="chat-thread" class="chat-thread">
+          <p class="chat-empty">Memuat percakapan...</p>
+        </div>
+        <p id="chat-closed-banner" class="chat-closed-banner hidden"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Pesanan ini sudah selesai/dibatalkan — chat ditutup.</p>
+        <form id="chat-form" class="chat-form">
+          <input type="text" id="chat-input" placeholder="Tulis pesan..." maxlength="2000" required autocomplete="off">
+          <button type="submit" class="btn btn-green brutal-sm">Kirim</button>
+        </form>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+        <button type="button" id="switch-order-btn" class="btn btn-ink brutal-sm hover-lift-sm">← Lihat pesanan lain</button>
+        <button type="button" id="notif-btn" class="btn btn-blue brutal-sm hover-lift-sm"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg> Aktifkan Notifikasi</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="icons.js"></script>
+  <script src="pesanan.js"></script>
+</body>
+</html>

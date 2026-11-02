@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>Admin — EX-SCHOOL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="admin.css?v=12">
+<style>
+  /* Anti-kedip: tampilkan dashboard langsung kalau profil admin/owner sudah ter-cache. */
+  html.staff-cached-session #login-view{ display:none !important; }
+  html.staff-cached-session #dashboard-view{ display:block !important; }
+</style>
+<script>
+(function(){
+  try {
+    var raw = sessionStorage.getItem('exschool_profile_cache');
+    if (!raw) return;
+    var profile = JSON.parse(raw);
+    var LEVEL = { member: 1, cs: 2, admin: 3, owner: 4 };
+    var level = LEVEL[String(profile.role || '').trim().toLowerCase()] || 0;
+    if (level === LEVEL.cs) { location.replace('cs.html'); return; }
+    if (level >= LEVEL.admin) {
+      document.documentElement.classList.add('staff-cached-session');
+      window.__cachedProfile = profile;
+    }
+  } catch (e) { /* abaikan */ }
+})();
+</script>
+  <script src="motion.js"></script>
+</head>
+<body class="admin-body">
+
+  <!-- LOGIN -->
+  <section id="login-view" class="login-view">
+    <form id="login-form" class="login-card">
+      <div class="logo">EX-SCHOOL</div>
+      <h1>Masuk</h1>
+      <p class="login-sub">Panel untuk owner, admin, dan CS.</p>
+
+      <label class="field">
+        <span>Email</span>
+        <input type="email" id="login-email" required autocomplete="username">
+      </label>
+      <label class="field">
+        <span>Kata sandi</span>
+        <input type="password" id="login-password" required autocomplete="current-password">
+      </label>
+
+      <p id="login-error" class="login-error" style="display:none;"></p>
+
+      <button type="submit" class="btn btn-green btn-block">Masuk</button>
+      <a href="index.html" class="back-link">Kembali ke beranda</a>
+    </form>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard-view" class="dashboard-view hidden">
+    <header class="admin-header">
+      <div class="admin-brand"><span class="logo">EX-SCHOOL</span><span class="admin-brand-tag">Admin</span></div>
+      <div class="admin-header-right">
+        <span id="role-badge" class="role-badge"></span>
+        <span id="admin-name" class="admin-name"></span>
+        <a href="cs.html" id="cs-panel-link" class="btn has-badge" data-min-role="cs"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5z"/></svg><span class="btn-label">CS Panel</span></a>
+        <button id="notif-btn" type="button" class="btn" aria-label="Notifikasi"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg></button>
+        <button id="logout-btn" class="btn" type="button">Keluar</button>
+      </div>
+    </header>
+
+    <div class="admin-layout">
+      <nav class="admin-sidebar" aria-label="Menu panel">
+        <a href="#overview" class="admin-nav-link"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg><span>Ringkasan</span></a>
+        <a href="#orders-panel" class="admin-nav-link"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"/></svg><span>Pesanan</span></a>
+        <p class="admin-nav-group-label">Toko</p>
+        <a href="#products-panel" class="admin-nav-link"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg><span>Produk</span></a>
+        <a href="#categories-panel" class="admin-nav-link"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h7"/></svg><span>Kategori</span></a>
+        <a href="#options-panel" class="admin-nav-link"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Pilihan &amp; harga</span></a>
+        <a href="#testimonials-panel" class="admin-nav-link"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8L12 3.5z"/></svg><span>Testimoni</span></a>
+        <a href="#banner-panel" class="admin-nav-link"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="4" rx="1"/><path d="M5 11v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg><span>Teks banner</span></a>
+        <p class="admin-nav-group-label" data-min-role="owner">Pengaturan</p>
+        <a href="#hero-banner-panel" class="admin-nav-link" data-min-role="owner"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5L6 20"/></svg><span>Banner utama</span></a>
+        <a href="#social-panel" class="admin-nav-link" data-min-role="owner"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6"/></svg><span>Media sosial</span></a>
+        <a href="#team-panel" class="admin-nav-link" data-min-role="owner"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="18" cy="8" r="2.4"/><path d="M15.5 14.3c2.6.4 4.5 2.6 4.5 5.7"/></svg><span>Tim</span></a>
+      </nav>
+
+      <main class="admin-content">
+
+      <p id="dashboard-load-error" class="dashboard-load-error hidden"></p>
+
+      <!-- RINGKASAN -->
+      <section class="admin-page" id="overview">
+        <div class="page-head">
+          <h2 id="overview-title">Ringkasan</h2>
+          <p class="panel-sub" id="overview-role-desc"></p>
+        </div>
+
+        <div class="stat-row">
+          <a class="stat-card" href="#orders-panel"><span class="stat-num" id="stat-orders-new">–</span><span class="stat-label">Pesanan baru</span></a>
+          <a class="stat-card" href="#products-panel"><span class="stat-num" id="stat-products">–</span><span class="stat-label">Produk</span></a>
+          <a class="stat-card" href="#categories-panel"><span class="stat-num" id="stat-categories">–</span><span class="stat-label">Kategori</span></a>
+          <a class="stat-card" href="#testimonials-panel"><span class="stat-num" id="stat-testimonials">–</span><span class="stat-label">Testimoni</span></a>
+          <a class="stat-card" href="#team-panel" data-min-role="owner"><span class="stat-num" id="stat-team">–</span><span class="stat-label">Anggota tim</span></a>
+          <a class="stat-card" href="#hero-banner-panel" data-min-role="owner"><span class="stat-num" id="stat-hero">–</span><span class="stat-label">Banner utama</span></a>
+        </div>
+
+        <h3 class="quick-title">Pintasan</h3>
+        <div class="quick-links">
+          <a class="quick-card" href="#orders-panel"><span class="qc-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5z"/></svg></span><strong>Pesanan</strong></a>
+          <a class="quick-card" href="#products-panel"><span class="qc-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v9l9 5 9-5V8"/><path d="M12 13v9"/></svg></span><strong>Produk</strong></a>
+          <a class="quick-card" href="#options-panel"><span class="qc-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></span><strong>Pilihan &amp; harga</strong></a>
+          <a class="quick-card" href="#testimonials-panel"><span class="qc-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8L12 3.5z"/></svg></span><strong>Testimoni</strong></a>
+          <a class="quick-card" href="#hero-banner-panel" data-min-role="owner"><span class="qc-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-5L6 20"/></svg></span><strong>Banner utama</strong></a>
+          <a class="quick-card" href="#team-panel" data-min-role="owner"><span class="qc-icon"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="18" cy="8" r="2.4"/><path d="M15.5 14.3c2.6.4 4.5 2.6 4.5 5.7"/></svg></span><strong>Tim</strong></a>
+        </div>
+      </section>
+
+      <!-- PESANAN -->
+      <section class="admin-panel admin-page" id="orders-panel">
+        <div class="page-head page-head-row">
+          <h2>Pesanan</h2>
+          <select id="order-status-filter" class="select-sm" aria-label="Filter status">
+            <option value="">Semua status</option>
+            <option value="menunggu">Menunggu</option>
+            <option value="diproses">Diproses</option>
+            <option value="dikirim">Dikirim</option>
+            <option value="selesai">Selesai</option>
+            <option value="dibatalkan">Dibatalkan</option>
+          </select>
+        </div>
+        <div id="order-list" class="admin-list"></div>
+      </section>
+
+      <!-- TEKS BANNER -->
+      <section class="admin-panel admin-page" id="banner-panel">
+        <div class="page-head"><h2>Teks banner</h2></div>
+        <form id="banner-form" class="inline-form">
+          <input type="text" id="banner-input" placeholder="Pesan baru" required>
+          <button type="submit" class="btn btn-green">Tambah</button>
+        </form>
+        <div id="banner-list" class="admin-list"></div>
+      </section>
+
+      <!-- KATEGORI -->
+      <section class="admin-panel admin-page" id="categories-panel">
+        <div class="page-head"><h2>Kategori</h2></div>
+        <form id="category-form" class="inline-form">
+          <input type="text" id="category-input" placeholder="Nama kategori" required>
+          <button type="submit" class="btn btn-green">Tambah</button>
+        </form>
+        <div id="category-list" class="admin-list"></div>
+      </section>
+
+      <!-- PRODUK -->
+      <section class="admin-panel admin-page" id="products-panel">
+        <div class="page-head page-head-row">
+          <h2>Produk</h2>
+          <button type="button" id="product-add-btn" class="btn btn-green"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Tambah produk</span></button>
+        </div>
+        <div id="product-list" class="admin-list"></div>
+
+      </section>
+
+      <!-- PILIHAN & HARGA -->
+      <section class="admin-panel admin-page" id="options-panel">
+        <div class="page-head"><h2>Pilihan &amp; harga</h2></div>
+        <label class="field"><span>Produk</span><select id="opt-product"></select></label>
+
+        <div id="opt-area" class="hidden">
+          <p id="opt-base" class="opt-base"></p>
+          <div id="opt-groups"></div>
+          <button type="button" class="btn btn-sm" id="opt-add-group"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Grup pilihan</span></button>
+          <p id="opt-status" class="pde-status"></p>
+          <div class="pde-actions">
+            <button type="button" class="btn btn-green" id="opt-save">Simpan</button>
+            <a id="opt-preview" class="btn" href="#" target="_blank" rel="noopener">Lihat halaman beli</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- TESTIMONI -->
+      <section class="admin-panel admin-page" id="testimonials-panel">
+        <div class="page-head"><h2>Testimoni</h2></div>
+        <form id="testimonial-form" class="form-grid">
+          <label class="field"><span>Nama pembeli</span><input type="text" id="testimonial-name" required></label>
+          <label class="field"><span>Keterangan</span><input type="text" id="testimonial-role" placeholder="Kota atau produk yang dibeli"></label>
+          <label class="field">
+            <span>Rating</span>
+            <select id="testimonial-rating">
+              <option value="5">5 bintang</option>
+              <option value="4">4 bintang</option>
+              <option value="3">3 bintang</option>
+              <option value="2">2 bintang</option>
+              <option value="1">1 bintang</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Untuk produk</span>
+            <select id="testimonial-product"><option value="">Semua produk</option></select>
+          </label>
+          <div class="field">
+            <span>Foto (opsional)</span>
+            <input type="file" id="testimonial-image" accept="image/*" data-up-label="Pilih foto">
+            <span id="testimonial-image-status" class="up-status"></span>
+          </div>
+          <label class="field full"><span>Isi testimoni</span><input type="text" id="testimonial-quote" required></label>
+          <div class="form-actions full"><button type="submit" class="btn btn-green">Tambah</button></div>
+        </form>
+        <div id="testimonial-list" class="admin-list"></div>
+      </section>
+
+      <!-- BANNER UTAMA (owner) -->
+      <section id="hero-banner-panel" class="admin-panel admin-page hidden" data-min-role="owner">
+        <div class="page-head"><h2>Banner utama</h2></div>
+        <form id="hero-banner-form" class="form-grid">
+          <div class="field full">
+            <span>Gambar atau video</span>
+            <input type="file" id="hero-banner-image" accept="image/*,video/mp4,video/webm,video/quicktime" data-up-label="Pilih gambar atau video" data-up-hint="Video maks. 1 menit, 100 MB">
+            <div id="hero-banner-preview" class="image-preview hidden">
+              <div class="ip-frame wide"><img id="hero-banner-preview-img" alt="Pratinjau banner"><video id="hero-banner-preview-video" class="hidden" muted controls playsinline></video></div>
+              <span id="hero-banner-status" class="up-status"></span>
+            </div>
+          </div>
+          <label class="field full"><span>Link saat diklik (opsional)</span><input type="url" id="hero-banner-link" placeholder="https://"></label>
+          <div class="form-actions full"><button type="submit" class="btn btn-green">Tambah banner</button></div>
+        </form>
+        <div id="hero-banner-list" class="admin-list"></div>
+      </section>
+
+      <!-- MEDIA SOSIAL (owner) -->
+      <section id="social-panel" class="admin-panel admin-page hidden" data-min-role="owner">
+        <div class="page-head"><h2>Media sosial</h2></div>
+        <form id="social-form" class="form-grid">
+          <label class="field"><span>Platform</span><input type="text" id="social-platform" placeholder="Instagram" required></label>
+          <label class="field"><span>Link</span><input type="url" id="social-url" placeholder="https://" required></label>
+          <div class="form-actions full"><button type="submit" class="btn btn-green">Tambah</button></div>
+        </form>
+        <div id="social-list" class="admin-list"></div>
+      </section>
+
+      <!-- TIM (owner) -->
+      <section id="team-panel" class="admin-panel admin-page hidden" data-min-role="owner">
+        <div class="page-head"><h2>Tim</h2></div>
+        <div id="team-list" class="admin-list"></div>
+      </section>
+
+      </main>
+    </div>
+  </section>
+
+  <!-- PANEL DETAIL PRODUK (geser dari kanan) -->
+        <form id="product-detail-form" class="detail-editor hidden">
+          <div class="de-head">
+            <div><h3 id="pde-title"></h3><span class="de-sub">Detail halaman produk</span></div>
+            <button type="button" class="am-close" id="pde-close" aria-label="Tutup"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+          </div>
+          <div class="de-body">
+            <label class="field"><span>Deskripsi <em id="pde-wordcount" class="pde-wordcount"></em></span>
+              <textarea id="pde-description" rows="7" placeholder="Jelaskan produk ini"></textarea>
+            </label>
+            <label class="field"><span>Estimasi pengerjaan</span>
+              <input type="text" id="pde-delivery" placeholder="2–3 hari kerja">
+            </label>
+            <label class="field"><span>Yang didapat pembeli</span>
+              <textarea id="pde-features" rows="4" placeholder="Satu poin per baris"></textarea>
+            </label>
+
+            <div class="field">
+              <span>Galeri foto</span>
+              <input type="file" id="pde-gallery-input" accept="image/*" multiple data-up-label="Tambah foto galeri">
+              <div id="pde-gallery" class="pde-thumbs"></div>
+            </div>
+
+            <div class="field">
+<span>Contoh hasil kerja</span>
+              <div class="pde-target">
+                <label for="pde-sc-target">Masuk ke kategori</label>
+                <select id="pde-sc-target"></select>
+                <button type="button" class="btn btn-sm" id="pde-cat-new"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Kategori</span></button>
+              </div>
+              <input type="file" id="pde-showcase-input" accept="image/*" multiple data-up-label="Tambah contoh hasil">
+              <div id="pde-showcase" class="pde-showcase"></div>
+            </div>
+
+            <label class="field"><span>FAQ</span>
+              <textarea id="pde-faq" rows="4" placeholder="Pertanyaan | Jawaban (satu per baris)"></textarea>
+            </label>
+          </div>
+          <div class="de-foot">
+            <p id="pde-status" class="pde-status"></p>
+            <a id="pde-preview" class="btn" href="#" target="_blank" rel="noopener">Lihat halaman</a>
+            <button type="button" class="btn" id="pde-cancel">Tutup</button>
+            <button type="submit" class="btn btn-green" id="pde-save">Simpan</button>
+          </div>
+        </form>
+  <div id="drawer-backdrop" class="am-overlay in hidden"></div>
+
+  <!-- MODAL PRODUK (tambah & edit) -->
+  <div id="product-modal" class="am-overlay hidden">
+    <div class="am am-lg" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+      <div class="am-head"><h3 id="product-modal-title">Tambah produk</h3><button type="button" class="am-close" id="product-modal-close" aria-label="Tutup"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div>
+      <form id="product-form" class="am-form">
+        <div class="am-body">
+          <div class="fld full"><label for="product-name">Nama produk</label><input type="text" id="product-name" required></div>
+          <div class="fld"><label for="product-shop">Nama toko</label><input type="text" id="product-shop" required></div>
+          <div class="fld"><label for="product-category">Kategori</label><select id="product-category"></select></div>
+          <div class="fld"><label for="product-price">Harga (Rp)</label><input type="number" id="product-price" min="0" required></div>
+          <div class="fld"><label for="product-old-price">Harga coret</label><input type="number" id="product-old-price" min="0" placeholder="Opsional"></div>
+          <div class="fld"><label for="product-badge">Label</label><input type="text" id="product-badge" placeholder="Baru, Diskon"></div>
+          <div class="fld"><label for="product-icon">Ikon</label><input type="text" id="product-icon" placeholder="Emoji, opsional" maxlength="4"></div>
+
+          <div class="fld full">
+            <label>Foto produk</label>
+            <input type="file" id="product-image" accept="image/*" data-up-label="Pilih foto produk">
+            <div id="product-image-preview" class="image-preview hidden">
+              <div class="ip-frame"><img id="product-image-preview-img" alt="Pratinjau foto produk"></div>
+              <span id="product-image-status" class="up-status"></span>
+            </div>
+          </div>
+
+          <div class="fld full toggles">
+            <label class="field-checkbox"><input type="checkbox" id="product-featured"><span>Tampil di produk unggulan</span></label>
+            <label class="field-checkbox"><input type="checkbox" id="product-active" checked><span>Aktif (tampil di toko)</span></label>
+          </div>
+        </div>
+        <div class="am-foot">
+          <button type="button" class="btn" id="product-modal-cancel">Batal</button>
+          <button type="submit" class="btn btn-green" id="product-modal-save">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CHAT PESANAN -->
+  <div id="order-chat-modal" class="order-modal-overlay hidden">
+    <div class="order-modal" style="max-width:520px;">
+      <button type="button" id="order-chat-close" class="order-modal-close" aria-label="Tutup"><svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+      <h2 id="oc-code" class="oc-title"></h2>
+      <p class="oc-buyer" id="oc-buyer"></p>
+      <div class="chat-wrap" style="border:none;">
+        <div id="oc-thread" class="chat-thread" style="max-height:42vh; padding:12px 0;"></div>
+        <p id="oc-closed-banner" class="chat-closed-banner hidden">Pesanan selesai atau dibatalkan, chat ditutup. Ubah status untuk membukanya lagi.</p>
+        <form id="oc-form" class="chat-form" style="padding:12px 0 0; border-top:1px solid var(--line);">
+          <input type="text" id="oc-input" placeholder="Tulis balasan" maxlength="2000" required autocomplete="off">
+          <button type="submit" class="btn btn-green">Kirim</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="icons.js"></script>
+  <script src="admin-ui.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
